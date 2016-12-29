@@ -1,0 +1,27 @@
+/*
+ * dbbaginfo.c
+ *
+ *  Created on: 2016Äê12ÔÂ25ÈÕ
+ *      Author: Administrator
+ */
+
+#include "db/db.h"
+int DbBaginfo(int oprType, BAGINFO *fileRecord)
+{
+	POKA_ORA
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	BAGINFO  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	char strSql[300] = {0};
+
+	memset(&tmpData, 0x00, sizeof(BAGINFO));
+	memcpy(&tmpData, fileRecord, sizeof(BAGINFO));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+	}
+}

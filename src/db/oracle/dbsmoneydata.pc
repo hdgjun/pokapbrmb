@@ -1,0 +1,67 @@
+#include "db/db.h"
+
+int DbsMoneydata(int oprType, FILERECORD *fileRecord)
+{
+	POKA_ORA
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	FILERECORD  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(FILERECORD));
+	memcpy(&tmpData, fileRecord, sizeof(FILERECORD));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+			   MONEYDATA(
+				PERCODE,
+				COLTIME,
+				MON,
+				MONTYPE,
+				MONVAL,
+				MONVER,
+				TRUEFLAG,
+				OPERATORID,
+				OPERDATE,
+				BUNDLEID,
+				PACKAGEID,
+				CHECKER,
+				IMAGEPATH,
+				BUSINESSTYPE,
+				MONBOXID,
+				ATMID,
+				ADDMONOPERATOR,
+				ADDMONCHECKER,
+				BANKNO,
+				FILENAME,
+				AGENCYNO
+				)
+				VALUES(
+				:tmpData.MachineSNo,
+				 to_date(:tmpData.DateTime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.SNo,
+				:tmpData.MoneyFlag,
+				:tmpData.Valuta,
+				:tmpData.Ver,
+				:tmpData.tfFlag,//"0",
+				:tmpData.Operator,
+				 SYSDATE,
+				:tmpData.BundleID,
+				:tmpData.PackageId,
+				:tmpData.Monitor,
+				:tmpData.ImageFilePath,
+				:tmpData.BusinessType,
+				:tmpData.MonBoxID,
+				:tmpData.AtmID,
+				:tmpData.AddMonOperator,
+				:tmpData.AddMonChecker,
+				:tmpData.BankNo,
+				:tmpData.FileName,
+				:tmpData.AgencyNo
+				 );
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+	}
+   return SUCESS;
+}

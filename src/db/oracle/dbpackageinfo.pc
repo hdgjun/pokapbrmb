@@ -1,0 +1,47 @@
+/*
+ * dbpackageinfo.pc
+ *
+ *  Created on: 2016Äê12ÔÂ25ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+
+int DbPackageinfo(int oprType, DBPACKAGEINFO *fileRecord)
+{
+	POKA_ORA
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	DBPACKAGEINFO  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(DBPACKAGEINFO));
+	memcpy(&tmpData, fileRecord, sizeof(DBPACKAGEINFO));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+				PACKAGEINFO(
+				  PACKAGEID ,
+				  BUNDLEID  ,
+				  OPERATORID,
+				  OPERTIME  ,
+				  CHECKER   ,
+				  FILENAME  ,
+				  REMARK,
+				  INSERTDATE
+				)
+				VALUES(
+				:tmpData.packageId,
+				:tmpData.bundleId,
+				:tmpData.operatorid,
+				 to_date(:tmpData.opertime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.checker,
+				:tmpData.fileName,
+				:tmpData.remark,
+				 SYSDATE
+				 );
+
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+	}
+}
