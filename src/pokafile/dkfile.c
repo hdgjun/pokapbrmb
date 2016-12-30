@@ -214,7 +214,7 @@ static char *GetDKSucInsLocalDir(char *dir,const  FILENAME *fn)
 	memcpy(bankno,fn->BankNo,strlen(fn->BankNo));
 	memcpy(agencyno,fn->AgencyNo,strlen(fn->AgencyNo));
 	memcpy(subId,fn->PackageId,10);
-	sprintf(temDir,"%s/%s/%s/%s/%s/%s/%s/",g_param.FileStoreBasePath,g_param.InsertDir
+	sprintf(temDir,"%s/%s/%s/%s/%s/%s/%s/",g_param.FileStoreBasePath,g_param.handleDir
 			,bankno,agencyno,newDate,subId,fn->PackageId);
 	memcpy(dir,temDir,strlen(temDir));
 	JudgeSavePathExist(temDir);
