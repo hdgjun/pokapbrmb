@@ -145,7 +145,7 @@ int DownFile(ROUTE *route) {
 		ruleSize = 1;
 	}
 
-	GetProgramPath(apppath);
+	GetProgramPath(apppath,APP_NAME,DEF_INSTALL_PATH);
 	int i;
 
 	for (i = 0; i < ruleSize; i++) {
@@ -175,7 +175,7 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	char result[FILE_PATH_CHARNUM] = { 0 };
 	FILE *rp = NULL;
 
-	GetProgramPath(apppath);
+	GetProgramPath(apppath,APP_NAME,DEF_INSTALL_PATH);
 
 	int time = GetTimeInt();
 

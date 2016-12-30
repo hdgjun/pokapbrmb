@@ -127,7 +127,9 @@ typedef struct FTP_MESSAGE
 	FTP_MODE model;
 }FTP_MESSAGE;
 
-int JudgeProgramExist(const char *appName);
+int JudgeProgramExist(int flag,const char *appName);
 int test_pthread(pthread_t tid);
 void psleep(int timeOut);
+char *GetProgramPath(char *path,const char *enName,const char *def);
+
 #endif /* COMMON_H_ */

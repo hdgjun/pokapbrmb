@@ -16,8 +16,21 @@
 #include "switch.h"
 #include "common.h"
 
+
 static int CheckServer(int iFlag,const char *appName);
 static int IsServer(char *pszDir,const char *appName);
+
+
+char *GetProgramPath(char *path,const char *enName,const char *def)
+{
+	char *env = getenv(enName);
+	if(env){
+		memcpy(path,env,strlen(env));
+	}else{
+		memcpy(path, def,strlen(def));
+	}
+	return path;
+}
 
 /*pthread_kill的返回值：成功（0） 线程不存在（ESRCH） 信号不合法（EINVAL）*/
 int test_pthread(pthread_t tid)
@@ -60,8 +73,8 @@ void psleep(int timeOut)
 }
 
 
-int JudgeProgramExist(const char *appName) {
-	if (1 != CheckServer(1,appName)) {
+int JudgeProgramExist(int iFlag,const char *appName) {
+	if (1 != CheckServer(iFlag,appName)) {
 		printf("No certain %s is running\n",appName);
 	} else {
 		printf("The program %s is running!\n",appName);
@@ -70,7 +83,7 @@ int JudgeProgramExist(const char *appName) {
 	return SUCESS;
 }
 
-static int CheckServer(int iFlag,const char *appName)
+int CheckServer(int iFlag,const char *appName)
 {
 	int iRet = 0;
 	DIR *dir;

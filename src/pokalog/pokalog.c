@@ -11,15 +11,19 @@
 #include "common.h"
 #include "pokalog.h"
 
+#if 0
 sem_t log_sem;
+#endif
 
 char G_LOGPATH[FILE_PATH_CHARNUM];
 
 void vWriteStrFile( char *psLogFileName,  char *pszMsg );
 static char *GetNowDateLogName(char *logName);
 
+
 int initPokaLog()
 {
+#if 0
 	int res;
 
 	/* Create semaphore */
@@ -28,6 +32,7 @@ int initPokaLog()
 	{
 		return ERROR;
 	}
+#endif
 	return SUCESS;
 }
 /**************************************************************************/

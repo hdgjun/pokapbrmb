@@ -17,5 +17,4 @@
 
 pthread_attr_t attr;
 
-char *GetProgramPath(char *path);
 #endif /* POKAPBRMB_H_ */

@@ -36,7 +36,7 @@ extern cir_queue_t gQue;
 
 int main(int argc, char **argv) {
 
-	if(JudgeProgramExist(APP_NAME) != SUCESS){
+	if(JudgeProgramExist(1,APP_NAME) != SUCESS){
 		exit(0);
 	}
 
@@ -157,7 +157,7 @@ static int initlog() {
 	char CurPath[FILE_PATH_CHARNUM] = { 0 };
 	char LogDirPath[FILE_PATH_CHARNUM] = { 0 };
 
-	GetProgramPath(CurPath);
+	GetProgramPath(CurPath,APP_NAME,DEF_INSTALL_PATH);
 
 	sprintf(LogDirPath, "%s/%s/%s/", CurPath, LOGFOLDER_NAME,APP_NAME);
 
@@ -168,16 +168,7 @@ static int initlog() {
 
 	return initPokaLog();
 }
-char *GetProgramPath(char *path)
-{
-	char *env = getenv(POKA_HOME);
-	if(env){
-		memcpy(path,env,strlen(env));
-	}else{
-		memcpy(path, DEF_INSTALL_PATH,strlen(DEF_INSTALL_PATH));
-	}
-	return path;
-}
+
 static int initpath()
 {
 	char temPath[FILE_PATH_CHARNUM] = { 0 };

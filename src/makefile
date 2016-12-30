@@ -1,6 +1,7 @@
 TOPDIR=./..
 
 exclude_dirs=xpp pokaftp main
-TARGETDIRS=pokapbrmb 
+
+TARGETDIRS=pokapbrmb pokadaemon
 
 include $(TOPDIR)/cfg/Makefile.mk
