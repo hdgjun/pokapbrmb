@@ -157,6 +157,17 @@ int htoi(char *s)
 	return n;
 }
 
+int htoi1(char *s)
+{
+	int i,n;
+	n=0;
+	for(i=0;s[i]!='\0';i++)
+	{ if(s[i]>='0'&&s[i]<='9')  n=n*16+s[i]-'0';
+	if(s[i]>='a'&&s[i]<='f')  n=n*16+s[i]-'a'+10;
+	if(s[i]>='A'&&s[i]<='F')  n=n*16+s[i]-'A'+10;
+	}
+	return n;
+}
 
 //去除空格
 char *strtrim(char *pstr)
@@ -178,6 +189,19 @@ char *strtrimr(char *pstr)
 		p[i--] = '\0';
 	}
 	return pstr;
+}
+
+//整形版本指数函数
+int npow(int n,int m)
+{
+    int sum = 1;
+	int i = 0;
+    for(i = 0; i < m; i++)
+	{
+        sum *= n;
+    }
+
+    return sum;
 }
 
 char *strtriml(char *pstr)

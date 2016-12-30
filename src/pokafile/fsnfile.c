@@ -10,6 +10,7 @@
 #include "db/dbbusinesslistatm.h"
 #include "db/dbperinfo.h"
 #include "db/dbmoneydata.h"
+#include "common.h"
 
 #ifdef DEBUG
 	#include <time.h>
@@ -290,6 +291,16 @@ int	WriteToSnoTable(FILENAME *fsnFile)
 		return ERROR;
 	}
 
+	if(SUCESS == JudgeIncludeImageSno(FileHeadBuf))//ÅÐ¶ÏÊÇ·ñ°üº¬Í¼Ïñ
+	{
+		fsnFile->IncludeImageSnoFlag = 1;
+	}
+	else
+	{
+		fsnFile->IncludeImageSnoFlag = 0;
+	}
+
+
 	unsigned int iFSNSNoNum = 0;//¹Ú×ÖºÅ¼ÇÂ¼Êý
 	iFSNSNoNum = ReadSnoNum(FileHeadBuf);//¹Ú×ÖºÅ¼ÇÂ¼Êý
 
@@ -531,6 +542,35 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 	FileRecord->Reserve1[0] = list[loc + 130];
 	printf("FileRecord->Reserve1:%c\n",FileRecord->Reserve1[0]);
 
+	if((1 == pfilename->IncludeImageSnoFlag) &&
+		(g_param.SaveImage==DEF_IMAGE_SAVE))
+	{
+		char ImageFileName[MAX_STRING_SIZE] = {0};
+		char strDateTime[20] = {0};
+		char sDateTime[20] = {0};
+
+		sprintf(strDateTime,"%s",pfilename->DateTime);
+		if((strlen(FileRecord->SNo) == 0) || (strlen(strDateTime) == 0))
+		{
+			return -1;
+		}
+
+		sprintf(ImageFileName,"%s_%d%d_%d.bmp",FileRecord->SNo,GetDateInt(),GetTimeInt(),iSnoNo);
+
+
+		char FolderPath[FILE_PATH_CHARNUM] = {0};//ÎÄ¼þ¼ÐÂ·¾¶
+		sprintf(FolderPath,"%s/%s/%s/%s/",g_param.ImagePath,g_param.ImageDir,pfilename->BankNo,pfilename->Date);
+
+		if(JudgeSavePathExist(FolderPath) != 0)
+		{
+			//return -1;
+		}
+
+		sprintf(FileRecord->ImageFilePath,"%s/%s",FolderPath,ImageFileName);
+
+		SaveSnoImageFromFsnFile(pfilename,FileRecord,list,iSnoNo);//½ØÈ¡Í¼Æ¬
+	}
+
 	unsigned int uiBusinessType = 0;
 	if(STANDARD_ONE_RECORD_SIZE == pfilename->OneRecordSize)
 	{
@@ -711,6 +751,7 @@ MONEYDATAR *GetFSNRecode(MONEYDATAR *fsn,FILERECORD *recode,FILENAME *fn)
 	memcpy(fsn->agencyno,fn->AgencyNo,strlen(fn->AgencyNo));
 	memcpy(fsn->packageid,recode->PackageId,strlen(recode->PackageId));
 	memcpy(fsn->filename,recode->FileName,strlen(recode->FileName));
+	memcpy(fsn->imagepath,recode->ImageFilePath,strlen(recode->ImageFilePath));
 	return fsn;
 }
 ATMRECODE *GetAtmRecode(ATMRECODE *atm,FILERECORD *recode,FILENAME *fn)

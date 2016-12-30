@@ -43,7 +43,37 @@
 #define  SERVER_CODE_3                   3
 
 typedef unsigned short WORD;  //16位无符号整形
+typedef unsigned int DWORD;
 typedef unsigned int LONG;   //32位无符号整形
+
+#define  USHORT 					unsigned short			//16位无符号整形
+#define  ULONG						unsigned int			//32位无符号整形
+//#define  LEFT_ROTATE 				0
+#define  RIGHT_ROTATE  				1
+
+#pragma pack(2)
+typedef struct tagBITMAPFILEHEADER          // 文件头
+{
+    WORD bfType;
+    LONG bfSize;
+    WORD bfReserved1;
+    WORD bfReserved2;
+    LONG bfOffBits;
+} BITMAPFILEHEADER;
+#pragma pack()
+typedef struct tagBITMAPINFOHEADER{         // 信息头
+	DWORD biSize;
+    LONG biWidth;
+    LONG biHeight;
+    WORD biPlanes;
+    WORD biBitCount;
+    DWORD biCompression;
+    DWORD biSizeImage;
+    LONG biXPelsPerMeter;
+    LONG biYPelsPerMeter;
+    DWORD biClrUsed;
+    DWORD biClrImportant;
+} BITMAPINFOHEADER;
 
 typedef struct t_FileName
 {
@@ -58,6 +88,7 @@ typedef struct t_FileName
 	char BusinessType[5];
 	char Percode[24+1];
 	unsigned int OneRecordSize;
+	unsigned int IncludeImageSnoFlag;
 	DataType *df;
 }FILENAME,*pFileName;
 
@@ -76,27 +107,27 @@ typedef struct t_BundleBobInfo
 //文件头结构体
 typedef struct T_FileHead
 {
-	WORD HeadStart[4];	//USHORT:16位无符号整型
-	WORD HeadString[6];
-	LONG  Counter;			//ULONG:32位无符号整型
-	WORD HeadEnd[4];
+	USHORT HeadStart[4];	//USHORT:16位无符号整型
+	USHORT HeadString[6];
+	ULONG  Counter;			//ULONG:32位无符号整型
+	USHORT HeadEnd[4];
 
 }FILEHEAD, *pFileHead;
 
 //单个图像号码结构
 typedef struct T_ImageSNoData
 {
-	LONG Data[32];
+	ULONG Data[32];
 
 }IMAGESNODATA, *pImageSNoData;
 
 //图像冠字号结构
 typedef struct T_ImageSNo
 {
-	WORD Num;
-	WORD height;
-	WORD width;
-	WORD Reserve2;
+	USHORT Num;
+	USHORT height;
+	USHORT width;
+	USHORT Reserve2;
 	IMAGESNODATA SNo[12];
 
 }IMAGESNO, *pImageSNo;
@@ -192,4 +223,6 @@ int UploadFile(ROUTE *route);
 int DownFile(ROUTE *route);
 int Start_service(ROUTE *route);
 int Stop_service(ROUTE *route);
+int SaveSnoImageFromFsnFile(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int iSnoNo);
+
 #endif

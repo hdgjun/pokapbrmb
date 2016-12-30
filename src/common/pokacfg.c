@@ -78,6 +78,8 @@ int ReadParamFromIniFile(Param *param, char *app_home) {
 void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 		char szValue[PARAM_NUM][MAX_STRING_SIZE], Param *param) {
 	int i;
+	param->SaveImage = -1;
+
 	for (i = 0; i <= PARAM_NUM; i++) {
 
 		if (strcmp(szKey[i], DBUSER_KEY) == 0) {
@@ -145,23 +147,25 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 		if (strcmp(szKey[i], PBNO_KEY) == 0) {
 				strcpy(param->PBno, szValue[i]);
 				continue;
-			}
-#if 0
-		if (strcmp(szKey[i], UPLOAGDIR_KEY) == 0) {
-			strcpy(param->, szValue[i]);
+		}
+
+		if (strcmp(szKey[i], IMAGE_PATH_KEY) == 0) {
+			strcpy(param->ImagePath, szValue[i]);
 			continue;
 		}
 
-		if(strcmp(szKey[i],NEEDDELIMAGEFIELD_STRING) == 0)
+		if(strcmp(szKey[i],IMAGE_DIR_KEY) == 0)
 		{
-			strcpy(param->NeedDelImageField,szValue[i]);
+			strcpy(param->ImageDir,szValue[i]);
 			continue;
 		}
-		if(strcmp(szKey[i],NEEDSAVESNOIMAGE_STRING) == 0)
+
+		if(strcmp(szKey[i],IMAGE_SAVE_KEY) == 0)
 		{
-			strcpy(param->NeedSaveSnoImage,szValue[i]);
+			param->SaveImage=atoi(szValue[i]);
 			continue;
 		}
+#if 0
 		if(strcmp(szKey[i],INSERTSNOBYFILE_STRING) == 0)
 		{
 			strcpy(param->InsertSnoByFile,szValue[i]);
@@ -381,6 +385,13 @@ void UseDefaultValue(Param *param) {
 	if (strlen(param->UpdateDIr) <= 0) {
 		strcpy(param->UpdateDIr, DEF_UPDATE_DIR);
 	}
+
+	if (strlen(param->ImageDir) <= 0) {
+		strcpy(param->ImageDir, DEF_IMAGE_DIR);
+	}
+	if (strlen(param->ImagePath) <= 0) {
+		strcpy(param->ImagePath, param->FileStoreBasePath);
+	}
 	if (param->ThreadSize <= 0 || param->ThreadSize > MAX_THREAD_NUM) {
 		param->ThreadSize = DEF_THREAD_SIZE;
 	}
@@ -392,6 +403,10 @@ void UseDefaultValue(Param *param) {
 	}
 	if (strlen(param->BankNo) <= 0) {
 		strcpy(param->BankNo, DEF_BANKNO);
+	}
+
+	if (param->SaveImage <= 0) {
+		param->SaveImage = DEF_IMAGE_SAVE;
 	}
 }
 //ÅÐ¶Ï²ÎÊý

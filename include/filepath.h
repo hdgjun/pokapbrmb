@@ -16,4 +16,6 @@ int Move(const char *src,const char *des);
 int DelFileOrDir(unsigned int uiFileDirFlag,const char *szFileDirPath);
 int GetTimeInterval(int sec);
 int GetDateInterval(int sec);
+int npow(int n,int m);
+int htoi1(char *s);
 #endif

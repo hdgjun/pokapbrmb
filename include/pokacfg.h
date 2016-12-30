@@ -12,6 +12,8 @@
 #define  DATE_START                 1
 #define  DATE_END                   0
 
+#define  DEF_IMAGE_SAVE             1                  /*默认保存图片*/
+#define  DEF_IMAGE_DIR              "image"
 #define  DEF_FILE_STORE_BASE_PATH   "/home/poka/"
 #define  DEF_SWITCH_DIR             "fsn_put"         /*商行端[文件发送到文件处理目录和转发目录(人行子目录)]人行端[清分中心文件分发到转发目录，其他文件转发到文件处理目录]*/
 #define  DEF_HANDLE_DIR             "fsn_cb_handin"   /*[商行端、人行端共同]文件处理后入库目录*/
@@ -41,6 +43,10 @@
 /*#define  PBLOADINGDIR_KEY            "pbloadingdir"*/
 #define  THREADSIZE_KEY              "threadsize"
 #define  SLEEPTIME_KEY               "sleeptime"
+#define  IMAGE_PATH_KEY              "imagepath"
+#define  IMAGE_DIR_KEY               "imagedir"
+#define  IMAGE_SAVE_KEY              "saveimage"
+
 //参数结构体
 typedef struct t_Param
 {
@@ -58,9 +64,12 @@ typedef struct t_Param
 	char SendFileDIr[MIN_STRING_SIZE];
 	char UpdateDIr[MIN_STRING_SIZE];
 	char ErrorDir[MIN_STRING_SIZE];
+	char ImagePath[MIN_STRING_SIZE];
+	char ImageDir[MIN_STRING_SIZE];
 /*	char PbLoadingDir[MIN_STRING_SIZE];*/
 	int  ThreadSize;
 	int  SleepTime;
+	int  SaveImage;
 }Param,*pParam;
 
 Param g_param;
