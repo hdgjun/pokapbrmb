@@ -3,9 +3,8 @@
 daemonname=pokadaemon
 procname=pokapbrmb
 
-basepath=/home/poka/xiang/pokapbrmb/
-daemonpath=/home/poka/xiang/pokapbrmb/pokadaemon
-procpath=/home/poka/xiang/pokapbrmb/pokapbrmb
+
+basepath=/home/poka/pokapbrmb/
 
 #oraclehomepath=/opt/oracle/product/11gR2/db
 #oracletnsadmin=/opt/oracle/product/11gR2/db/network/admin
@@ -15,21 +14,40 @@ oraclesid=orcl
 
 case "$1" in
 	start)
-		if test $( pgrep -f ${procname} | wc -l ) -gt 2 
-		then 
-		echo "${procname} is runing!" 
-		else
-		export ORACLE_HOME=${oraclehomepath}
-		export ORACLE_SID=${oraclesid}
-		export TNS_ADMIN=${oracletnsadmin}
-		cd ${basepath}
-		nohup ${procpath} >/dev/null &
-		nohup ${daemonpath} >/dev/null &
-		fi
+                if [ -z "${POKA_HOME}" ];
+                then
+                   echo "export poka_home" 
+                   export POKA_HOME=$basepath;
+                else
+                fi
+                
+                if [ -z "${ORACLE_HOME}" ];
+                then
+                   export ORACLE_HOME=${oraclehomepath}
+                fi
+  
+                if [ -z "${ORACLE_SID}" ];
+                then 
+                   export ORACL_SID=${oraclesid} 
+                fi
+
+                if [ -z "${TNS_ADMIN}" ]
+                then 
+                   export TNS_ADMIN=${oracletnsadmin}
+                fi
+                
+                if test $( pgrep -f ${daemonname} |wc -l ) -eq 1
+                then "{daemonname} is running!"
+                else
+                     cd ${POKA_HOME}/bin/
+                     pwd
+                     nohup ${POKA_HOME}/bin/${daemonname} > /dev/null &  
+                fi
+               
 		;;
 	stop)
-		ps -ef | grep -E ${daemonname} | grep -v grep | awk '{print $2}' | xargs kill -9
-		ps -ef | grep -E ${procname} | grep -v grep | awk '{print $2}' | xargs kill -9
+		pgrep -f ${daemonname} | xargs kill -9
+		pgrep -f ${procname}   | xargs kill -9
 		;;
 esac
 
