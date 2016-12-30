@@ -217,6 +217,7 @@ int CopyFiles(FILEMOVEINFO *pInfo);
 char *GetSucInsLocalDir(char *dir,const  FILENAME *fn);
 int MoveFSNFile(FILENAME *fn,int result);
 void *SendFileThread();
+void *CleanFileThread();
 char *GetPercode(const char *src,char *des);
 int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *business);
 int UploadFile(ROUTE *route);

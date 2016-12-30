@@ -13,9 +13,18 @@ passwd=$6
 file=$7
 result=$8
 
-logfile=ftp_${a}_${b}.log
-
+logfile=${ldir}/ftp_${a}_${b}.log
+#logfile=/home/poka/hdgjun1/ftp_${a}_${b}.log
 echo "error" > ${result}
+
+
+#echo "ip  ${ip}" >>${logfile}.txt
+#echo "port ${port}" >> ${logfile}.txt
+#echo "ldir  ${ldir}">>${logfile}.txt
+#echo "rdir  ${rdir}">>${logfile}.txt
+#echo "passwd ${passwd}">>${logfile}.txt
+#echo "file ${file}">>${logfile}.txt
+#echo "result ${result}">>${logfile}.txt
 
 echo "
 open ${ip} ${port}
@@ -23,6 +32,7 @@ passive off
 prompt off
 user ${user} ${passwd}
 binary
+mdir ${rdir} 
 pwd
 cd ${rdir}
 pwd

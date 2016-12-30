@@ -66,7 +66,8 @@
 #define	 FTP_PUTSHELLNAME_STRING	"putfile_ftp.sh"			//ftp发送文件shell脚本名称
 #define	 SFTP_PUTSHELLNAME_STRING 	"putfile_sftp.sh"			//sftp发送文件shell脚本名称
 #define  FTP_GETDIRSHELLNAME_STRING "getdir.sh"
-
+#define  DELETE_IMAGE_SHELLNAME_STRING "deleteimage.sh"
+#define  DELETE_FSN_SHELLNAME_STRING	"deletefsn.sh"
 #define	 ZIPCMD_STRING				"zip"					//zip压缩命令字符串
 
 #define  TIMEFILL_STRING			"XXXXXX"

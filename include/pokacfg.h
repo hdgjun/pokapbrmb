@@ -12,6 +12,9 @@
 #define  DATE_START                 1
 #define  DATE_END                   0
 
+#define  DEF_LOG_SAVE_DAY           30                /*默认日志保存天数*/
+#define  DEF_FILE_SAVE_DAY          90                /*默认文件保存天数*/
+#define  DEF_IMAGE_SAVE_DAY         90                /*默认图片保存天数*/
 #define  DEF_IMAGE_SAVE             1                  /*默认保存图片*/
 #define  DEF_IMAGE_DIR              "image"
 #define  DEF_FILE_STORE_BASE_PATH   "/home/poka/"
@@ -46,6 +49,10 @@
 #define  IMAGE_PATH_KEY              "imagepath"
 #define  IMAGE_DIR_KEY               "imagedir"
 #define  IMAGE_SAVE_KEY              "saveimage"
+#define  LOG_SAVE_DAY_KEY            "logsaveday"
+#define  FILE_SAVE_DAY_KEY           "filesaveday"
+#define  IMAGE_SAVE_DAY_KEY          "imagesaveday"
+
 
 //参数结构体
 typedef struct t_Param
@@ -66,7 +73,9 @@ typedef struct t_Param
 	char ErrorDir[MIN_STRING_SIZE];
 	char ImagePath[MIN_STRING_SIZE];
 	char ImageDir[MIN_STRING_SIZE];
-/*	char PbLoadingDir[MIN_STRING_SIZE];*/
+	int  LogSaveDay;
+	int  FileSaveDay;
+	int  ImageSaveDay;
 	int  ThreadSize;
 	int  SleepTime;
 	int  SaveImage;

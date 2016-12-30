@@ -3,12 +3,12 @@
 
 
 
-echo "open localhost 
+echo "open 192.168.125.12 
 passive off
 prompt off
 user root 123456
 binary
-ls
+cd /home
 close
 bye
-"|ftp -v -n > 2.log
+"|ftp -v -n > unix.log

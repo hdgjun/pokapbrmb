@@ -80,6 +80,7 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 	int i;
 	param->SaveImage = -1;
 
+
 	for (i = 0; i <= PARAM_NUM; i++) {
 
 		if (strcmp(szKey[i], DBUSER_KEY) == 0) {
@@ -165,23 +166,23 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 			param->SaveImage=atoi(szValue[i]);
 			continue;
 		}
+
+		if(strcmp(szKey[i],LOG_SAVE_DAY_KEY) == 0)
+		{
+			param->LogSaveDay=atoi(szValue[i]);
+			continue;
+		}
+		if(strcmp(szKey[i],FILE_SAVE_DAY_KEY) == 0)
+		{
+			param->FileSaveDay = atoi(szValue[i]);
+			continue;
+		}
+		if(strcmp(szKey[i],IMAGE_SAVE_DAY_KEY) == 0)
+		{
+			param->ImageSaveDay = atoi(szValue[i]);
+			continue;
+		}
 #if 0
-		if(strcmp(szKey[i],INSERTSNOBYFILE_STRING) == 0)
-		{
-			strcpy(param->InsertSnoByFile,szValue[i]);
-			continue;
-		}
-		if(strcmp(szKey[i],DAYSSPACE_STRING) == 0)
-		{
-			param->iDaysSpace = atoi(szValue[i]);
-			//printf("--------->param->iDaysSpace:%d\n",param->iDaysSpace);
-			continue;
-		}
-		if(strcmp(szKey[i],DELOLDDATAFILETIME_STRING) == 0)
-		{
-			strcpy(param->DelOldDataFileTime,szValue[i]);
-			continue;
-		}
 		if(strcmp(szKey[i],GETORDERSPACE_STRING) == 0)
 		{
 			param->iGetOrderSpace = atoi(szValue[i]);
@@ -407,6 +408,15 @@ void UseDefaultValue(Param *param) {
 
 	if (param->SaveImage <= 0) {
 		param->SaveImage = DEF_IMAGE_SAVE;
+	}
+	if (param->LogSaveDay <= 0) {
+		param->LogSaveDay = DEF_LOG_SAVE_DAY;
+	}
+	if (param->FileSaveDay <= 0) {
+		param->FileSaveDay = DEF_FILE_SAVE_DAY;
+	}
+	if (param->ImageSaveDay <= 0) {
+		param->ImageSaveDay = DEF_IMAGE_SAVE_DAY;
 	}
 }
 //ÅÐ¶Ï²ÎÊý

@@ -72,6 +72,11 @@ int main(int argc, char **argv) {
 				{
 					pthread_create(&sendfile, &attr, SendFileThread,NULL);
 				}
+				/*清理旧文件*/
+				if (ESRCH == test_pthread(clearFile))
+				{
+					pthread_create(&clearFile, &attr, CleanFileThread,NULL);
+				}
 			}
 			/*从队列获取任务，处理文件*/
 			if (ESRCH == test_pthread(fileOpr[i]))
