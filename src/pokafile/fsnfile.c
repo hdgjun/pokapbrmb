@@ -388,7 +388,7 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 		//读取一条冠字号全部信息
 		if(ReadOneRecordInfo(pfilename,&fileRecord,list,iSnoCountFSN) == SUCESS)
 		{
-			iRet = CheckFSNRecode(&fileRecord);
+			//iRet = CheckFSNRecode(&fileRecord);
 			if(pfilename->df->fileType == FSN_FILE_TYPE){
 				MONEYDATAR rec;
 				GetFSNRecode(&rec,&fileRecord,pfilename);
@@ -399,7 +399,7 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 				iRet = TmpDbsMoneydataAtm(DBS_INSERT,GtmpTableName(tmpTable),&atm);
 				vLog("TmpDbsMoneydataAtm[%d]",iRet);
 			}
-			if(iRet == WARING){
+			if(iRet == WARING){ /*没有连接数据库*/
 				vLog("DbsRollback");
 				DbsRollback();
 				return iRet;
@@ -531,13 +531,15 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 	}
 	printf("ReadOneRecordInfo FileRecord.SNo:%s/\n",FileRecord->SNo);
 	strtrim(FileRecord->SNo);
-
+	FileRecord->SNo[12]=0x00;
 	//机器（具）编号
 	for(i = 0; i < 24; i++)
 	{
 		FileRecord->MachineSNo[i] = list[loc + 82 + 2*i];
 	}
 	printf("FileRecord->MachineSNo:%s/\n",FileRecord->MachineSNo);
+
+	FileRecord->MachineSNo[24]=0x00;
 
 	FileRecord->Reserve1[0] = list[loc + 130];
 	printf("FileRecord->Reserve1:%c\n",FileRecord->Reserve1[0]);
@@ -550,9 +552,10 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 		char sDateTime[20] = {0};
 
 		sprintf(strDateTime,"%s",pfilename->DateTime);
-		if((strlen(FileRecord->SNo) == 0) || (strlen(strDateTime) == 0))
+		if(strlen(FileRecord->SNo) == 0)
 		{
-			return -1;
+			vLog("mon is null");
+			return ERROR;
 		}
 
 		sprintf(ImageFileName,"%s_%d%d_%d.bmp",FileRecord->SNo,GetDateInt(),GetTimeInt(),iSnoNo);
@@ -561,10 +564,7 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 		char FolderPath[FILE_PATH_CHARNUM] = {0};//文件夹路径
 		sprintf(FolderPath,"%s/%s/%s/%s/",g_param.ImagePath,g_param.ImageDir,pfilename->BankNo,pfilename->Date);
 
-		if(JudgeSavePathExist(FolderPath) != 0)
-		{
-			//return -1;
-		}
+		JudgeSavePathExist(FolderPath);
 
 		sprintf(FileRecord->ImageFilePath,"%s/%s",FolderPath,ImageFileName);
 
@@ -587,17 +587,9 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 		printf("----------->BundleID:%s\n",FileRecord->BundleID);
 
 		//操作员
-		//printf("----------->Operator:%s\n",FileRecord->Operator);
-		if(STANDARD_ONE_RECORD_SIZE == pfilename->OneRecordSize)
+		for(i = 0; i < 8; i++)
 		{
-			memcpy(FileRecord->Operator,pfilename->Operator,USERID_LEN);
-		}
-		else
-		{
-			for(i = 0; i < 8; i++)
-			{
-				FileRecord->Operator[i] = list[loc + uiSpace+24 + i];
-			}
+			FileRecord->Operator[i] = list[loc + uiSpace+24 + i];
 		}
 
 		//监督员
@@ -607,7 +599,6 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 		}
 		//printf("----------->MonitorID:%s\n",FileRecord->Monitor);
 
-		//梅州散装加钞业务
 		//钞箱ID
 		for(i = 0; i < 24; i++)
 		{
@@ -634,11 +625,10 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 		{
 			FileRecord->AddMonChecker[i] = list[loc + uiSpace+96 + i];
 		}
-		//printf("----------->AddMonChecker:%s\n",FileRecord->AddMonChecker);
 
 			//业务类型(存取款标志)
-			uiBusinessType = list[loc + uiSpace+104];
-			itoafunc(uiBusinessType,FileRecord->BusinessType);
+		uiBusinessType = list[loc + uiSpace+104];
+		itoafunc(uiBusinessType,FileRecord->BusinessType);
 	}
 
 	if(3 == uiBusinessType)
