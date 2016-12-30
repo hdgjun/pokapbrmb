@@ -357,6 +357,10 @@ void *SendFileThread() {
 	vLog("SendFileThread   ThreadConnectDB ok");
 	int iRet;
 	pthread_t service;
+
+	/*»Ö¸´³õÊ¼×´Ì¬*/
+	DbRoute(DBS_UPDATE1, NULL);
+
 	while (1) {
 		ROUTE route;
 		ROUTE *ro;
@@ -376,13 +380,15 @@ void *SendFileThread() {
 			memset(ro,0x00,sizeof(ROUTE));
 			iRet = DbRoute(DBS_FETCH, ro);
 			if (iRet == NODATA || iRet == ERROR) {
+#ifdef DEBUG
 				vLog("DbRoute   DBS_FETCH NODATA [%d]",iRet);
+#endif
 				DbRoute(DBS_CLOSE, NULL);
+#ifdef DEBUG
 				vLog("DbRoute   DBS_CLOSE CURSOR ");
+#endif
 				break;
 			}
-			vLog("pthread_create SendTask[%d],id [%d]",co++,ro->id);
-
 
 			pthread_create(&service, &attr, SendTask, (void *) (ro));
 		}
@@ -393,7 +399,7 @@ void *SendFileThread() {
 }
 void printRout(ROUTE *route )
 {
-	vLog("route->id[%d],route->ipaddr[%s],route->port[%s],route->user[%s]\
+	vLog("SendTask start:route->id[%d],route->ipaddr[%s],route->port[%s],route->user[%s]\
 			route->password[%s],route->localdir[%s],route->remotedir[%s]",route->id
 			,route->ipaddr,route->port,route->user,route->password
 			,route->localdir,route->remotedir);
@@ -410,9 +416,8 @@ void *SendTask(void *sp) {
 	char tBank[20 + 1] = { 0 };
 	char fBank[20 + 1] = { 0 };
 
-
-	vLog("SendTask route[%d] start", route.id);
 	printRout(&route);
+
 	if (ThreadConnectDB() != SUCESS) {
 		return (void *) ERROR;
 	}
@@ -472,6 +477,8 @@ void *SendTask(void *sp) {
 		}else{
 			route.lastdate = GetDateInt();
 		}
+	}else{
+		vLog("SendTask error:id[%d]",route.id);
 	}
 	Stop_service(&route);
 	DisconnectDB();

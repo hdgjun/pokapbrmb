@@ -70,6 +70,9 @@ int DbRoute(int oprType, ROUTE *record)
 					temData.status,temData.starttime,temData.lastdate,temData.id);
 			mysql_query(pcon,strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
+		case DBS_UPDATE1:
+		mysql_query(pcon,"UPDATE ROUTE SET STATUS = 1  where STATUS='0'");
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
 	}
 	return SUCESS;
 }

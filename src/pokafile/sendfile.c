@@ -41,7 +41,7 @@ int UploadFile(ROUTE *route) {
 		return ERROR;
 	}
 	int time = GetTimeInt();
-	sprintf(tempDir, "%s/%u_%d", route->localdir, (unsigned int) pthread_self(),
+	sprintf(tempDir, "%s/%u_%d", szFolderPath, (unsigned int) pthread_self(),
 			time);
 	JudgeSavePathExist(tempDir);
 
@@ -85,6 +85,17 @@ int UploadFile(ROUTE *route) {
 					StroeFiles(tempDir, route);
 				}
 			}
+		}else{
+			if((strstr(dirlist->d_name,"_")!=0)&&(strstr(tempDir,dirlist->d_name))==0){
+				vLog("error dir [%s] ",dirlist->d_name);
+				sprintf(temTarget, "%s/%s/PACK_*", szFolderPath,dirlist->d_name);
+				DelFileOrDir(1, temTarget);
+				sprintf(temTarget, "%s/%s/*", szFolderPath,dirlist->d_name);
+				Move(temTarget, szFolderPath);
+				vLog("Upload error ,delete dir:%s", temTarget);
+				sprintf(temTarget, "%s/%s/", szFolderPath,dirlist->d_name);
+				DelFileOrDir(0, temTarget);
+			}
 		}
 
 	}
@@ -112,6 +123,40 @@ int UploadFile(ROUTE *route) {
 	return SUCESS;
 }
 
+void RecoverDir(char *dir)
+{
+	DIR* p;
+	struct dirent* dirlist;
+	struct stat filestat;
+	char szFolderPath[FILE_PATH_CHARNUM] = { 0 };
+	char indir[FILE_PATH_CHARNUM] = { 0 };
+	char temTarget[FILE_PATH_CHARNUM] = { 0 };
+	char CmdStr[FILE_PATH_CHARNUM] = { 0 };
+	//char temName[FILE_PATH_CHARNUM] = { 0 };
+	char tempDir[FILE_PATH_CHARNUM] = { 0 };
+
+	sprintf(szFolderPath, "%s", dir);
+	p = opendir(szFolderPath);
+	while ((dirlist = readdir(p)) != NULL) {
+			sprintf(indir, "%s/%s", szFolderPath, dirlist->d_name);
+			stat(indir, &filestat);
+			if (!S_ISREG(filestat.st_mode))
+			{
+				if(strstr(dirlist->d_name,"_")!=0){
+					sprintf(temTarget, "%s/%s/*", szFolderPath,dirlist->d_name);
+					Move(temTarget, szFolderPath);
+					sprintf(temTarget, "%s/%s/", szFolderPath,dirlist->d_name);
+					vLog("Upload error ,delete dir:%s", temTarget);
+					DelFileOrDir(0, temTarget);
+				}
+			}
+	}
+	if (p != NULL) {
+		closedir(p);
+		p = NULL;
+	}
+	return;
+}
 int DownFile(ROUTE *route) {
 	char szFolderPath[FILE_PATH_CHARNUM] = { 0 };
 	char redir[FILE_PATH_CHARNUM] = { 0 };
@@ -121,6 +166,9 @@ int DownFile(ROUTE *route) {
 	char getfilelist[FILE_PATH_CHARNUM] = { 0 };
 	char apppath[FILE_PATH_CHARNUM] = { 0 };
 	char result[FILE_PATH_CHARNUM] = { 0 };
+
+	/*�ָ�Ŀ¼״̬*/
+	RecoverDir(route->localdir);
 
 	int time = GetTimeInt();
 	sprintf(tempDir, "%s/%u_%d", route->localdir, (unsigned int) pthread_self(),
@@ -179,7 +227,7 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 
 	int time = GetTimeInt();
 
-	sprintf(zFile, "%u_%d_%d.zip", (unsigned int) pthread_self(), time, batch);
+	sprintf(zFile, "PACK_%u_%d_%d.zip", (unsigned int) pthread_self(), time, batch);
 	sprintf(zpath, "%s/%s", dir, zFile);
 	sprintf(files, "%s/*", dir);
 	CompressFile(files, zpath);
