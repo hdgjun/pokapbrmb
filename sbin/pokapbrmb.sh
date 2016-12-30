@@ -18,7 +18,6 @@ case "$1" in
                 then
                    echo "export poka_home" 
                    export POKA_HOME=$basepath;
-                else
                 fi
                 
                 if [ -z "${ORACLE_HOME}" ];
@@ -40,7 +39,6 @@ case "$1" in
                 then "{daemonname} is running!"
                 else
                      cd ${POKA_HOME}/bin/
-                     pwd
                      nohup ${POKA_HOME}/bin/${daemonname} > /dev/null &  
                 fi
                
