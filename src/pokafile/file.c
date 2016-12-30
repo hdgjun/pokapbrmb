@@ -343,22 +343,6 @@ void *HandleFileThread(void *pt) {
 }
 
 void *SendFileThread() {
-#if 0
-	FTP_MESSAGE msg;
-	memset(&msg,0x00,sizeof(FTP_MESSAGE));
-	sprintf(msg.ip,"192.168.125.112");
-	sprintf(msg.port,"10001");
-	sprintf(msg.user,"poka");
-	sprintf(msg.passwd,"1234");
-	sprintf(msg.localdir,"/home/poka/hdgjun/");
-	sprintf(msg.remotedir,"/");
-	sprintf(msg.logname,"/home/poka/hdgjun/ftp.log");
-	sprintf(msg.filename,"*");
-	msg.model = FTP_MGET;
-	shellftp1(&msg);
-//	Shellftp(&msg);
-#endif
-
 	int SLEEPTIME;
 	vLog("SendFileThread   start");
 	while (1) {
