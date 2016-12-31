@@ -28,8 +28,8 @@ extern pthread_attr_t attr;
 
 static void *SendTask(void *sp);
 static int GetBanknoAndAgencyno(const char *szFileName, FILENAME *pfilename);
-
 static void printRout(ROUTE *route );
+
 void *SwitchFileThread(void *pt) {
 	DIR* p;
 	struct dirent* dirlist;
@@ -91,8 +91,8 @@ void *SwitchFileThread(void *pt) {
 					continue;
 				}
 
-				if(tp==ZIP_FILE_STRING){
-					memset(df, 0x00, sizeof(DataType));
+				if(tp == ZIP_FILE_TYPE){
+					memset(&df, 0x00, sizeof(DataType));
 					memcpy(df.filePath, szFolderPath, strlen(szFolderPath));
 					memcpy(df.fileName, dirlist->d_name, strlen(dirlist->d_name));
 					df.filesize = filestat.st_size;
