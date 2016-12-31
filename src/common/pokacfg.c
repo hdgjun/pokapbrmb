@@ -29,7 +29,7 @@ int ReadParamFromIniFile(Param *param, char *app_home) {
 	char apppath[FILE_PATH_CHARNUM] = { 0 };
 
 
-	sprintf(ConfFilePath, "%s/%s/%s", GetProgramPath(apppath,APP_NAME,DEF_INSTALL_PATH),CFG_DIR, CONFILE_NAME);
+	sprintf(ConfFilePath, "%s/%s/%s", GetProgramPath(apppath,POKA_HOME,DEF_INSTALL_PATH),CFG_DIR, CONFILE_NAME);
 
 	pConfFile = fopen(ConfFilePath, ONLYREAD_ACCESS_STRING);
 	if (pConfFile == NULL) {

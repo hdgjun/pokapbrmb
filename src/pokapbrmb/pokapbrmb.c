@@ -162,7 +162,7 @@ static int initlog() {
 	char CurPath[FILE_PATH_CHARNUM] = { 0 };
 	char LogDirPath[FILE_PATH_CHARNUM] = { 0 };
 
-	GetProgramPath(CurPath,APP_NAME,DEF_INSTALL_PATH);
+	GetProgramPath(CurPath,POKA_HOME,DEF_INSTALL_PATH);
 
 	sprintf(LogDirPath, "%s/%s/%s/", CurPath, LOGFOLDER_NAME,APP_NAME);
 
