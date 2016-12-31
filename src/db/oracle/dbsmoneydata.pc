@@ -1,15 +1,20 @@
 #include "db/db.h"
-
-int DbsMoneydata(int oprType, FILERECORD *fileRecord)
+#include "db/dbmoneydata.h"
+#include "common.h"
+#include "pokafile.h"
+int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
 {
-	POKA_ORA
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
 
 	EXEC SQL BEGIN DECLARE SECTION;
-	FILERECORD  tmpData;
+	MONEYDATAR  tmpData;
 	EXEC SQL END DECLARE SECTION;
 
-	memset(&tmpData, 0x00, sizeof(FILERECORD));
-	memcpy(&tmpData, fileRecord, sizeof(FILERECORD));
+	memset(&tmpData, 0x00, sizeof(MONEYDATAR));
+	memcpy(&tmpData, fileRecord, sizeof(MONEYDATAR));
 
 	switch (oprType)
 	{
@@ -39,27 +44,27 @@ int DbsMoneydata(int oprType, FILERECORD *fileRecord)
 				AGENCYNO
 				)
 				VALUES(
-				:tmpData.MachineSNo,
-				 to_date(:tmpData.DateTime,'yyyy-mm-dd hh24:mi:ss'),
-				:tmpData.SNo,
-				:tmpData.MoneyFlag,
-				:tmpData.Valuta,
-				:tmpData.Ver,
-				:tmpData.tfFlag,//"0",
-				:tmpData.Operator,
+				:tmpData.percode,
+				 to_date(:tmpData.coltime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.mon,
+				:tmpData.montype,
+				:tmpData.monval,
+				:tmpData.monver,
+				:tmpData.trueflag,//"0",
+				:tmpData.operatorid,
 				 SYSDATE,
-				:tmpData.BundleID,
-				:tmpData.PackageId,
-				:tmpData.Monitor,
-				:tmpData.ImageFilePath,
-				:tmpData.BusinessType,
-				:tmpData.MonBoxID,
-				:tmpData.AtmID,
-				:tmpData.AddMonOperator,
-				:tmpData.AddMonChecker,
-				:tmpData.BankNo,
-				:tmpData.FileName,
-				:tmpData.AgencyNo
+				:tmpData.bundleid,
+				:tmpData.packageid,
+				:tmpData.checker,
+				:tmpData.imagepath,
+				:tmpData.businesstype,
+				:tmpData.monboxid,
+				:tmpData.atmid,
+				:tmpData.addmonoperator,
+				:tmpData.addmonchecker,
+				:tmpData.bankno,
+				:tmpData.filename,
+				:tmpData.agencyno
 				 );
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
 	}

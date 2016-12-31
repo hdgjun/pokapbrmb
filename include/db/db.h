@@ -55,11 +55,12 @@ extern  pthread_key_t p_Thread_key;
 #define DBS_SEL_ONE_ROW2          110
 
 #ifdef DB_ORACLE
+/*
 #define  POKA_ORA  struct sqlca sqlca;\
 sql_context ctx;\
 ctx = (sql_context)pthread_getspecific(p_Thread_key);\
-EXEC SQL CONTEXT USE :ctx;\
-
+EXEC SQL CONTEXT USE :ctx;
+*/
 int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca);
 
 #endif

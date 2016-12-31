@@ -84,7 +84,7 @@ static int ReadBkContents(FILENAME *fn)
 		return ERROR;
 	}
 	memcpy(bundlebobinfo.OperatorId,buf,24);
-	bundlebobinfo.OperatorId[24];
+	bundlebobinfo.OperatorId[24]=0;
 #ifdef DEBUG
 	vLog("OperatorId :%s ",bundlebobinfo.OperatorId);
 #endif

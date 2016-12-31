@@ -6,5 +6,5 @@ DBFLAGS=thread=yes cpool=yes
 #LIDBS=-L /opt/oracle/product/10gR1/db/lib/ -l clntsh  -ldl -lm -lstdc++ -ldboracle
 #INDBS=-I /opt/oracle/product/10gR1/db/precomp/public/ -I /opt/oracle/product/10gR1/db/rdbms/public/
 
-LIDBS = -L /usr/lib/mysql/ 
-INDBS = -I /usr/include/mysql/
+LIDBS+= -L /usr/lib/mysql/ 
+INDBS+= -I /usr/include/mysql/

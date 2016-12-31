@@ -4,11 +4,15 @@
  *  Created on: 2016Äê12ÔÂ25ÈÕ
  *      Author: Administrator
  */
-
+#include "common.h"
 #include "db/db.h"
+#include "db/dbbaginfo.h"
 int DbBaginfo(int oprType, BAGINFO *fileRecord)
 {
-	POKA_ORA
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
 
 	EXEC SQL BEGIN DECLARE SECTION;
 	BAGINFO  tmpData;
@@ -24,4 +28,5 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 		case DBS_INSERT:
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
 	}
+	return SUCESS;
 }

@@ -79,8 +79,8 @@ void vLogErrReal( char const *vspFileName, char const *vspFuncName, int vtLine,i
             strpTm->tm_hour,
             strpTm->tm_min,
             strpTm->tm_sec,
-			currTime.tv_usec,
-			pthread_self(),
+			(unsigned int)currTime.tv_usec,
+			(unsigned int)pthread_self(),
             vspFileName,
             vtLine );
 

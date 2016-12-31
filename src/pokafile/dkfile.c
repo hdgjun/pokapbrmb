@@ -21,7 +21,7 @@ int DKFile(DataType *df)
 	}
 
 	memset(&fn,0x00,sizeof(FILENAME));
-	ReadFSNOrBKFileName(df->fileName,&fn);
+	ReadDKFileName(df->fileName,&fn);
 	fn.df = df;
 	int iRet = ReadDkContents(&fn);
 	if(MoveDKFile(&fn,iRet) != SUCESS){

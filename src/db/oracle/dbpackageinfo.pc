@@ -4,11 +4,16 @@
  *  Created on: 2016Äê12ÔÂ25ÈÕ
  *      Author: Administrator
  */
+#include "common.h"
 #include "db/db.h"
+#include "db/dbpackageinfo.h"
 
 int DbPackageinfo(int oprType, DBPACKAGEINFO *fileRecord)
 {
-	POKA_ORA
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
 
 	EXEC SQL BEGIN DECLARE SECTION;
 	DBPACKAGEINFO  tmpData;
@@ -44,4 +49,5 @@ int DbPackageinfo(int oprType, DBPACKAGEINFO *fileRecord)
 
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
 	}
+	return SUCESS;
 }
