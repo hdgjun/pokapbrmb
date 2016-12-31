@@ -75,7 +75,7 @@ void *SwitchFileThread(void *pt) {
 			return (void *) ERROR;
 		}
 		char *fileType;
-		//	DataType *df;
+		DataType df;
 		int fs = 0;
 		int tp;
 		FILENAME fn;
@@ -88,6 +88,18 @@ void *SwitchFileThread(void *pt) {
 				fileType = strrchr(dirlist->d_name, '.');
 				if (((tp = CheckFileType(fileType)) == ERROR)
 						|| tp == START_FILE_TYPE) {
+					continue;
+				}
+
+				if(tp==ZIP_FILE_STRING){
+					memset(df, 0x00, sizeof(DataType));
+					memcpy(df.filePath, szFolderPath, strlen(szFolderPath));
+					memcpy(df.fileName, dirlist->d_name, strlen(dirlist->d_name));
+					df.filesize = filestat.st_size;
+					df.fileType = tp;
+					if(StartFile(&df)==SUCESS){
+						ZIPFile(&df);
+					}
 					continue;
 				}
 
