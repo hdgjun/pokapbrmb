@@ -59,21 +59,21 @@ int main()
 			vLog("Target program[%s] does not run!",TARGET);
 
 			char szBuf[1024] = {0};
-			sprintf(szBuf, "nohup %s/%s/%s %s &",install, BIN_DIR, TARGET);
+			sprintf(szBuf, "nohup %s/%s/%s &",install, BIN_DIR, TARGET);
 
 			int iExecSysRet = system(szBuf);
 			if(iExecSysRet == -1)
 			{
-				vLog("Target program[%s] fail:%s",TARGET,strerror(errno));
+				vLog("Target program[%s/%s] fail:%s",install,TARGET,strerror(errno));
 			}
 			else
 			{
-				vLog("Exec Target program[%s] ok",TARGET);
+				vLog("Exec Target program[%s/%s] ok",install,TARGET);
 			}
 		}
 		else
 		{
-			vLog("Target program[%s] is running",TARGET);
+			vLog("Target program[%s/%s] is running",install,TARGET);
 		}
 		psleep(TIME_SPACE);
 	} 
