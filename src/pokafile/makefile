@@ -3,9 +3,9 @@ include $(TOPDIR)/cfg/Makefile.db
 
 LIB=libpokafile.a
 
-INCPATH=$(TOPDIR)/include/ $(INDBS)
+INCPATH=$(TOPDIR)/include/ $(IN_DB)
 LIBPATH=$(TOPDIR)/lib
-CFLAGS= -I$(INCPATH)
+CFLAGS+= -I$(INCPATH)
 
 
 include $(TOPDIR)/cfg/Makefile.mk

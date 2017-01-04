@@ -4,10 +4,9 @@ LIB=libdboracle.a
 
 INCPATH=$(TOPDIR)/include/
 LIBPATH=$(TOPDIR)/lib
-CFLAGS= -I$(INCPATH) -l
+CFLAGS+= -I$(INCPATH) $(IN_DB)
 
 DBINCLUD=$(INCPATH)
-DBTYPE=oracle
-include $(TOPDIR)/cfg/Makefile.db
+
 
 include $(TOPDIR)/cfg/Makefile.mk

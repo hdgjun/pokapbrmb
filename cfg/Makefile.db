@@ -1,10 +1,9 @@
 
-PROC=proc
-DBEXTEND=pc
+
 DBFLAGS=thread=yes cpool=yes
 
-#LIDBS=-L /opt/oracle/product/10gR1/db/lib/ -l clntsh  -ldl -lm -lstdc++ -ldboracle
-#INDBS=-I /opt/oracle/product/10gR1/db/precomp/public/ -I /opt/oracle/product/10gR1/db/rdbms/public/
+LID_ORA=-L /opt/oracle/product/10gR1/db/lib/ -lclntsh  -ldl -lm -lstdc++ -ldboracle
+IN_ORA=-I /opt/oracle/product/10gR1/db/precomp/public/ -I /opt/oracle/product/10gR1/db/rdbms/public/
 
-LIDBS+= -L /usr/lib/mysql/ 
-INDBS+= -I /usr/include/mysql/
+LID_MSQL= -L /usr/lib/mysql/  -ldl -lm -ldbmysql -lmysqlclient_r
+IN_MSQL= -I /usr/include/mysql/

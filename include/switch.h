@@ -13,10 +13,10 @@
 #endif
 
 //#define DB_ORACLE  /*编译oralce*/
-#define DB_MYSQL  /*编译mysql*/
+//#define DB_MYSQL  /*编译mysql*/
 #define TIME_FLAG   /*coltime使用文件名时间，注释后使用真实coltime*/
 
-#define DEBUG    /*调试模式,打印所有日志*/
+//#define DEBUG    /*调试模式,打印所有日志*/
 //#define PEOPLEBANK   /*定义走人行流程  注释走商行流程*/
 
 #endif /* INCLUDE_SWITCH_H_ */

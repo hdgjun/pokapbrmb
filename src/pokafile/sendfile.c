@@ -197,7 +197,7 @@ int DownFile(ROUTE *route) {
 	int i;
 
 	for (i = 0; i < ruleSize; i++) {
-		vLog("getting file from %d[%d],%s  %s",route->servicecode,GetDateInterval(-1),redir,tempDir);
+		vLog("getting file from servicecode:%d[%d],%s  %s",route->servicecode,GetDateInterval(-1),redir,tempDir);
 		sprintf(getfilelist, "%s/%u_%d_%d.list", tempDir, (unsigned int) pthread_self(),
 				GetTimeInt(), i);
 		sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s %s %s"
