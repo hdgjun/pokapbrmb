@@ -8,6 +8,7 @@
 #include "db/dbroute.h"
 #include "common.h"
 #include "pokalog.h"
+#include "filepath.h"
 int DbRoute(int oprType, ROUTE *record)
 {
 	POKA_MYSQL
@@ -24,10 +25,10 @@ int DbRoute(int oprType, ROUTE *record)
 	switch (oprType)
 	{
 		case DBS_CURSOR_OPEN:
-		sprintf(strSql,"SELECT ID,TARGETBANK,FORWARDBANK,USER,PASSWORD,\
-				LOCALDIR,REMOTEDIR,TYPE,SERVICECODE,STARTTIME,INTER_VAL ,\
-				STATUS,LASTDATE,IPADDR,PORT FROM ROUTE WHERE STATUS = 1 AND STARTTIME < %d \
-				AND STARTTIME<>0 AND (LASTDATE <> '%d' OR LASTDATE IS NULL)",temData.starttime,temData.lastdate);
+		sprintf(strSql,"SELECT ID,TARGETBANK,FORWARDBANK,USER_,PASSWORD_,\
+				LOCALDIR,REMOTEDIR,TYPE_,SERVICECODE,STARTTIME,INTER_VAL ,\
+				STATUS_,LASTDATE,IPADDR,PORT_,MODEL_ FROM ROUTE WHERE (STATUS_ = '1' OR STATUS_ IS NULL) AND STARTTIME < %d \
+				AND (LASTDATE <> '%d' OR LASTDATE IS NULL)",temData.starttime,temData.lastdate);
 		mysql_query(pcon,strSql);
 		printf("%s",strSql);
 		ctx->result =  mysql_store_result(pcon);
@@ -52,6 +53,15 @@ int DbRoute(int oprType, ROUTE *record)
 					if(row[12]!=NULL)temData.lastdate= atoi(row[12]);
 					if(row[13]!=NULL)memcpy(temData.ipaddr,row[13],strlen(row[13]));
 					if(row[14]!=NULL)memcpy(temData.port,row[14],strlen(row[14]));
+					if(row[15]!=NULL)temData.model= atoi(row[15]);
+					strtrim(temData.targetbank);
+					strtrim(temData.forwardbank);
+					strtrim(temData.user);
+					strtrim(temData.password);
+					strtrim(temData.localdir);
+					strtrim(temData.remotedir);
+					strtrim(temData.ipaddr);
+					strtrim(temData.port);
 					memcpy(record,&temData,sizeof(ROUTE));
 					pthread_setspecific(p_Thread_key,(void *)(ctx));
 					return SUCESS;
@@ -66,12 +76,12 @@ int DbRoute(int oprType, ROUTE *record)
 			pthread_setspecific(p_Thread_key,(void *)(ctx));
 			return SUCESS;
 		case DBS_UPDATE:
-			sprintf(strSql,"UPDATE ROUTE SET STATUS = %d ,STARTTIME = %d,LASTDATE = '%d' where ID='%d'",
+			sprintf(strSql,"UPDATE ROUTE SET STATUS_ = '%c' ,STARTTIME = %d,LASTDATE = '%d' where ID='%d'",
 					temData.status,temData.starttime,temData.lastdate,temData.id);
 			mysql_query(pcon,strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
 		case DBS_UPDATE1:
-		mysql_query(pcon,"UPDATE ROUTE SET STATUS = 1  where STATUS='0'");
+		mysql_query(pcon,"UPDATE ROUTE SET STATUS_ = '1'  where STATUS_='0'");
 		return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
 	}
 	return SUCESS;

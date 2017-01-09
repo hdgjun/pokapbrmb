@@ -38,7 +38,7 @@ int test_pthread(pthread_t tid)
 {
 
 	if (tid == NULL) {
-		printf("thread not exist");
+		printf("thread not exist\n");
 		return ESRCH;
 	}
 	int pthread_kill_err;

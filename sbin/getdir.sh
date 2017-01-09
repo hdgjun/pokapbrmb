@@ -12,6 +12,7 @@ user=$5
 pwd=$6
 list=$7
 filetype=$8
+model=$9
 
 logfile=ftp_${a}_${b}.log
 
@@ -42,7 +43,7 @@ else
 fi
 
 echo "open ${ip} ${port}
-passive off
+passive ${model}
 prompt off
 user ${user} ${pwd}
 binary

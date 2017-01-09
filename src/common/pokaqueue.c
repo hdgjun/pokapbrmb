@@ -17,13 +17,16 @@ void init_cir_queue(cir_queue_t *q)
 {
   int res;
 
-  /* Create semaphore */
+  pthread_mutex_init(&q->lock, NULL);
+  pthread_cond_init(&q->notempty, NULL);
+  pthread_cond_init(&q->notfull, NULL);
+  /* Create semaphore
   res = sem_init(&q->queue_sem, 0, 1);
   if (res != 0)
   {
     perror("Semaphore init failed.\n");
     exit(EXIT_FAILURE);
-  }
+  } */
   memset(q->data, 0, QUE_SIZE*sizeof(void *));
   q->front = q->rear = 0;
   q->count = 0;
@@ -53,22 +56,20 @@ int is_full_cir_queue(cir_queue_t *q)
  */
 int push_cir_queue(cir_queue_t *q, void *x)
 {
-  sem_wait(&q->queue_sem);
-  if (is_full_cir_queue(q))
+  pthread_mutex_lock(&q->lock);
+
+  while(is_full_cir_queue(q))
   {
-    printf("queue overflow.\n");
-    sem_post(&q->queue_sem);
-    return ERROR;
+	  printf("queue is full......\n");
+	  pthread_cond_wait(&q->notfull, &q->lock);
   }
-  /*
-  DataType * da = (DataType *)malloc(sizeof(DataType));
-  memset(da,0x00,sizeof(DataType));
-  memcpy(da,x,sizeof(DataType));
-*/
+
   q->data[q->rear] = x;
   q->rear = (q->rear+1) % QUE_SIZE;
   q->count++;
-  sem_post(&q->queue_sem);
+  pthread_cond_signal(&q->notempty);
+  pthread_mutex_unlock(&q->lock);
+
   return SUCESS;
 }
 
@@ -78,24 +79,21 @@ int push_cir_queue(cir_queue_t *q, void *x)
  */
 void *pop_cir_queue(cir_queue_t *q)
 {
-  DataType *temp;
+	DataType *temp;
+	pthread_mutex_lock(&q->lock);
+	while(is_empty_cir_queue(q))
+	{
+		printf("queue is empty......\n");
+		pthread_cond_wait(&q->notempty, &q->lock);
+	}
 
-  sem_wait(&q->queue_sem);
-
-  if (is_empty_cir_queue(q))
-  {
-	  printf("queue empty.\n");
-	  sem_post(&q->queue_sem);
-	  return NULL;
-  }
-
-  temp = q->data[q->front];
-  q->data[q->front] = 0;
-  q->front = (q->front+1) % QUE_SIZE;
-  q->count--;
-  sem_post(&q->queue_sem);
-
-  return temp;
+	temp = q->data[q->front];
+	q->data[q->front] = 0;
+	q->front = (q->front+1) % QUE_SIZE;
+	q->count--;
+	pthread_cond_signal(&q->notfull);
+	pthread_mutex_unlock(&q->lock);
+	return temp;
 }
 
 
@@ -108,13 +106,16 @@ void free_data_cir_queue(void *x)
 
 void destroy_cir_queue(cir_queue_t *q)
 {
-  sem_wait(&q->queue_sem);
+  pthread_mutex_lock(&q->lock);
   int i = q->front;
   while(i!=q->rear){
 	  free_data_cir_queue(q->data[i]);
 	  i = (i+1)%QUE_SIZE;
   }
-  sem_destroy(&q->queue_sem);
+  pthread_mutex_unlock(&q->lock);
+  pthread_mutex_destroy(&q->lock);
+  pthread_cond_destroy(&q->notempty);
+  pthread_cond_destroy(&q->notfull);
   return;
 }
 

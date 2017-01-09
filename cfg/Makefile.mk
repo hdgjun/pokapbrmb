@@ -24,8 +24,8 @@ SUBDIRS := $(dirs)
 SRCS:=$(wildcard *.pc)
 ifneq ($(SRCS),)
 SRCS:=$(filter-out $(exclude_files),$(SRCS))
-OBJS=$(SRCS:%.pc=%.c)
-OBJS=$(SRCS:%.c=%.o)
+OBJS:=$(SRCS:%.pc=%.c)
+OBJS:=$(OBJS:%.c=%.o)
 else
 SRCS:=$(wildcard *.c)
 $(warning  SRCS :$(SRCS))
@@ -37,8 +37,9 @@ $(warning  OBJS :$(OBJS))
 
 
 .SUFFIXES: .sqc .pc .c .o
-.pc.o:
+.pc.c:
 	$(PROC) $< $(DBFLAGS) include=$(DBINCLUD)
+#	$(CC) -c $(CFLAGS) $(LDFLAGS) $^
 .c.o:
 	$(CC) -c $(CFLAGS) $(LDFLAGS) $^
 	
@@ -50,7 +51,7 @@ $(LIB):$(OBJS)
 	$(RM) tp* *.lis
 	
 $(TARGET):$(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 	$(CP) $@ $(EXEPATH)
 
 tagdirs:$(TARGETDIRS)

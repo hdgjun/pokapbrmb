@@ -72,7 +72,7 @@ void vLogErrReal( char const *vspFileName, char const *vspFuncName, int vtLine,i
     gettimeofday(&currTime, NULL);
 
     va_start( strArgPtr, vspFmt );
-     sprintf(sMsg, "[%04d-%02d-%02d %02d:%02d:%02d:%u][%u][%s:%d]",
+     sprintf(sMsg, "[%04d-%02d-%02d %02d:%02d:%02d:%u][%u][%s:%s:%d]",
             strpTm->tm_year+1900,
             strpTm->tm_mon+1,
             strpTm->tm_mday,
@@ -82,6 +82,7 @@ void vLogErrReal( char const *vspFileName, char const *vspFuncName, int vtLine,i
 			(unsigned int)currTime.tv_usec,
 			(unsigned int)pthread_self(),
             vspFileName,
+			vspFuncName,
             vtLine );
 
     nMsgOutLen = strlen(sMsg);

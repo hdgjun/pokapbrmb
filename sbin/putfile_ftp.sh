@@ -12,7 +12,7 @@ user=$5
 passwd=$6
 file=$7
 result=$8
-
+model=$9
 logfile=${ldir}/ftp_${a}_${b}.log
 #logfile=/home/poka/hdgjun1/ftp_${a}_${b}.log
 echo "error" > ${result}
@@ -28,7 +28,7 @@ echo "error" > ${result}
 
 echo "
 open ${ip} ${port}
-passive off
+passive ${model}
 prompt off
 user ${user} ${passwd}
 binary
@@ -67,4 +67,4 @@ else
     fi
 fi
 
-rm ${logfile}
+rm  ${logfile}

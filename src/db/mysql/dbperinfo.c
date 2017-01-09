@@ -43,6 +43,8 @@ int DbPerinfo(int oprType, PERINFO *record)
 				memcpy(record,&tem,sizeof(PERINFO));
 				return SUCESS;
 			}
+			if(ctx->result)
+				mysql_free_result(ctx->result);
 			return ERROR;
 
 	}

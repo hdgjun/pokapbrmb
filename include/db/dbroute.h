@@ -25,6 +25,7 @@ typedef struct t_Route
     char status;
     char ipaddr[20+1];
     char port[8+1];
+    int  model;
 }ROUTE, *pRoute;
 
 int DbRoute(int oprType, ROUTE *record);

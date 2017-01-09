@@ -14,8 +14,8 @@
 #define WARING 	1
 #define ERROR 	-1
 #define NODATA 	-2
-#define S_START  0
-#define S_STOP   1
+#define S_START  '0'
+#define S_STOP   '1'
 
 #define  MAX_THREAD_NUM    			50
 #define  MAX_SLEEP_TIME    			60*10

@@ -9,7 +9,7 @@
 #include <sqlca.h>
 #endif
 #ifdef DB_MYSQL
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 #endif
 #include <pthread.h>

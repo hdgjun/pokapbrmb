@@ -1,10 +1,8 @@
 #include "db/db.h"
 #include "db/dbmoneydataatm.h"
 #include "common.h"
-static const char insertsql[] = "INSERT DELAYED INTO MONEYDATA_ATM (\
-		PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,\
-		OPERDATE,IMAGEPATH,BUSINESSTYPE,\
-		BANKNO,AGENCYNO,BUSINESSID) VALUES(";
+#include "pokalog.h"
+
 int DbsMoneydataAtm(int oprType, ATMRECODE *fileRecord)
 {
 #if 0
@@ -102,9 +100,9 @@ int TmpDbsMoneydataAtm(int oprType,const char *tn,ATMRECODE *fileRecord)
 			sprintf(strSql,"INSERT  INTO %s (\
 					PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,\
 					OPERDATE,IMAGEPATH,BUSINESSTYPE,\
-					BANKNO,AGENCYNO,BUSINESSID) VALUES( '%s', \
+					BANKNO,AGENCYNO) VALUES( '%s', \
 					str_to_date('%s','%s'), '%s', '%s', '%s', \
-					'%s', '%c', CURRENT_TIMESTAMP(), '%s', '%s', '%s', '%s', '%s')",tn,
+					'%s', '%c', CURRENT_TIMESTAMP(), '%s', '%s', '%s', '%s')",tn,
 					tmpData.percode,
 					tmpData.coltime,
 					"%Y%m%d%H%i%s",
@@ -116,13 +114,12 @@ int TmpDbsMoneydataAtm(int oprType,const char *tn,ATMRECODE *fileRecord)
 					tmpData.imagepath,
 					tmpData.businesstype,
 					tmpData.bankno,
-					tmpData.agencyno,
-					tmpData.businessid);
+					tmpData.agencyno);
 			mysql_query(pcon, strSql);
-
+			vLog("sql:[%s]",strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT TEMP",pcon);
 		case DBS_CREATE_TEMP:
-			sprintf(strSql,"create temporary table %s type='heap' \
+			sprintf(strSql,"create temporary table %s  \
 						 select * from MONEYDATA_ATM where 1=0;",tn);
 			mysql_query(pcon, strSql);
 
@@ -133,6 +130,9 @@ int TmpDbsMoneydataAtm(int oprType,const char *tn,ATMRECODE *fileRecord)
 			if(mysql_errno(pcon)==1146){
 				return ERROR;
 			}else{
+				ctx->result =  mysql_store_result(pcon);
+				if(ctx->result)
+				mysql_free_result(ctx->result);
 				return SUCESS;
 			}
 		case DBS_TRUNCATE:

@@ -1,8 +1,8 @@
 #ifndef __POKA_QUEUE_H__
 #define __POKA_QUEUE_H__
 
-#include <semaphore.h>
-
+//#include <semaphore.h>
+#include <pthread.h>
 #define QUE_SIZE 100
 
 typedef struct data_type
@@ -11,6 +11,7 @@ typedef struct data_type
 	char filePath[300];
 	unsigned long  filesize;
 	int  fileType;
+	int  threadid;
 }DataType;
 
 typedef struct cir_queue_t
@@ -19,7 +20,10 @@ typedef struct cir_queue_t
   int front;
   int rear;
   int count;
-  sem_t queue_sem;
+  //sem_t queue_sem;
+  pthread_mutex_t lock;//зда§Ыј
+  pthread_cond_t notempty;
+  pthread_cond_t notfull;
 }cir_queue_t;
 
 cir_queue_t gQue;

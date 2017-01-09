@@ -23,7 +23,7 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 ATMRECODE *GetAtmRecode(ATMRECODE *atm,FILERECORD *recode,FILENAME *fn);
 MONEYDATAR *GetFSNRecode(MONEYDATAR *fsn,FILERECORD *recode,FILENAME *fn);
 
-char *GtmpTableName(char *tab);
+char *GtmpTableName(char *tab,int id);
 int MoveATMFSNFile(FILENAME *fn,int result);
 
 int FSNFile(DataType *df)
@@ -56,9 +56,10 @@ int FSNFile(DataType *df)
     }else{
     	/*创建moneydata_atm临时表*/
     	vLog("create temp table");
-    	GtmpTableName(tn);
+    	GtmpTableName(tn,df->threadid);
     	if(TmpDbsMoneydataAtm(DBS_SELECT,tn,NULL)!=SUCESS)
     	{
+    		vLog("create temp table [%s]",tn);
 			if(TmpDbsMoneydataAtm(DBS_CREATE_TEMP,tn,NULL)!=SUCESS)
 			{
 				return WARING;
@@ -68,11 +69,19 @@ int FSNFile(DataType *df)
     	iRet = ReadAtmFileName(df->fileName,&fn,&business);
     	if(iRet == ERROR){
     		fn.df = df;
-    		MoveATMFSNFile(&fn,iRet);
+    		MoveFSNFile(&fn,iRet);
     		return ERROR;
-    	}else if(iRet == WARING){
-
     	}
+
+    	iRet = DbBusinessListAtm(DBS_SELECT1,&business);
+		if(iRet != SUCESS)
+		{//重复数据
+			iRet = ERROR;
+			 vLog("Duplicate business data [%d] ",business.id);
+			fn.df = df;
+			MoveFSNFile(&fn,iRet);
+			return ERROR;
+		}
 
     }
 
@@ -82,40 +91,40 @@ int FSNFile(DataType *df)
 
 	if(df->fileType == FSN_FILE_TYPE)
 	{
-		if(MoveFSNFile(&fn,iRet) != SUCESS){
-			MoveFSNFile(&fn,iRet);//try again
-		}
 	}else{
-		iRet = DbBusinessListAtm(DBS_INSERT,&business);
-		if(iRet != SUCESS){
-			vLog("Insert into table businesslistatm err!");
-			return iRet;
-		}
-		iRet = DbBusinessListAtm(DBS_SEL_ONE_ROW,&business);
-		if(iRet != SUCESS)
-		{
-			vLog("Select Business id err!");
-			return iRet;
-		}
-
-		iRet = FromTmpToAtm(tn,business.id);
-
-		vLog("FromTmpToAtm[%d]!",iRet);
-
 		if(iRet == SUCESS){
-			iRet = DbsCommit();
-		}else{
-			DbBusinessListAtm(DBS_DELETE,&business);
-			DbsCommit();
-		}
+			while(1){
+				iRet = DbBusinessListAtm(DBS_INSERT,&business);
+				if(iRet != SUCESS){
+					vLog("Insert into table businesslistatm err!");
+					break;
+				}
+				iRet = DbBusinessListAtm(DBS_SEL_ONE_ROW,&business);
+				if(iRet != SUCESS)
+				{
+					vLog("Select Business id err!");
+					break;
+				}
 
+				iRet = FromTmpToAtm(tn,business.id);
+
+				vLog("FromTmpToAtm[%d]!",iRet);
+
+				if(iRet == SUCESS){
+					iRet = DbsCommit();
+				}else{
+					DbBusinessListAtm(DBS_DELETE,&business);
+					DbsCommit();
+				}
+				break;
+			}
+		}
 		TmpDbsMoneydataAtm(DBS_TRUNCATE,tn,NULL);
+	}
 
-
-		if(MoveFSNFile(&fn,iRet) != SUCESS)
-		{
-			MoveFSNFile(&fn,iRet);//try again
-		}
+	if(MoveFSNFile(&fn,iRet) != SUCESS)
+	{
+		MoveFSNFile(&fn,iRet);//try again
 	}
 #ifdef DEBUG
 	finish = clock();//取结束时间
@@ -396,7 +405,7 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 			}else{
 				ATMRECODE atm;
 				GetAtmRecode(&atm,&fileRecord,pfilename);
-				iRet = TmpDbsMoneydataAtm(DBS_INSERT,GtmpTableName(tmpTable),&atm);
+				iRet = TmpDbsMoneydataAtm(DBS_INSERT,GtmpTableName(tmpTable,pfilename->df->threadid),&atm);
 				vLog("TmpDbsMoneydataAtm[%d]",iRet);
 			}
 			if(iRet == WARING){ /*没有连接数据库*/
@@ -707,10 +716,10 @@ void RestoreDateTime(FILERECORD *FileRecord,int DateArray,int DateArray1,int Tim
 	}
 }
 
-char *GtmpTableName(char *tab)
+char *GtmpTableName(char *tab,int id)
 {
 	char ta[100] = {0};
-	sprintf(ta,"MONEYDATA_ATM_%u",(unsigned int)pthread_self());
+	sprintf(ta,"MONEYDATA_ATM_%d",id);
 	memcpy(tab,ta,strlen(ta));
 	return tab;
 }
@@ -813,6 +822,23 @@ int GetMessageFromPerInfo(char *src,FILENAME *fn)
 	}
 	return ERROR;
 }
+char *DeleteXOrx(char *des,char *src)
+{
+	char *pt;
+	pt=src;
+	int i=0;
+	while(1)
+	{
+		if(*pt=='X'||*pt=='x'){
+			i++;
+			pt++;
+			continue;
+		}
+		break;
+	}
+	memcpy(des,src+i,strlen(src)-i);
+	return des;
+}
 int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *business)
 {
 	char strFileName[FILE_PATH_CHARNUM] = { 0 };
@@ -833,6 +859,7 @@ int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *busine
 		memcpy(business->bankno,fn->BankNo,strlen(fn->BankNo));
 		memcpy(business->netno,fn->AgencyNo,strlen(fn->AgencyNo));
 		memcpy(business->percode,fn->Percode,strlen(fn->Percode));
+
 	}else{
 		return ERROR;
 	}
@@ -848,7 +875,7 @@ int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *busine
 	pReturn1 = strtok_r(NULL, ATM_SEPARATOR_STRING, &pLeftStr);
 	if (pReturn1 != NULL)
 	{
-		memcpy(business->businessid,pReturn1,strlen(pReturn1));
+		DeleteXOrx(business->businessid,pReturn1);
 	}else{
 		return ERROR;
 	}
@@ -856,7 +883,8 @@ int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *busine
 	pReturn1 = strtok_r(NULL, ATM_SEPARATOR_STRING, &pLeftStr);
 	if (pReturn1 != NULL)
 	{
-		memcpy(business->accountno,pReturn1,strlen(pReturn1));
+		DeleteXOrx(business->accountno,pReturn1);
+
 	}else{
 		return ERROR;
 	}
@@ -865,8 +893,8 @@ int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *busine
 	pReturn1 = strtok_r(NULL, ATM_SEPARATOR_STRING, &pLeftStr);
 	if (pReturn1 != NULL)
 	{
-		memcpy(business->businessdate,pReturn1,strlen(pReturn1));
-		memcpy(fn->DateTime,pReturn1,strlen(pReturn1));
+		DeleteXOrx(business->businessdate,pReturn1);
+		DeleteXOrx(fn->DateTime,pReturn1);
 	}else{
 		return ERROR;
 	}
@@ -875,7 +903,7 @@ int ReadAtmFileName(const char *szFileName, FILENAME *fn,ATMBUSINESSLIST *busine
 	pReturn1 = strtok_r(NULL, ATM_SEPARATOR_STRING, &pLeftStr);
 	if (pReturn1 != NULL)
 	{
-		memcpy(business->moneytotal,pReturn1,strlen(pReturn1));
+		DeleteXOrx(business->moneytotal,pReturn1);
 	}else{
 		return ERROR;
 	}

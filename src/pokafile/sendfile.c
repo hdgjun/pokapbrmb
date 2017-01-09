@@ -16,9 +16,22 @@
 #include "common.h"
 #include "pokapbrmb.h"
 
+#define PASSIVE "on"
+#define ACTIIVE "off"
+
 static int CheckRule(ROUTERULE *rule, const int ruleSize, const char *fileType);
 static int Upload(const char *dir, const ROUTE *route, int batch);
 static int StroeFiles(const char *dir, const ROUTE *route);
+static char *GetFtpModel(ROUTE *route);
+
+static char *GetFtpModel(ROUTE *route)
+{
+	if(route->model ==0){
+		return ACTIIVE;
+	}else{
+		return PASSIVE;
+	}
+}
 
 int UploadFile(ROUTE *route) {
 	DIR* p;
@@ -45,6 +58,7 @@ int UploadFile(ROUTE *route) {
 			time);
 	JudgeSavePathExist(tempDir);
 
+	vLog("Get ROUTERULE[%d]",route->id);
 	ROUTERULE rule[MAX_RULE];
 	int ruleSize;
 	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
@@ -54,7 +68,7 @@ int UploadFile(ROUTE *route) {
 	//int i, iRet;
 	int count = 0;
 	int batch = 0;
-	vLog("starting upload dir:", route->localdir);
+	vLog("starting upload dir:%s", route->localdir);
 	while ((dirlist = readdir(p)) != NULL) {
 		sprintf(indir, "%s/%s", szFolderPath, dirlist->d_name);
 		stat(indir, &filestat);
@@ -200,10 +214,10 @@ int DownFile(ROUTE *route) {
 		vLog("getting file from servicecode:%d[%d],%s  %s",route->servicecode,GetDateInterval(-1),redir,tempDir);
 		sprintf(getfilelist, "%s/%u_%d_%d.list", tempDir, (unsigned int) pthread_self(),
 				GetTimeInt(), i);
-		sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s %s %s"
+		sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s %s %s %s"
 				,apppath,SHELL_DIR,FTP_GETDIRSHELLNAME_STRING,route->ipaddr
 				,route->port,tempDir,redir,route->user,route->password
-				,getfilelist,rule[i].fileextend);
+				,getfilelist,rule[i].fileextend,GetFtpModel(route));
 		system(CmdStr);
 		sprintf(temTarget, "%s/*", tempDir);
 		Move(temTarget, route->localdir);
@@ -234,9 +248,10 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	sprintf(result, "%s/%u_%d_%d.result", dir, (unsigned int) pthread_self(),
 			time, batch);
 
-	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
+
+	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
 	FTP_PUTSHELLNAME_STRING, route->ipaddr, route->port, dir, route->remotedir,
-			route->user, route->password, zFile, result);
+			route->user, route->password, zFile, result,GetFtpModel(route));
 	system(cmd);
 	vLog("uploag cmd:%s", cmd);
 	rp = fopen(result, ONLYREAD_ACCESS_STRING);

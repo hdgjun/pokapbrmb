@@ -48,4 +48,5 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 			mysql_query(pcon, strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
 	}
+	return SUCESS;
 }

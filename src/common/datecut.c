@@ -75,7 +75,7 @@ void *date_cut_thread()
 		if (ThreadConnectDB() == SUCESS) {
 			break;
 		}
-		psleep(10 * SLEEPTIME);
+		sleep(10 * SLEEPTIME);
 		SLEEPTIME++;
 		SLEEPTIME = SLEEPTIME % 180;
 	}

@@ -22,6 +22,19 @@
 #define UPLOAD    0
 #define DOWNLOAD  1
 
+#define TRY_CONNECT_DB  \
+	int SLEEPTIME = 1;\
+	while (1) {\
+		if (ThreadConnectDB() == SUCESS) {\
+			break;\
+		}\
+		sleep(10 * SLEEPTIME);\
+		SLEEPTIME++;\
+		SLEEPTIME = SLEEPTIME % 180;\
+	}\
+	SLEEPTIME = 1;\
+	vLog("ThreadConnectDB:%d  ok");\
+
 extern cir_queue_t gQue;
 extern Param g_param;
 extern pthread_attr_t attr;
@@ -41,17 +54,7 @@ void *SwitchFileThread(void *pt) {
 	char temName[FILE_PATH_CHARNUM] = { 0 };
 	pthread_t *th = (pthread_t *) pt;
 
-	int SLEEPTIME = 1;
-	while (1) {
-		if (ThreadConnectDB() == SUCESS) {
-			break;
-		}
-		psleep(10 * SLEEPTIME);
-		SLEEPTIME++;
-		SLEEPTIME = SLEEPTIME % 180;
-	}
-	SLEEPTIME = 1;
-	vLog("ThreadConnectDB:%d  ok");
+	TRY_CONNECT_DB
 
 	sprintf(szFolderPath, "%s/%s/", g_param.FileStoreBasePath,
 			g_param.SwitchDir);
@@ -62,7 +65,7 @@ void *SwitchFileThread(void *pt) {
 	while (1) {
 		if (is_date_cut() == SUCESS) {
 			vLog("sleep in datecut!");
-			psleep(60 * 10);
+			sleep(60 * 10);
 			continue;
 		}
 
@@ -173,12 +176,13 @@ void *SwitchFileThread(void *pt) {
 				system(CmdStr);
 			}
 		}
-		psleep(10);
+		if (p != NULL) {
+			closedir(p);
+			p = NULL;
+		}
+		sleep(10);
 	}
-	if (p != NULL) {
-		closedir(p);
-		p = NULL;
-	}
+
 	if (th != NULL) {
 		memset(th, 0x00, sizeof(pthread_t));
 	}
@@ -206,7 +210,7 @@ void *ListDirThread(void *pt) {
 
 		if (is_date_cut() == SUCESS) {
 			vLog("ListDirThread:sleep in datecut!");
-			psleep(60 * 10);
+			sleep(60 * 10);
 			continue;
 		}
 
@@ -215,9 +219,9 @@ void *ListDirThread(void *pt) {
 #endif
 		p = opendir(szFolderPath);
 		if (p == NULL) {
-			printf("SwitchFile_Thread Open dir %s fail:%s\n", szFolderPath,
+			printf("ListDirThread Open dir %s fail:%s\n", szFolderPath,
 					strerror(errno));
-			vLog("SwitchFile_Thread Open dir %s fail:%s", szFolderPath,
+			vLog("ListDirThread Open dir %s fail:%s", szFolderPath,
 					strerror(errno));
 			return (void *) ERROR;
 		}
@@ -229,9 +233,6 @@ void *ListDirThread(void *pt) {
 			sprintf(indir, "%s/%s", szFolderPath, dirlist->d_name);
 			stat(indir, &filestat);
 
-#ifdef   DEBUG
-			vLog("ListDirThread  indir:%s", indir);
-#endif
 			if (S_ISREG(filestat.st_mode)) {
 				fileType = strrchr(dirlist->d_name, '.');
 				if (((tp = CheckFileType(fileType)) == ERROR)
@@ -249,30 +250,26 @@ void *ListDirThread(void *pt) {
 					free_data_cir_queue(&df);
 					continue;
 				}
-				while (push_cir_queue(&gQue, df) == ERROR) {
-					psleep(10 * SLEEPTIME);
-					SLEEPTIME++;
-#ifdef DEBUG
-					vLog("task queue is full");
-#endif
-				}
-				SLEEPTIME = 1;
+
+				push_cir_queue(&gQue, df);
+
 #ifdef   DEBUG
-				vLog("SwitchFile_Thread add:%d,queue:%d", ++fs, gQue.count);
+				vLog("ListDirThread add:%d,queue:%d", ++fs, gQue.count);
 #endif
 			}
 
 		}
 
 #ifdef   DEBUG
-		vLog("ListDirThread  psleep");
+		vLog("ListDirThread  sleep");
 #endif
-		psleep(10);
+		if (p != NULL) {
+			closedir(p);
+			p = NULL;
+		}
+		sleep(10);
 	}
-	if (p != NULL) {
-		closedir(p);
-		p = NULL;
-	}
+
 	if (th != NULL) {
 		memset(th, 0x00, sizeof(pthread_t));
 	}
@@ -283,45 +280,24 @@ void *HandleFileThread(void *pt) {
 	DataType *df;
 
 	int id = (int) pt;
-	int SLEEPTIME = 1;
-	vLog("SwitchFileThread:%d start", id);
-	while (1) {
-		if (ThreadConnectDB() == SUCESS) {
-			break;
-		}
-		psleep(10 * SLEEPTIME);
-		SLEEPTIME++;
-		SLEEPTIME = SLEEPTIME % 180;
-	}
-	SLEEPTIME = 1;
-	vLog("ThreadConnectDB:%d  ok", id);
+
+	TRY_CONNECT_DB
+
+	vLog("HandleFileThread[%d] starting",id);
+
 	while (1) {
 		if (is_date_cut() == SUCESS) {
-			vLog("SwitchFileThread:sleep in datecut!");
-			psleep(60 * 10);
+			vLog("HandleFileThread:sleep in datecut!");
+			sleep(60 * 10);
 			continue;
 		}
-		df = pop_cir_queue(&gQue);
-		if (df == NULL) {
-			psleep(10 * SLEEPTIME);
-			SLEEPTIME++;
-			SLEEPTIME = (SLEEPTIME % 100) + 1;
-			if (SLEEPTIME == 1)
-				vLog("task %d queue is empty", id);
-			continue;
-		}
-		SLEEPTIME = 1;
-#if 0
-		sprintf(indir, "%s/%s.%s", df->filePath, df->fileName,START_FILE_STRING);
-		stat(indir, &filestat);
-
-		if(df->filesize!=filestat->st_size) {
-			StopFile(df);
-			free_data_cir_queue(df);
-			continue;
-		}
+#ifdef DEBUG
+		vLog("HandleFileThread[%d] pop_cir_queue ",id);
 #endif
+		df = pop_cir_queue(&gQue);
+
 		vLog("Start file:%s  Insert.", df->fileName);
+		df->threadid = id;
 		int iRet;
 		switch (df->fileType) {
 		case FSN_FILE_TYPE:
@@ -356,18 +332,11 @@ void *HandleFileThread(void *pt) {
 }
 
 void *SendFileThread() {
-	int SLEEPTIME;
+
 	vLog("SendFileThread   start");
-	while (1) {
-		if (ThreadConnectDB() == SUCESS) {
-			break;
-		}
-		psleep(10 * SLEEPTIME);
-		SLEEPTIME++;
-		SLEEPTIME = SLEEPTIME % 180;
-	}
-	SLEEPTIME = 1;
-	vLog("SendFileThread   ThreadConnectDB ok");
+
+	TRY_CONNECT_DB
+
 	int iRet;
 	pthread_t service;
 
@@ -405,7 +374,7 @@ void *SendFileThread() {
 
 			pthread_create(&service, &attr, SendTask, (void *) (ro));
 		}
-		psleep(60);
+		sleep(60);
 	}
 
 	return (void *) 0;
@@ -483,13 +452,15 @@ void *SendTask(void *sp) {
 		DisconnectDB();
 		return (void *) 0;
 	}
-
+	vLog("SUCESS route[id = %d] get interval [%d] iRet[%d] ", route.id, route.interval,iRet);
 	if(iRet == SUCESS){
+
 		if(route.interval!=0){
 			route.starttime = GetTimeInterval(route.interval);
 		}else{
 			route.lastdate = GetDateInt();
 		}
+		vLog("SUCESS route[id = %d] get interval [%d]  ", route.id, route.interval);
 	}else{
 		vLog("SendTask error:id[%d]",route.id);
 	}
@@ -618,7 +589,7 @@ void CheckResult(DataType *df, int result) {
 		if (iRet == ERROR) {
 			DisconnectDB();
 			while (ThreadConnectDB() != SUCESS) {
-				psleep(10 * st);
+				sleep(10 * st);
 				st = (st + 1) % 200;
 			}
 		}

@@ -3,6 +3,7 @@ TOPDIR=.
 include $(TOPDIR)/cfg/Makefile.db
 
 exclude_dirs= include  bin  lib cfg sbin log
+#code_dir=src
 
 LIBPATH=$(TOPDIR)/lib
 EXEPATH=$(TOPDIR)/bin
@@ -17,7 +18,7 @@ export DEBUG=DEBUG
 
 #定义走人行流程  注释走商行流程
 #export BANKTYPE=PEOPLEBANK
-
+#all:
 
 ifeq ($(DBTYPE),DB_ORACLE)
 	export IN_DB=$(IN_ORA)
@@ -34,7 +35,9 @@ endif
 
 
 include $(TOPDIR)/cfg/Makefile.mk
-
+#all:
+#	make -C ${code_dir} all||exit 1;
+	
 clean:
 	$(RM) $(LIBPATH)/*.a $(EXEPATH)/*
 	$(MAKE) cleansub||exit 1;

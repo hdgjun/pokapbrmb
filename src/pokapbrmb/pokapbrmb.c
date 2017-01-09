@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 				pthread_create(&fileOpr[i], &attr, HandleFileThread, (void *)i);
 			}
 		}
-		psleep(g_param.SleepTime);
+		sleep(g_param.SleepTime);
 	}
 
 	return 0;

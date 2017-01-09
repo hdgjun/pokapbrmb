@@ -72,6 +72,25 @@ int DbBusinessListAtm(int oprType, ATMBUSINESSLIST *record)
 					"%Y%m%d%H%i%s",tmpData.percode,tmpData.businessid);
 			mysql_query(pcon,strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_DELETE  BUSINESSLIST_ATM",pcon);
+		case DBS_SELECT1:
+			sprintf(strSql,"SELECT ID FROM BUSINESSLIST_ATM WHERE NETNO=%s and\
+					ACCOUNTNO='%s' and BUSINESSDATE=str_to_date('%s','%s') and\
+					PERCODE='%s' and BUSINESSID='%s'",tmpData.netno,tmpData.accountno,tmpData.businessdate,
+					"%Y%m%d%H%i%s",tmpData.percode,tmpData.businessid);
+			mysql_query(pcon,strSql);
+			iRet = JudgeSqlExecResultLocal(0,"DBS_SELECT1 ",pcon);
+			if(iRet != SUCESS)
+			{
+				return WARING;
+			}
+			ctx->result =  mysql_store_result(pcon);
+			ulrow = (unsigned long)mysql_num_rows(ctx->result);
+			if(ctx->result)mysql_free_result(ctx->result);
+			if(ulrow>=1){
+				 return ERROR;
+			 }else{
+				 return SUCESS;
+			 }
 	}
 	return SUCESS;
 }

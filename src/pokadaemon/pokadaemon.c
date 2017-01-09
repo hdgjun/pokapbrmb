@@ -75,7 +75,7 @@ int main()
 		{
 			vLog("Target program[%s/%s] is running",install,TARGET);
 		}
-		psleep(TIME_SPACE);
+		sleep(TIME_SPACE);
 	} 
 
 	return 0;

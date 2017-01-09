@@ -100,8 +100,10 @@ int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca)
 			printf("[%s fail]%s\n",szExecText,sqlca->sqlerrm.sqlerrmc);
 		}
 		return WARING;
-    }else if(sqlca->sqlcode == 1403||sqlca->sqlcode== -1403||sqlca->sqlcode == 0){
+    }else if(sqlca->sqlcode == 0||sqlca->sqlcode == 1405||sqlca->sqlcode== -1405){
     	return SUCESS;
+    }else if(sqlca->sqlcode == 1403||sqlca->sqlcode== -1403){
+    	return NODATA;
     }
 	if(iFlag == 0)
 	{

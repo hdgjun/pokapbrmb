@@ -2,8 +2,8 @@
 
 DBFLAGS=thread=yes cpool=yes
 
-LID_ORA=-L /opt/oracle/product/10gR1/db/lib/ -lclntsh  -ldl -lm -lstdc++ -ldboracle
+LID_ORA=-ldboracle -L /opt/oracle/product/10gR1/db/lib/ -lclntsh  -ldl -lm -lstdc++ 
 IN_ORA=-I /opt/oracle/product/10gR1/db/precomp/public/ -I /opt/oracle/product/10gR1/db/rdbms/public/
 
-LID_MSQL= -L /usr/lib/mysql/  -ldl -lm -ldbmysql -lmysqlclient_r
+LID_MSQL= -L /usr/lib/mysql/  -ldl -lm -ldbmysql -lmysqlclient
 IN_MSQL= -I /usr/include/mysql/
