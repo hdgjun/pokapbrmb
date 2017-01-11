@@ -81,8 +81,9 @@ int DbRoute(int oprType, ROUTE *record)
 			mysql_query(pcon,strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
 		case DBS_UPDATE1:
-		mysql_query(pcon,"UPDATE ROUTE SET STATUS_ = '1'  where STATUS_='0'");
+			mysql_query(pcon,"UPDATE ROUTE SET STATUS_ = '1'  where STATUS_='0'");
 		return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
+
 	}
 	return SUCESS;
 }

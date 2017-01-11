@@ -3,7 +3,7 @@ PROC=proc
 MAKE=make
 AR=ar cr
 RM= -rm -rf
-CP=mv 
+CP=mv
 
 CFLAGS+=-Wall -g   -D$(DBTYPE) 
 

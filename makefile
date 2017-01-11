@@ -31,8 +31,8 @@ else
 	$(warning  oracle_type)
 	endif
 endif
-
-
+$(shell mkdir -p bin)
+$(shell mkdir -p lib)
 
 include $(TOPDIR)/cfg/Makefile.mk
 #all:
