@@ -118,7 +118,7 @@ int TmpDbsMoneydataAtm(int oprType,const char *tn,ATMRECODE *fileRecord)
 			printf("--------bankno[%s]-----------\n",tmpData.bankno);
 			printf("--------agencyno[%s]-----------\n",tmpData.agencyno);
 
-			sqlstmt.len=sprintf(sqlstmt.arr,"INSERT INTO %s(ID,PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,OPERDATE,IMAGEPATH,BUSINESSTYPE,BANKNO,AGENCYNO) VALUES(0,:v1,to_date(:v2,'yyyymmddhh24miss'),:v3,:v4,:v5,:v6,:v7,SYSDATE,:v8,:v9,:v10,:v11)",tn);
+			sqlstmt.len = sprintf(sqlstmt.arr,"INSERT INTO %s(ID,PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,OPERDATE,IMAGEPATH,BUSINESSTYPE,BANKNO,AGENCYNO) VALUES(0,:v1,to_date(:v2,'yyyymmddhh24miss'),:v3,:v4,:v5,:v6,:v7,SYSDATE,:v8,:v9,:v10,:v11)",tn);
 			EXEC SQL PREPARE mystmt FROM :sqlstmt;
 			EXEC SQL EXECUTE mystmt USING
 			:tmpData.percode,

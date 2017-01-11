@@ -192,7 +192,7 @@ static int MoveDKFile(FILENAME *fn,int result)
 			break;
 		case SUCESS:
 			GetDKSucInsLocalDir(dir,fn);
-			sprintf(fe.LocalDesBaseName,"%s.%s",fn->df->fileName,TMP_FILE_STRING);
+			sprintf(fe.LocalDesBaseName,"%s",fn->df->fileName);
 			memcpy(fe.LocalDesFilePath,dir,strlen(dir));
 		break;
 		case WARING:return result;

@@ -1,0 +1,74 @@
+/*
+ * dbbundleinfo.c
+ *
+ *  Created on: 2017Äê1ÔÂ9ÈÕ
+ *      Author: Administrator
+ */
+
+#include "db/db.h"
+#include "db/dbbundleinfo.h"
+#include "common.h"
+#include "switch.h"
+int DbBundleinfo(int oprType, BUNDLEINFO *record)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char strSql[1024] = {0};
+	BUNDLEINFO  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	if(record)
+	{
+		memset(&tmpData, 0x00, sizeof(BUNDLEINFO));
+		memcpy(&tmpData, record, sizeof(BUNDLEINFO));
+	}
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+#ifdef BFNEW
+			sprintf(strSql,"INSERT INTO BUNDLEINFO(BUNDLEID,PERCODE,SCANTIME,CREATETIME,OPERATORID,CHECKER,ADDMONOPERATOR,ADDMONCHECKER,ADDMONTIME,FLAG,BANKNO,AGENCYNO,FILENAME,ID) VALUES('%s', '%s' , to_date('%s','%s'), SYSDATE,'%s','%s','%s','%s', to_date('%s','%s'),'%c','%s','%s','%s','%s')",
+			tmpData.bundleid,
+			tmpData.percode,
+			tmpData.scantime,
+			"yyyy-mm-dd hh24:mi:ss",
+			"",
+			"",
+			tmpData.addmonoperator,
+			tmpData.addmonchecker,
+			tmpData.addmontime,
+			"yyyy-mm-dd hh24:mi:ss",
+			tmpData.flag,
+			tmpData.bankno,
+			tmpData.agencyno,
+			tmpData.filename,
+			tmpData.id
+			);
+
+#else
+			sprintf(strSql,"INSERT INTO BUNDLEINFO(BUNDLEID,PERCODE,SCANTIME,CREATETIME,OPERATORID,CHECKER,ADDMONOPERATOR,ADDMONCHECKER,ADDMONTIME,FLAG,BANKNO,AGENCYNO,FILENAME) VALUES('%s', '%s' , to_date('%s','%s'), SYSDATE,'%s','%s','%s','%s', to_date('%s','%s'),'%c','%s','%s','%s')",
+						tmpData.bundleid,
+						tmpData.percode,
+						tmpData.scantime,
+						"yyyy-mm-dd hh24:mi:ss",
+						"",
+						"",
+						tmpData.addmonoperator,
+						tmpData.addmonchecker,
+						tmpData.addmontime,
+						"yyyy-mm-dd hh24:mi:ss",
+						tmpData.flag,
+						tmpData.bankno,
+						tmpData.agencyno,
+						tmpData.filename
+						);
+#endif
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT DbBundleinfo ",&sqlca);
+	}
+	return SUCESS;
+}

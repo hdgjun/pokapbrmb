@@ -18,8 +18,11 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 	BAGINFO  tmpData;
 	EXEC SQL END DECLARE SECTION;
 
-	memset(&tmpData, 0x00, sizeof(BAGINFO));
-	memcpy(&tmpData, fileRecord, sizeof(BAGINFO));
+	if(fileRecord)
+	{
+		memset(&tmpData, 0x00, sizeof(BAGINFO));
+		memcpy(&tmpData, fileRecord, sizeof(BAGINFO));
+	}
 
 	switch (oprType)
 	{

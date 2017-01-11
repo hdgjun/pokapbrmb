@@ -211,7 +211,11 @@ static int initcfg()
 
 static int initDataBase()
 {
-	return InitDb();
+	char CurPath[FILE_PATH_CHARNUM] = { 0 };
+    GetProgramPath(CurPath,POKA_HOME,DEF_INSTALL_PATH);
+    char sbin[FILE_PATH_CHARNUM] = { 0 };
+    sprintf(sbin,"%s/%s/",CurPath,SHELL_DIR);
+	return InitDb(sbin);
 }
 
 static int initThread()

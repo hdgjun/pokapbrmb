@@ -3,7 +3,7 @@
 
 //#include <semaphore.h>
 #include <pthread.h>
-#define QUE_SIZE 100
+#define QUE_SIZE 2000
 
 typedef struct data_type
 {
@@ -33,6 +33,7 @@ int is_empty_cir_queue(cir_queue_t* q);
 int is_full_cir_queue(cir_queue_t* q);
 int push_cir_queue(cir_queue_t* q, void *x);
 void *pop_cir_queue(cir_queue_t* q);
+void *pop_notwait_cir_queue(cir_queue_t* q);
 //DataType *top_cir_queue(cir_queue_t* q);
 void destroy_cir_queue(cir_queue_t* q);
 void free_data_cir_queue(void *x);

@@ -16,11 +16,20 @@
 #include "switch.h"
 
 extern Param g_param;
+#define INIT_SH  "initoracle.sh"
+#define INIT_SQL  "initoracle.sql"
 
-int InitDb()
+int InitDb(char *path)
 {
 	pthread_key_create(&p_Thread_key,NULL);
 	EXEC SQL ENABLE THREADS;
+
+	char cmd[500] = {0};
+	sprintf(cmd,"sh %s/%s %s %s %s %s/%s",path,INIT_SH,
+				g_param.DBUser,g_param.DBPassword,
+				g_param.DBServiceName,path,INIT_SQL);
+	printf("******************  %s\n",cmd);
+	system(cmd);
 	return SUCESS;
 }
 int DestroyDb(){
@@ -107,7 +116,7 @@ int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca)
     }
 	if(iFlag == 0)
 	{
-		printf("[%s ERROR %d ]%s\n",szExecText,sqlca->sqlcode,sqlca->sqlerrm.sqlerrmc);
+		printf("[%s ERROR %d ]:[%s]\n",szExecText,sqlca->sqlcode,sqlca->sqlerrm.sqlerrmc);
 	}
 	return ERROR;
 }

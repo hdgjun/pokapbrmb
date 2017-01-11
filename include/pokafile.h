@@ -7,6 +7,12 @@
 #include "db/dbbusinesslistatm.h"
 #include "db/dbrouterule.h"
 #include "db/dbroute.h"
+#include "switch.h"
+
+#define FTP_UPLOAD     0
+#define FTP_DOWNLOAD   1
+#define SFTP_UPLOAD    2
+#define SFTP_DOWNLOAD  3
 
 #define  FTP_SUCESS                	"sucess"
 #define  FTP_ERROR                  "error"
@@ -189,6 +195,19 @@ typedef struct t_FileMoveInfo
     int  isCompress;
 }FILEMOVEINFO,*pFileMoveInfo;
 
+
+typedef struct t_AddMonInfo
+{
+	char BundleId[24+1];//捆、把ID
+	char MachineId[18+1];//ATM编号
+	char MonBoxId[11+1];//钞箱ID
+	char AddMonOperator[8+1];//加钞员
+	char AddMonChecker[8+1];//加钞监管员
+	char AddMonDate[19+1];//加钞时间
+#ifdef BFNEW
+	char Id[30+1];
+#endif
+}ADDMONINFO,*pAddMonInfo;
 
 int FSNFile(DataType *df);
 int DKFile(DataType *df);

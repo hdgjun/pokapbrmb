@@ -180,7 +180,7 @@ int DownFile(ROUTE *route) {
 	char getfilelist[FILE_PATH_CHARNUM] = { 0 };
 	char apppath[FILE_PATH_CHARNUM] = { 0 };
 	char result[FILE_PATH_CHARNUM] = { 0 };
-
+    char shname[FILE_PATH_CHARNUM] = { 0 };
 	/*�ָ�Ŀ¼״̬*/
 	RecoverDir(route->localdir);
 
@@ -194,19 +194,39 @@ int DownFile(ROUTE *route) {
 	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
 	DbRouteRule(&rule, &ruleSize, route->id);
 
-	switch (route->servicecode) {
-	case SERVER_CODE_2:
-		sprintf(redir, "%s/%d/", route->remotedir, GetDateInterval(-1));
-		break;
-	case SERVER_CODE_3:
-	default:
-		sprintf(redir, "%s/", route->remotedir);
+	switch (route->servicecode)
+	{
+		case SERVER_CODE_2:
+			sprintf(redir, "%s/%d/", route->remotedir, GetDateInterval(-1));
+			break;
+		case SERVER_CODE_3:
+		default:
+			sprintf(redir, "%s/", route->remotedir);
 	}
+
 
 	if (ruleSize == 0) {
 		ruleSize = 1;
+		if(route->type == SFTP_DOWNLOAD)
+		{
+			rule[0].fileextend[0]='1';
+		}
 	}
 
+	switch(route->type)
+	{
+		case FTP_DOWNLOAD:
+			sprintf(shname,"%s",FTP_GETDIRSHELLNAME_STRING);
+			break;
+		case SFTP_DOWNLOAD:
+			sprintf(shname,"%s",SFTP_GETDIRSHELLNAME_STRING);
+			break;
+		default:
+		{
+			vLog("route[%d] type[%d] not in (ftp(0|1) | sftp(3|4)) error",route->id,route->type);
+			return ERROR;
+		}
+	}
 	GetProgramPath(apppath,POKA_HOME,DEF_INSTALL_PATH);
 	int i;
 
@@ -215,7 +235,7 @@ int DownFile(ROUTE *route) {
 		sprintf(getfilelist, "%s/%u_%d_%d.list", tempDir, (unsigned int) pthread_self(),
 				GetTimeInt(), i);
 		sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s %s %s %s"
-				,apppath,SHELL_DIR,FTP_GETDIRSHELLNAME_STRING,route->ipaddr
+				,apppath,SHELL_DIR,shname,route->ipaddr
 				,route->port,tempDir,redir,route->user,route->password
 				,getfilelist,rule[i].fileextend,GetFtpModel(route));
 		system(CmdStr);
@@ -235,6 +255,7 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	char cmd[FILE_PATH_CHARNUM * 10] = { 0 };
 	char apppath[FILE_PATH_CHARNUM] = { 0 };
 	char result[FILE_PATH_CHARNUM] = { 0 };
+	char shname[FILE_PATH_CHARNUM] = { 0 };
 	FILE *rp = NULL;
 
 	GetProgramPath(apppath,POKA_HOME,DEF_INSTALL_PATH);
@@ -248,9 +269,23 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	sprintf(result, "%s/%u_%d_%d.result", dir, (unsigned int) pthread_self(),
 			time, batch);
 
+	switch(route->type)
+	{
+		case FTP_UPLOAD:
+			sprintf(shname,"%s",FTP_PUTSHELLNAME_STRING);
+			break;
+		case SFTP_UPLOAD:
+			sprintf(shname,"%s",SFTP_PUTSHELLNAME_STRING);
+			break;
+		default:
+		{
+			vLog("route[%d] type[%d] not in (ftp(0|1) | sftp(3|4)) error",route->id,route->type);
+			return ERROR;
+		}
+	}
 
 	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
-	FTP_PUTSHELLNAME_STRING, route->ipaddr, route->port, dir, route->remotedir,
+			shname, route->ipaddr, route->port, dir, route->remotedir,
 			route->user, route->password, zFile, result,GetFtpModel(route));
 	system(cmd);
 	vLog("uploag cmd:%s", cmd);
@@ -308,9 +343,13 @@ static int StroeFiles(const char *dir, const ROUTE *route) {
 }
 static int CheckRule(ROUTERULE *rule, const int ruleSize, const char *fileType) {
 	int i, iRet;
-	if (ruleSize) {
-		for (i = 0; i < ruleSize; i++) {
-			if (strstr(fileType, (rule + i)->fileextend) != 0) {
+	if(fileType == NULL)return ERROR;
+	if (ruleSize!=0)
+	{
+		for (i = 0; i < ruleSize; i++)
+		{
+			if (strstr(fileType, (rule + i)->fileextend) != 0)
+			{
 				return SUCESS;
 			}
 		}

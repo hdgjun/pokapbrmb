@@ -59,13 +59,14 @@
 #define	 READBYTE_ACCESS_STRING		"rb"					//打开文件二进制读权限
 #define	 ADDBYTE_ACCESS_STRING		"ab+"					//打开文件二进制追加权限
 
-#define	 FTP_GETSHELLNAME_STRING	"getfile_ftp.sh"			//ftp获取文件shell脚本名称
-#define	 SFTP_GETSHELLNAME_STRING 	"getfile_sftp.sh"			//sftp获取文件shell脚本名称
-#define	 FTP_MOVESHELLNAME_STRING	"movefile_ftp.sh"			//ftp移动文件shell脚本名称
-#define	 SFTP_MOVESHELLNAME_STRING	"movefile_sftp.sh"			//sftp移动文件shell脚本名称
-#define	 FTP_PUTSHELLNAME_STRING	"putfile_ftp.sh"			//ftp发送文件shell脚本名称
-#define	 SFTP_PUTSHELLNAME_STRING 	"putfile_sftp.sh"			//sftp发送文件shell脚本名称
-#define  FTP_GETDIRSHELLNAME_STRING "getdir.sh"
+#define	 FTP_GETSHELLNAME_STRING	 "getfile_ftp.sh"			//ftp获取文件shell脚本名称
+#define	 SFTP_GETSHELLNAME_STRING 	 "getfile_sftp.sh"			//sftp获取文件shell脚本名称
+#define	 FTP_MOVESHELLNAME_STRING	 "movefile_ftp.sh"			//ftp移动文件shell脚本名称
+#define	 SFTP_MOVESHELLNAME_STRING	 "movefile_sftp.sh"			//sftp移动文件shell脚本名称
+#define	 FTP_PUTSHELLNAME_STRING	 "putfile_ftp.sh"			//ftp发送文件shell脚本名称
+#define	 SFTP_PUTSHELLNAME_STRING 	 "putfile_sftp.sh"			//sftp发送文件shell脚本名称
+#define  FTP_GETDIRSHELLNAME_STRING  "getdir_ftp.sh"
+#define  SFTP_GETDIRSHELLNAME_STRING "getdir_sftp.sh"
 #define  DELETE_IMAGE_SHELLNAME_STRING "deleteimage.sh"
 #define  DELETE_FSN_SHELLNAME_STRING	"deletefsn.sh"
 #define	 ZIPCMD_STRING				"zip"					//zip压缩命令字符串

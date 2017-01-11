@@ -16,11 +16,16 @@
 #include "pokalog.h"
 
 extern Param g_param;
-
-int InitDb()
+#define INIT_SCR   "initmysql.sql"
+int InitDb(char *path)
 {
+	char cmd[500] = {0};
 	pthread_key_create(&p_Thread_key,NULL);
 	mysql_library_init(0, NULL, NULL);
+	sprintf(cmd,"mysql -h%s -P%s -u%s -p%s %s < %s/%s",
+			g_param.DBIP,g_param.DBPort,g_param.DBUser,g_param.DBPassword,
+			g_param.DBServiceName,path,INIT_SCR);
+	system(cmd);
 	return SUCESS;
 }
 int DestroyDb(){

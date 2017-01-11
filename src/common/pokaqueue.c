@@ -95,7 +95,24 @@ void *pop_cir_queue(cir_queue_t *q)
 	pthread_mutex_unlock(&q->lock);
 	return temp;
 }
+void *pop_notwait_cir_queue(cir_queue_t* q)
+{
+	DataType *temp;
+	pthread_mutex_lock(&q->lock);
+	while(is_empty_cir_queue(q))
+	{
+		pthread_mutex_unlock(&q->lock);
+		return NULL;
+	}
 
+	temp = q->data[q->front];
+	q->data[q->front] = 0;
+	q->front = (q->front+1) % QUE_SIZE;
+	q->count--;
+	pthread_cond_signal(&q->notfull);
+	pthread_mutex_unlock(&q->lock);
+	return temp;
+}
 
 void free_data_cir_queue(void *x)
 {
@@ -109,6 +126,7 @@ void destroy_cir_queue(cir_queue_t *q)
   pthread_mutex_lock(&q->lock);
   int i = q->front;
   while(i!=q->rear){
+	  printf("i[%d],rear[%d]\n",i,q->rear);
 	  free_data_cir_queue(q->data[i]);
 	  i = (i+1)%QUE_SIZE;
   }

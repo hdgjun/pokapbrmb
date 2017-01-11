@@ -82,7 +82,7 @@ typedef struct t_mysqlctx
 int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,MYSQL *pcon);
 #endif
 
-int InitDb();
+int InitDb(char *path);
 int DestroyDb();
 int ThreadConnectDB();
 int DisconnectDB();

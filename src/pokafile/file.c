@@ -19,8 +19,7 @@
 #include "common.h"
 #include "pokapbrmb.h"
 
-#define UPLOAD    0
-#define DOWNLOAD  1
+
 
 #define TRY_CONNECT_DB  \
 	int SLEEPTIME = 1;\
@@ -307,6 +306,7 @@ void *HandleFileThread(void *pt) {
 			iRet = ZIPFile(df);
 			break;
 		case BF_FILE_TYPE:
+			iRet = BFFile(df);
 			break;
 		case BK_FILE_TYPE:
 			iRet = BKFile(df);
@@ -440,10 +440,12 @@ void *SendTask(void *sp) {
 
 	int iRet;
 	switch (route.type) {
-	case UPLOAD:
+	case FTP_UPLOAD:
+	case SFTP_UPLOAD:
 		iRet = UploadFile(&route);
 		break;
-	case DOWNLOAD:
+	case FTP_DOWNLOAD:
+	case SFTP_DOWNLOAD:
 		iRet = DownFile(&route);
 		break;
 	default:
