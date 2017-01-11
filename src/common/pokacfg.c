@@ -79,7 +79,7 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 		char szValue[PARAM_NUM][MAX_STRING_SIZE], Param *param) {
 	int i;
 	param->SaveImage = -1;
-
+	param->openTransfom = -1;
 
 	for (i = 0; i <= PARAM_NUM; i++) {
 
@@ -182,22 +182,23 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 			param->ImageSaveDay = atoi(szValue[i]);
 			continue;
 		}
+
+		if(strcmp(szKey[i],OPEN_TRANSFORM__KEY) == 0)
+		{
+			param->openTransfom = atoi(szValue[i]);
+			continue;
+		}
+		if(strcmp(szKey[i],TRANSFORM_DIR_KEY) == 0)
+		{
+			strcpy(param->transformDir,szValue[i]);
+			continue;
+		}
+		if(strcmp(szKey[i],TRANSFORM_FIN_DIR_KEY) == 0)
+		{
+			strcpy(param->transformFinDir,szValue[i]);
+			continue;
+		}
 #if 0
-		if(strcmp(szKey[i],GETORDERSPACE_STRING) == 0)
-		{
-			param->iGetOrderSpace = atoi(szValue[i]);
-			continue;
-		}
-		if(strcmp(szKey[i],DELMONSSPACE_STRING) == 0)
-		{
-			param->iDelMonsSpace = atoi(szValue[i]);
-			continue;
-		}
-		if(strcmp(szKey[i],THREADNUM_STRING) == 0)
-		{
-			param->iThreadNum= atoi(szValue[i]);
-			continue;
-		}
 		if(strcmp(szKey[i],LOCALNEEDSAVEIMAGE_STRING) == 0)
 		{
 			strcpy(param->LocalNeedSaveSnoImage,szValue[i]);
@@ -417,6 +418,15 @@ void UseDefaultValue(Param *param) {
 	}
 	if (param->ImageSaveDay <= 0) {
 		param->ImageSaveDay = DEF_IMAGE_SAVE_DAY;
+	}
+	if (param->openTransfom <= 0) {
+		param->openTransfom = DEF_OPEN_TRANSFORM;
+	}
+	if (strlen(param->transformDir) <= 0) {
+		strcpy(param->transformDir, DEF_TRANSFORM_DIR);
+	}
+	if (strlen(param->transformFinDir) <= 0) {
+		strcpy(param->transformFinDir, DEF_TRANSFORM_FIN_DIR);
 	}
 }
 //ÅÐ¶Ï²ÎÊý

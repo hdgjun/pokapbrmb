@@ -27,6 +27,7 @@ static pthread_t taskfile;
 static pthread_t sendfile;
 static pthread_t switchfile;
 static pthread_t clearFile;
+static pthread_t fsnfiletobase;
 static pthread_t fileOpr[MAX_THREAD_NUM];
 
 extern pthread_attr_t attr;
@@ -55,6 +56,15 @@ int main(int argc, char **argv) {
 		for (i = 0; i < g_param.ThreadSize; i++) {
 			if(i == 0)
 			{
+				/*宝嘉fsn转标准fsn*/
+				if(g_param.openTransfom !=0)
+				{
+					if (ESRCH == test_pthread(fsnfiletobase))
+					{
+						pthread_create(&fsnfiletobase, &attr,
+								ListTransFormDirThread, (void *)&fsnfiletobase);
+					}
+				}
 				/*将insertdir:fan_insert目录文件放入入库队列，等待入库处理*/
 				if (ESRCH == test_pthread(taskfile))
 				{
@@ -201,6 +211,17 @@ static int initpath()
 	sprintf(temPath, "%s/%s/", g_param.FileStoreBasePath,g_param.ErrorDir);
 	if (JudgeSavePathExist(temPath) == ERROR) {
 		return ERROR;
+	}
+
+	if(g_param.openTransfom !=0){
+		sprintf(temPath, "%s/%s/", g_param.FileStoreBasePath,g_param.transformDir);
+		if (JudgeSavePathExist(temPath) == ERROR) {
+			return ERROR;
+		}
+		sprintf(temPath, "%s/%s/", g_param.FileStoreBasePath,g_param.transformFinDir);
+		if (JudgeSavePathExist(temPath) == ERROR) {
+			return ERROR;
+		}
 	}
 	return SUCESS;
 }

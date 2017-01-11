@@ -244,5 +244,5 @@ int DownFile(ROUTE *route);
 int Start_service(ROUTE *route);
 int Stop_service(ROUTE *route);
 int SaveSnoImageFromFsnFile(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int iSnoNo);
-
+void *ListTransFormDirThread(void *pt);
 #endif

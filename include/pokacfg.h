@@ -12,6 +12,7 @@
 #define  DATE_START                 1
 #define  DATE_END                   0
 
+
 #define  DEF_LOG_SAVE_DAY           30                /*默认日志保存天数*/
 #define  DEF_FILE_SAVE_DAY          90                /*默认文件保存天数*/
 #define  DEF_IMAGE_SAVE_DAY         90                /*默认图片保存天数*/
@@ -24,6 +25,11 @@
 #define  DEF_SEND_FILE_DIR          "fsn_sc_ins"      /*[商行端、人行端共同]转发目录(目的银行号子目录)*/
 #define  DEF_ERROR_DIR          	"fsn_error"       /*[商行端、人行端共同]错误文件目录*/
 #define  DEF_UPDATE_DIR             "poka_update"     /*[商行端]程序更新目录 */
+
+#define  DEF_TRANSFORM_DIR          "fsn_trans"    /*[商行端、人行端共同]poka fsn 转 标准fsn*/
+#define  DEF_TRANSFORM_FIN_DIR      "fsn_trans_fin" /*[商行端、人行端共同]poka fsn 转 标准fsn完成*/
+#define  DEF_OPEN_TRANSFORM         0               /*默认0,关闭fsn转化功能*/
+
 /*#define  DEF_PB_LOADING_DIR         "fsn_pb_put"      */
 #define  DEF_THREAD_SIZE             10
 #define  DEF_SLEEP_TIME              60
@@ -52,8 +58,9 @@
 #define  LOG_SAVE_DAY_KEY            "logsaveday"
 #define  FILE_SAVE_DAY_KEY           "filesaveday"
 #define  IMAGE_SAVE_DAY_KEY          "imagesaveday"
-
-
+#define  TRANSFORM_DIR_KEY           "transformdir"
+#define  TRANSFORM_FIN_DIR_KEY       "transformfindir"
+#define  OPEN_TRANSFORM__KEY         "opentransform"
 //参数结构体
 typedef struct t_Param
 {
@@ -73,6 +80,9 @@ typedef struct t_Param
 	char ErrorDir[MIN_STRING_SIZE];
 	char ImagePath[MIN_STRING_SIZE];
 	char ImageDir[MIN_STRING_SIZE];
+	char transformDir[MIN_STRING_SIZE];
+	char transformFinDir[MIN_STRING_SIZE];
+	int  openTransfom;
 	int  LogSaveDay;
 	int  FileSaveDay;
 	int  ImageSaveDay;

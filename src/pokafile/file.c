@@ -187,7 +187,8 @@ void *SwitchFileThread(void *pt) {
 	}
 	return (void *) 0;
 }
-void *ListDirThread(void *pt) {
+void *ListDirThread(void *pt)
+{
 	DIR* p;
 	struct dirent* dirlist;
 	struct stat filestat;
@@ -549,7 +550,8 @@ void CoverFiles() {
 
 }
 
-int CheckFileType(char *fileType) {
+int CheckFileType(char *fileType)
+{
 	if (strstr(fileType, FSN_FILE_STRING) != 0) {
 		return FSN_FILE_TYPE;
 	} else if (strstr(fileType, ZIP_FILE_STRING) != 0) {

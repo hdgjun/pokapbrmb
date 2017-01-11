@@ -49,7 +49,7 @@ user ${user} ${pwd}
 binary
 cd ${rdir}
 lcd ${ldir}
-mget *${filetypr}
+mget *${filetype}
 close
 bye
 "|ftp -v -n > ${logfile}
