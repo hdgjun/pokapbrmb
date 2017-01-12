@@ -55,7 +55,9 @@ int FSNFile(DataType *df)
 		ReadFSNOrBKFileName(df->fileName,&fn);
     }else{
     	/*创建moneydata_atm临时表*/
+#ifdef DEBUG
     	vLog("create temp table");
+#endif
     	GtmpTableName(tn,df->threadid);
     	if(TmpDbsMoneydataAtm(DBS_SELECT,tn,NULL)!=SUCESS)
     	{
@@ -65,7 +67,9 @@ int FSNFile(DataType *df)
 				return WARING;
 			}
     	}
+#ifdef DEBUG
         vLog("after create temp table %s",tn);
+#endif
     	iRet = ReadAtmFileName(df->fileName,&fn,&business);
     	if(iRet == ERROR){
     		fn.df = df;
@@ -91,8 +95,10 @@ int FSNFile(DataType *df)
 
 	if(df->fileType == FSN_FILE_TYPE)
 	{
-	}else{
-		if(iRet == SUCESS){
+	}else
+	{
+		if(iRet == SUCESS)
+		{
 			while(1){
 				iRet = DbBusinessListAtm(DBS_INSERT,&business);
 				if(iRet != SUCESS){
@@ -398,21 +404,25 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 		if(ReadOneRecordInfo(pfilename,&fileRecord,list,iSnoCountFSN) == SUCESS)
 		{
 			//iRet = CheckFSNRecode(&fileRecord);
-			if(pfilename->df->fileType == FSN_FILE_TYPE){
+			if(pfilename->df->fileType == FSN_FILE_TYPE)
+			{
 				MONEYDATAR rec;
 				GetFSNRecode(&rec,&fileRecord,pfilename);
 				iRet = DbsMoneydata(DBS_INSERT,&rec);
-			}else{
+			}else
+			{
 				ATMRECODE atm;
 				GetAtmRecode(&atm,&fileRecord,pfilename);
 				iRet = TmpDbsMoneydataAtm(DBS_INSERT,GtmpTableName(tmpTable,pfilename->df->threadid),&atm);
 				vLog("TmpDbsMoneydataAtm[%d]",iRet);
 			}
-			if(iRet == WARING){ /*没有连接数据库*/
+			if(iRet == WARING)
+			{ /*没有连接数据库*/
 				vLog("DbsRollback");
 				DbsRollback();
 				return iRet;
-			}else if(iRet == ERROR){
+			}else if(iRet == ERROR)
+			{
 				err++;
 			}else{
 				suc++;
@@ -425,7 +435,7 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 
 	}
 	int ab = DbsCommit();
-	vLog("DbsCommit:%d",ab);
+	vLog("Insert file[%s/%s],sucess[%d],err[%d]",pfilename->df->filePath,pfilename->df->fileName,suc,err);
 	return ab;
 }
 

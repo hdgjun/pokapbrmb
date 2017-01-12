@@ -86,15 +86,18 @@ int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,MYSQL *pcon)
 	int iRet;
 	if(pcon){
 		iRet = mysql_errno(pcon);
-		if(iRet == 2002){/*未连接数据库*/
+		if(iRet == 2002)
+		{/*未连接数据库*/
 			vLog("szExecText [%s]  errno:[%d]  err:[%s] \n",szExecText,mysql_errno(pcon),mysql_error(pcon));
 			return WARING;
-		}else if(iRet != 0){
+		}else if(iRet != 0)
+		{
 			vLog("szExecText [%s]  errno:[%d]  err:[%s] \n",szExecText,mysql_errno(pcon),mysql_error(pcon));
 			return ERROR;
 		}
 		printf("szExecText [%s]  errno:[%d]  err:[%s] \n",szExecText,mysql_errno(pcon),mysql_error(pcon));
-	}else{
+	}else
+	{
 		vLog("not connected to db\n");
 		return WARING;
 	}

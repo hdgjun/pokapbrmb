@@ -42,7 +42,8 @@ static void *SendTask(void *sp);
 static int GetBanknoAndAgencyno(const char *szFileName, FILENAME *pfilename);
 static void printRout(ROUTE *route );
 
-void *SwitchFileThread(void *pt) {
+void *SwitchFileThread(void *pt)
+{
 	DIR* p;
 	struct dirent* dirlist;
 	struct stat filestat;
@@ -61,15 +62,11 @@ void *SwitchFileThread(void *pt) {
 #ifdef   DEBUG
 	vLog("dir:%s", szFolderPath);
 #endif
-	while (1) {
-		if (is_date_cut() == SUCESS) {
-			vLog("sleep in datecut!");
-			sleep(60 * 10);
-			continue;
-		}
-
+	while(1)
+	{
 		p = opendir(szFolderPath);
-		if (p == NULL) {
+		if (p == NULL)
+		{
 			printf("SwitchFile_Thread Open dir %s fail:%s\n", szFolderPath,
 					strerror(errno));
 			vLog("SwitchFile_Thread Open dir %s fail:%s", szFolderPath,
@@ -93,7 +90,8 @@ void *SwitchFileThread(void *pt) {
 					continue;
 				}
 
-				if(tp == ZIP_FILE_TYPE){
+				if(tp == ZIP_FILE_TYPE)
+				{
 					memset(&df, 0x00, sizeof(DataType));
 					memcpy(df.filePath, szFolderPath, strlen(szFolderPath));
 					memcpy(df.fileName, dirlist->d_name, strlen(dirlist->d_name));
@@ -132,12 +130,12 @@ void *SwitchFileThread(void *pt) {
 #ifndef PEOPLEBANK
 				memset(temName, 0x00, FILE_PATH_CHARNUM);
 				/*商行自动终端文件名修改*/
-				if ((strstr(dirlist->d_name, ATM_FILE_STRING) != 0)
-						|| strstr(dirlist->d_name, CRS_FILE_STRING) != 0) {
-					if (ReadAtmFileName((const char *)dirlist->d_name, &fn,
-							&business)==SUCESS) {
+				if ((tp == ATM_FILE_TYPE )|| (tp == CRS_FILE_TYPE ))
+				{
+					if (ReadAtmFileName(dirlist->d_name, &fn,&business)==SUCESS)
+					{
 						char percode[50] = { 0 };
-						GetPercode((const char *)fn.Percode, percode);
+						GetPercode(fn.Percode, percode);
 						char *sub = strstr(dirlist->d_name,ATM_SEPARATOR_STRING);
 #ifdef DEBUG
 						vLog("bankno[%s] agencyno[%s] percode[%s] sub[%s]",
@@ -182,7 +180,8 @@ void *SwitchFileThread(void *pt) {
 		sleep(10);
 	}
 
-	if (th != NULL) {
+	if (th != NULL)
+	{
 		memset(th, 0x00, sizeof(pthread_t));
 	}
 	return (void *) 0;
@@ -199,15 +198,13 @@ void *ListDirThread(void *pt)
 
 	pthread_t *th = (pthread_t *) pt;
 
-	sprintf(szFolderPath, "%s/%s/", g_param.FileStoreBasePath,
-			g_param.InsertDir);
+	sprintf(szFolderPath, "%s/%s/", g_param.FileStoreBasePath,g_param.InsertDir);
 
 #ifdef   DEBUG
 	vLog("ListDirThread:%s", szFolderPath);
 #endif
 
 	while (1) {
-
 		if (is_date_cut() == SUCESS) {
 			vLog("ListDirThread:sleep in datecut!");
 			sleep(60 * 10);
