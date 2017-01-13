@@ -145,6 +145,25 @@ begin
                           )';
       execute immediate 'alter table  ROUTE  add constraint IX_ROUTE_1_ID primary key (ID)';
     end if;
+    
+    table_:='SKJL';
+    select count(1) into num from user_tables where table_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create table  SKJL
+                          (
+                            ID          NUMBER(30) not null,
+                            BANKNO      VARCHAR2(20),
+                            NETNO       VARCHAR2(20),
+                            USERID      VARCHAR2(8),
+                            PERCODE     VARCHAR2(30),
+                            BUSINESSDATE    DATE,
+                            ACCOUNTNO   VARCHAR2(30),
+                            INSERTDATE  DATE
+                          )';
+      execute immediate 'alter table  SKJL  add constraint IX_SKJL_1_ID primary key (ID)';
+      execute immediate 'create index  IX_SKJL_BUSINESSDATE on  SKJL (BUSINESSDATE)';
+      execute immediate 'create index  IX_SKJL_ACCOUNTNO on  SKJL (ACCOUNTNO)';
+    end if;
 
     table_:='ROUTERULE';
     select count(1) into num from user_tables where table_name = upper(table_) ;
@@ -207,6 +226,31 @@ begin
                           cache 20
                           cycle';
     end if;
+    
+    table_:='SKJL_SEQ';
+    select count(1) into num from user_sequences where sequence_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create sequence  SKJL_SEQ
+                          minvalue 0
+                          maxvalue 9999999999999999999999999999
+                          start with 20
+                          increment by 1
+                          cache 20
+                          cycle';
+    end if;
+ 
+    table_:='SKJL_TRIGGER';
+    select count(1) into num from user_triggers where trigger_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create or replace trigger SKJL_TRIGGER
+                            before insert on SKJL
+                            for each
+                            row
+                            begin
+                                  select  SKJL_SEQ.Nextval    into:new.ID from sys.dual;
+                            end;';
+    end if;
+       
 
     table_:='BUSINESSLIST_ATM_TRIGGER';
     select count(1) into num from user_triggers where trigger_name = upper(table_) ;

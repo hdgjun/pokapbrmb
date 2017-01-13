@@ -1,0 +1,47 @@
+/*
+ * dbskjl.c
+ *
+ *  Created on: 2017Äê1ÔÂ13ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+#include "db/dbskjl.h"
+#include "common.h"
+#include "pokalog.h"
+#include "filepath.h"
+
+static const char insertsql[] = "INSERT INTO SKJL(BANKNO,NETNO,USERID,PERCODE,BUSINESSDATE,ACCOUNTNO,INSERTDATE) VALUES(";
+
+int DbSKJL(int oprType, DBSKJL *record)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char strSql[300+FILE_PATH_CHARNUM*21] = {0};
+
+	DBSKJL  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(DBSKJL));
+	memcpy(&tmpData, record, sizeof(DBSKJL));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			sprintf(strSql, "%s '%s','%s','%s','%s',to_date('%s','%s'),'%s',SYSDATE)", insertsql,
+				tmpData.bankno,
+				tmpData.notno,
+				tmpData.userid,
+				tmpData.percode,
+				tmpData.businessdate,
+				"yyyy-mm-dd hh24:mi:ss",
+				tmpData.accountno);
+			vLogErrReal(__FILE__, __func__, __LINE__, MESSAGE,"sql[%s]",strSql);
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+		return JudgeSqlExecResultLocal(0,"DBS_INSERT DbSKJL ",&sqlca);
+	}
+   return SUCESS;
+}

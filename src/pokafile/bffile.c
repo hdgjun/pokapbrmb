@@ -72,7 +72,7 @@ static int ReadBFFile(FILENAME *fn)
 #ifdef BFNEW
 		tem.Id[30]=0x00;
 #else
-		data->AddMonDate[19] = 0x00;
+		tem.AddMonDate[19] = 0x00;
 #endif
 		if(size == 1)
 		{
@@ -82,7 +82,7 @@ static int ReadBFFile(FILENAME *fn)
 				 fclose(stream);
 				 destroy_cir_queue(&que);
 				 vLog("malloc bf file[%s] error[%s]",file,strerror(errno));
-				 return ERROR;
+				 return WARING;
 			}
 			memcpy(data,&tem,sizeof(ADDMONINFO));
 			data->AddMonChecker[8] = 0x00;
@@ -101,6 +101,7 @@ static int ReadBFFile(FILENAME *fn)
 			vLog("MonBoxId[%s]",data->MonBoxId);
 #endif
 		}else{
+			vLog("strlen(&tem)[%d:%d]",strlen(&tem),(sizeof(ADDMONINFO)-1));
 			if(strlen(&tem) == (sizeof(ADDMONINFO)-1)){
 				data = (ADDMONINFO *)malloc(sizeof(ADDMONINFO));
 				if(data == NULL)
@@ -108,7 +109,7 @@ static int ReadBFFile(FILENAME *fn)
 					 fclose(stream);
 					 destroy_cir_queue(&que);
 					 vLog("malloc bf file[%s] error[%s]",file,strerror(errno));
-					 return ERROR;
+					 return WARING;
 				}
 				memcpy(data,&tem,sizeof(ADDMONINFO));
 				data->AddMonChecker[8] = 0x00;
@@ -127,7 +128,8 @@ static int ReadBFFile(FILENAME *fn)
 			vLog("MonBoxId[%s]",data->MonBoxId);
 #endif
 
-			}else if(strlen(&tem) != 0){//文件格式有错
+			}else if(strlen(&tem) != 0)
+			{//文件格式有错
 				 fclose(stream);
 				 destroy_cir_queue(&que);
 				 vLog(" bf file[%s] format error",file);
@@ -162,6 +164,8 @@ static int ReadBFFile(FILENAME *fn)
 			rest = DbMonboxaddmon(DBS_INSERT,&re);
 			if (rest == WARING)
 			{
+				if(data)
+				free(data);
 				destroy_cir_queue(&que);
 				return WARING;
 			}
@@ -193,13 +197,15 @@ static int ReadBFFile(FILENAME *fn)
 			rest = DbBundleinfo(DBS_INSERT,&re);
 			if (rest == WARING)
 			{
+				if(data)free(data);
 				destroy_cir_queue(&que);
+				DbsRollback();
 				return WARING;
 			}
 
 		}
 
-		free(data);
+		if(data)free(data);
 	}
 	rest = DbsCommit();
 	destroy_cir_queue(&que);

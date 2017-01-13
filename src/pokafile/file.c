@@ -297,6 +297,9 @@ void *HandleFileThread(void *pt) {
 			break;
 		case CT_FILE_TYPE:
 			break;
+		case SK_FILE_TYPE:
+			iRet = SKFile(df);
+			break;
 #ifndef PEOPLEBANK
 		case DK_FILE_TYPE:
 			iRet = DKFile(df);
@@ -547,6 +550,8 @@ int CheckFileType(char *fileType)
 		return CT_FILE_TYPE;
 	} else if (strstr(fileType, START_FILE_STRING) != 0) {
 		return START_FILE_TYPE;
+	}else if (strstr(fileType, SK_FILE_STRING) != 0) {
+		return SK_FILE_TYPE;
 	}
 #ifndef  PEOPLEBANK
 	else if (strstr(fileType, DK_FILE_STRING) != 0) {

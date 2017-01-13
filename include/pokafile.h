@@ -26,6 +26,7 @@
 #define  ATM_FILE_STRING            "ATM"
 #define  CRS_FILE_STRING            "CRS"
 #define  DK_FILE_STRING             "DK"
+#define  SK_FILE_STRING             "SK"
 
 #define  FSN_FILE_TYPE				0
 #define  ZIP_FILE_TYPE				1
@@ -35,7 +36,8 @@
 #define  ATM_FILE_TYPE              5
 #define  DK_FILE_TYPE               6
 #define  START_FILE_TYPE            7
-#define  CRS_FILE_TYPE            7
+#define  CRS_FILE_TYPE              8
+#define  SK_FILE_TYPE               9
 
 #define  MONVER_01_STRING				"1990"
 #define  MONVER_02_STRING				"1999"
@@ -209,6 +211,7 @@ typedef struct t_AddMonInfo
 #endif
 }ADDMONINFO,*pAddMonInfo;
 
+int SKFile(DataType *df);
 int FSNFile(DataType *df);
 int DKFile(DataType *df);
 int CTFile(DataType *df);
