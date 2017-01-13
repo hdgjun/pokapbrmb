@@ -29,25 +29,17 @@ pokapbrmb
 写入  export POKA_HOME=/home/poka/pokapbrmb/  
       export PATH=$POKA_HOME/bin:$POKA_HOME/sbin:$PATH
 保存
-   
    source /etc/profile
 
 2.修改配置文件$POKA_HOME/cfg/pkrmb.ini 参考配置文件说明
-  修改$POKA_HOME/include/switch.h ： 注释或定义相关宏         现在人民流程没有完成，使用默认编译【商行mysql版本】 
-		//#define DB_ORACLE  /*编译oralce*/
-		#define DB_MYSQL  /*编译mysql*/
-		
-		#define TIME_FLAG   /*coltime使用文件名时间，注释后使用真实coltime*/
-		
-		#define DEBUG    /*调试模式,打印所有日志，正式环境建议注释*/
-		
-		//#define PEOPLEBANK   /*定义走人行流程  注释走商行流程*/
 
-3.编译程序
+3.$POKA_HOME/makefile   参考编译说明
+
+4.编译程序
 cd $POKA_HOME
 make
 
-4.启动程序
+5.启动程序
 pokapbrmb.sh start
 
 hegl-test:~ # ps -ef|grep poka
@@ -56,6 +48,6 @@ root      4836     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokapb
 root      4965  4929  0 22:17 pts/1    00:00:00 grep poka
 
 
-5.停止程序
+6.停止程序
 pokapbrmb.sh stop
 

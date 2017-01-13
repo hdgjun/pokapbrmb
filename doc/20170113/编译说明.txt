@@ -1,0 +1,27 @@
+1.编译mysql版本程序：
+                vi $POKA_HOME/makefile
+                                                 注释     'DBTYPE=DB_ORACLE'
+		                         定义      'DBTYPE=DB_MYSQL'      
+		       
+		        vi $POKA_HOME/cfg/Makefile.db
+		                       检查'LID_MSQL'与'IN_MSQL'设置的路径是否正确(注意64位机器使用lib64)    
+		                       
+2.编译oracle版本程序：
+                vi $POKA_HOME/makefile
+                                                 注释     'DBTYPE=DB_MYSQL'
+		                         定义      'DBTYPE=DB_ORACLE'      
+		       
+		        vi $POKA_HOME/cfg/Makefile.db
+		                       检查'LID_ORA'与'IN_ORA'设置的路径是否正确(注意64位机器使用lib64)   	
+		                       
+		                       
+3.商行版本：
+ 		 vi $POKA_HOME/makefile
+                            注释     'export BANKTYPE=PEOPLEBANK'                      	                                   
+		   
+4.人行版本：
+ 		 vi $POKA_HOME/makefile
+                            定义     'export BANKTYPE=PEOPLEBANK' 				
+
+5.vi $POKA_HOME/makefile  
+ 注释 export DEBUG=DEBUG     可以少打日志

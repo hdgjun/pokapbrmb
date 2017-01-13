@@ -2,7 +2,7 @@ TOPDIR=.
 
 include $(TOPDIR)/cfg/Makefile.db
 
-exclude_dirs= include  bin  lib cfg sbin log
+exclude_dirs= include  bin  lib cfg sbin log doc
 #code_dir=src
 
 LIBPATH=$(TOPDIR)/lib
