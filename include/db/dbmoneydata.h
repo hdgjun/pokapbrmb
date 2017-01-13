@@ -32,5 +32,5 @@ typedef struct t_Moneydata
 
 
 int DbsMoneydata(int oprType,MONEYDATAR *fileRecord);
-
+int DbsDoubtMoneydata(int oprType,MONEYDATAR *fileRecord);
 #endif

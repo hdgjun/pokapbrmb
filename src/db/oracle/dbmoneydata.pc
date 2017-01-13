@@ -70,3 +70,72 @@ int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
 	}
    return SUCESS;
 }
+
+int DbsDoubtMoneydata(int oprType,MONEYDATAR *fileRecord)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	MONEYDATAR  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(MONEYDATAR));
+	memcpy(&tmpData, fileRecord, sizeof(MONEYDATAR));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+			DOUBTMONEYDATA(
+				PERCODE,
+				COLTIME,
+				MON,
+				MONTYPE,
+				MONVAL,
+				MONVER,
+				TRUEFLAG,
+				OPERATORID,
+				OPERDATE,
+				BUNDLEID,
+				PACKAGEID,
+				CHECKER,
+				IMAGEPATH,
+				BUSINESSTYPE,
+				MONBOXID,
+				ATMID,
+				ADDMONOPERATOR,
+				ADDMONCHECKER,
+				BANKNO,
+				FILENAME,
+				AGENCYNO
+				)
+				VALUES(
+				:tmpData.percode,
+				 to_date(:tmpData.coltime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.mon,
+				:tmpData.montype,
+				:tmpData.monval,
+				:tmpData.monver,
+				:tmpData.trueflag,//"0",
+				:tmpData.operatorid,
+				 SYSDATE,
+				:tmpData.bundleid,
+				:tmpData.packageid,
+				:tmpData.checker,
+				:tmpData.imagepath,
+				:tmpData.businesstype,
+				:tmpData.monboxid,
+				:tmpData.atmid,
+				:tmpData.addmonoperator,
+				:tmpData.addmonchecker,
+				:tmpData.bankno,
+				:tmpData.filename,
+				:tmpData.agencyno
+				 );
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+	}
+   return SUCESS;
+}

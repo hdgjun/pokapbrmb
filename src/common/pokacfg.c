@@ -407,7 +407,7 @@ void UseDefaultValue(Param *param) {
 		strcpy(param->BankNo, DEF_BANKNO);
 	}
 
-	if (param->SaveImage <= 0) {
+	if (param->SaveImage < 0) {
 		param->SaveImage = DEF_IMAGE_SAVE;
 	}
 	if (param->LogSaveDay <= 0) {
@@ -419,7 +419,7 @@ void UseDefaultValue(Param *param) {
 	if (param->ImageSaveDay <= 0) {
 		param->ImageSaveDay = DEF_IMAGE_SAVE_DAY;
 	}
-	if (param->openTransfom <= 0) {
+	if (param->openTransfom < 0) {
 		param->openTransfom = DEF_OPEN_TRANSFORM;
 	}
 	if (strlen(param->transformDir) <= 0) {

@@ -11,6 +11,7 @@
 #include "db/dbperinfo.h"
 #include "db/dbmoneydata.h"
 #include "common.h"
+#include "monrule.h"
 
 #ifdef DEBUG
 	#include <time.h>
@@ -90,7 +91,7 @@ int FSNFile(DataType *df)
     }
 
 	fn.df = df;
-
+    /*read fsn file*/
 	iRet = WriteToSnoTable(&fn);
 
 	if(df->fileType == FSN_FILE_TYPE)
@@ -272,9 +273,65 @@ int CheckFSNRecode(FILERECORD *fileRecord)
 {
 	return SUCESS;
 }
-void CheckDoubtMon(FILERECORD *fileRecord)
+void CheckDoubtMon(MONEYDATAR *rec)
 {
+	int j = 0;
+	int k = 0;
+	int imatchflag = 0;
 
+	MONRULEARRY *rule;
+	rule = getMonrule();
+	if(rule==NULL)
+	{
+		vLog("get doubt mon rule error");
+		return;
+	}
+	for(j = 0; j < rule->size; j++)
+	{
+		imatchflag = 0;//每比对一次完成置回初始值
+
+		//比对版别、币值、冠字号
+		printf("ReadOneRecordInfo FileRecord->Ver:%s MoneyRule[%d].MonVer:%s\n",rec->monver,
+																					j,
+																					rule->data[j].MonVer);
+
+		if(strlen(rule->data[j].MonVer)>1)
+		{
+			if(0 != strcmp(rec->monver,rule->data[j].MonVer))
+			{
+				continue;
+			}
+		}
+		printf("ReadOneRecordInfo FileRecord->Valuta:%s MoneyRule[%d].MonVer:%s\n",rec->monval,
+																					j,
+																					rule->data[j].MonVal);
+		if(0 != strcmp(rec->monval,rule->data[j].MonVal))
+		{
+			continue;
+		}
+
+		int iCharNum = SNO_LEN-2;
+		for(k = 0; k < iCharNum; k++)
+		{
+			printf("ReadOneRecordInfo FileRecord->SNo[%d]:%c pfilename->MoneyRule[%d].MonHead[%d]:%c\n",k,
+																					rec->mon[k],
+																					j,
+																					k,
+																					rule->data[j].MonHead[k]);
+			if((MATCH_CHAR != rule->data[j].MonHead[k]) &&
+				(rec->mon[k] != rule->data[j].MonHead[k]))
+			{
+				imatchflag = -1;
+				break;
+			}
+		}
+
+		if(0 == imatchflag)
+		{
+			DbsDoubtMoneydata(DBS_INSERT,rec);
+			break;
+		}
+	}
 }
 
 int	WriteToSnoTable(FILENAME *fsnFile)
@@ -409,6 +466,7 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 				MONEYDATAR rec;
 				GetFSNRecode(&rec,&fileRecord,pfilename);
 				iRet = DbsMoneydata(DBS_INSERT,&rec);
+				CheckDoubtMon(&rec); //黑名单
 			}else
 			{
 				ATMRECODE atm;
@@ -426,7 +484,6 @@ int ReadSNoInfoFromFSNFile(char *list,int iNumSNoFSN,FILENAME *pfilename)
 				err++;
 			}else{
 				suc++;
-				CheckDoubtMon(&fileRecord); //黑名单
 			}
 		}else{
 			vLog("WARING");
@@ -563,31 +620,33 @@ int ReadOneRecordInfo(FILENAME *pfilename,FILERECORD *FileRecord,char *list,int 
 	FileRecord->Reserve1[0] = list[loc + 130];
 	printf("FileRecord->Reserve1:%c\n",FileRecord->Reserve1[0]);
 
-	if((1 == pfilename->IncludeImageSnoFlag) &&
-		(g_param.SaveImage==DEF_IMAGE_SAVE))
+	if(g_param.SaveImage==DEF_IMAGE_SAVE)
 	{
-		char ImageFileName[MAX_STRING_SIZE] = {0};
-		char strDateTime[20] = {0};
-		char sDateTime[20] = {0};
-
-		sprintf(strDateTime,"%s",pfilename->DateTime);
-		if(strlen(FileRecord->SNo) == 0)
+		if(1 == pfilename->IncludeImageSnoFlag)
 		{
-			vLog("mon is null");
-			return ERROR;
+			char ImageFileName[MAX_STRING_SIZE] = {0};
+			char strDateTime[20] = {0};
+			char sDateTime[20] = {0};
+
+			sprintf(strDateTime,"%s",pfilename->DateTime);
+			if(strlen(FileRecord->SNo) == 0)
+			{
+				vLog("mon is null");
+				return ERROR;
+			}
+
+			sprintf(ImageFileName,"%s_%d%d_%d.bmp",FileRecord->SNo,GetDateInt(),GetTimeInt(),iSnoNo);
+
+
+			char FolderPath[FILE_PATH_CHARNUM] = {0};//文件夹路径
+			sprintf(FolderPath,"%s/%s/%s/%s/",g_param.ImagePath,g_param.ImageDir,pfilename->BankNo,pfilename->Date);
+
+			JudgeSavePathExist(FolderPath);
+
+			sprintf(FileRecord->ImageFilePath,"%s/%s",FolderPath,ImageFileName);
+
+			SaveSnoImageFromFsnFile(pfilename,FileRecord,list,iSnoNo);//截取图片
 		}
-
-		sprintf(ImageFileName,"%s_%d%d_%d.bmp",FileRecord->SNo,GetDateInt(),GetTimeInt(),iSnoNo);
-
-
-		char FolderPath[FILE_PATH_CHARNUM] = {0};//文件夹路径
-		sprintf(FolderPath,"%s/%s/%s/%s/",g_param.ImagePath,g_param.ImageDir,pfilename->BankNo,pfilename->Date);
-
-		JudgeSavePathExist(FolderPath);
-
-		sprintf(FileRecord->ImageFilePath,"%s/%s",FolderPath,ImageFileName);
-
-		SaveSnoImageFromFsnFile(pfilename,FileRecord,list,iSnoNo);//截取图片
 	}
 
 	unsigned int uiBusinessType = 0;

@@ -220,7 +220,7 @@ char *CompressFile(char *srcFile,char *zipFile);
 int CheckDirEmpty(char *dir);
 int ReadFSNOrBKFileName(const char *szFileName, FILENAME *pfilename);
 int	WriteToSnoTable(FILENAME *fsnFile);
-void CheckDoubtMon(FILERECORD *fileRecord);
+void CheckDoubtMon(MONEYDATAR *rec);
 int CheckFSNRecode(FILERECORD *fileRecord);
 void *ListDirThread(void *pt);
 void *SwitchFileThread(void *pt);

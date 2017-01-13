@@ -22,6 +22,10 @@ int InitDb(char *path)
 	char cmd[500] = {0};
 	pthread_key_create(&p_Thread_key,NULL);
 	mysql_library_init(0, NULL, NULL);
+
+	if(strlen(g_param.DBPort)<=0){
+		sprintf(g_param.DBPort,"3306");
+	}
 	sprintf(cmd,"mysql -h%s -P%s -u%s -p%s %s < %s/%s",
 			g_param.DBIP,g_param.DBPort,g_param.DBUser,g_param.DBPassword,
 			g_param.DBServiceName,path,INIT_SCR);
@@ -49,7 +53,7 @@ int ThreadConnectDB()
 	if (!mysql_real_connect(pcon, g_param.DBIP,
 			g_param.DBUser, g_param.DBPassword, g_param.DBServiceName, 0, NULL, CLIENT_MULTI_STATEMENTS|CLIENT_MULTI_RESULTS))
 	{
-	   printf("Connect sql fail:%s  [%s]\n",mysql_error(pcon),g_param.DBServiceName);
+	   vLog("Connect db fail:%s  [%s]\n",mysql_error(pcon),g_param.DBServiceName);
 	   return ERROR;
 	}
 	pthread_setspecific(p_Thread_key,(void *)(ctx));

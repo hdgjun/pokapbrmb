@@ -20,20 +20,6 @@
 #include "pokapbrmb.h"
 
 
-
-#define TRY_CONNECT_DB  \
-	int SLEEPTIME = 1;\
-	while (1) {\
-		if (ThreadConnectDB() == SUCESS) {\
-			break;\
-		}\
-		sleep(10 * SLEEPTIME);\
-		SLEEPTIME++;\
-		SLEEPTIME = SLEEPTIME % 180;\
-	}\
-	SLEEPTIME = 1;\
-	vLog("ThreadConnectDB:%d  ok");\
-
 extern cir_queue_t gQue;
 extern Param g_param;
 extern pthread_attr_t attr;

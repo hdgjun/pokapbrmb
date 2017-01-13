@@ -11,6 +11,7 @@
 #include "pokafile.h"
 #include "db/db.h"
 #include "switch.h"
+#include "monrule.h"
 
 extern Param g_param;
 
@@ -53,9 +54,12 @@ int main(int argc, char **argv) {
 
 	while(1)
 	{
-		for (i = 0; i < g_param.ThreadSize; i++) {
+		for (i = 0; i < g_param.ThreadSize; i++)
+		{
 			if(i == 0)
 			{
+				updateMonrule();
+				vLog("updateMonrule() ok!");
 				/*±¦¼Îfsn×ª±ê×¼fsn*/
 				if(g_param.openTransfom !=0)
 				{
@@ -94,7 +98,7 @@ int main(int argc, char **argv) {
 				pthread_create(&fileOpr[i], &attr, HandleFileThread, (void *)i);
 			}
 		}
-		sleep(g_param.SleepTime);
+		sleep(g_param.SleepTime*60);
 	}
 
 	return 0;
@@ -137,7 +141,7 @@ static int init() {
     vLog("init path ok!");
 
     if(initDataBase() != SUCESS){
-		vLog("init DB error");
+		vLog("init DB error,please check db configure");
 		return ERROR;
     }
 
@@ -236,7 +240,9 @@ static int initDataBase()
     GetProgramPath(CurPath,POKA_HOME,DEF_INSTALL_PATH);
     char sbin[FILE_PATH_CHARNUM] = { 0 };
     sprintf(sbin,"%s/%s/",CurPath,SHELL_DIR);
-	return InitDb(sbin);
+    InitDb(sbin);
+
+	return ThreadConnectDB();
 }
 
 static int initThread()

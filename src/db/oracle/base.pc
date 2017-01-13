@@ -103,7 +103,7 @@ int DbsRollback()
 int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca)
 {
 	if(sqlca->sqlcode == -3114 || sqlca->sqlcode == 3114|| sqlca->sqlcode == -1688||
-			sqlca->sqlcode == 1688)
+			sqlca->sqlcode == 1688 ||sqlca->sqlcode == 12514||sqlca->sqlcode == -12514)
 	{
 		if(iFlag == 0)
 		{
@@ -116,6 +116,6 @@ int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca)
     {
     	return NODATA;
     }
-    vLog("[%s ERROR %d ]:[%s]\n",szExecText,sqlca->sqlcode,sqlca->sqlerrm.sqlerrmc);
+	vLogErrReal(__FILE__, __func__, __LINE__, MESSAGE,"[%s ERROR %d ]:[%s]",szExecText,sqlca->sqlcode,sqlca->sqlerrm.sqlerrmc);
 	return ERROR;
 }

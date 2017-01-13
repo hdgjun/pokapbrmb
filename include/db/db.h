@@ -82,6 +82,20 @@ typedef struct t_mysqlctx
 int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,MYSQL *pcon);
 #endif
 
+
+#define TRY_CONNECT_DB  \
+	int SLEEPTIME = 1;\
+	while (1) {\
+		if (ThreadConnectDB() == SUCESS) {\
+			break;\
+		}\
+		sleep(10 * SLEEPTIME);\
+		SLEEPTIME++;\
+		SLEEPTIME = SLEEPTIME % 180;\
+	}\
+	SLEEPTIME = 1;\
+	vLog("ThreadConnectDB:%d  ok");\
+
 int InitDb(char *path);
 int DestroyDb();
 int ThreadConnectDB();

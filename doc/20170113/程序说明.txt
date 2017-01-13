@@ -1,0 +1,61 @@
+项目目录结构:
+
+pokapbrmb
+     |
+     |---------/bin         编译后可执行程序 pokapbrmb、pokadaemon 生成的目的地
+     |
+     |---------/cfg         配置文件目录
+     |
+     |---------/sbin        shell脚本目录
+     |
+     |---------/lib         程序使用的库的目录
+     |
+     |---------/include     程序头文件目录
+     |
+     |---------/src         程序源码目录
+     |
+     |---------/log         日志文件目录
+     |
+     |---------/doc         文档目录
+     |
+     |---------makefile      
+     
+     
+程序默认安装路径：/home/poka/pokapbrmb/
+
+配置程序：
+1.环境变量设置 
+  vi /etc/profile 
+写入  export POKA_HOME=/home/poka/pokapbrmb/  
+      export PATH=$POKA_HOME/bin:$POKA_HOME/sbin:$PATH
+保存
+   
+   source /etc/profile
+
+2.修改配置文件$POKA_HOME/cfg/pkrmb.ini 参考配置文件说明
+  修改$POKA_HOME/include/switch.h ： 注释或定义相关宏         现在人民流程没有完成，使用默认编译【商行mysql版本】 
+		//#define DB_ORACLE  /*编译oralce*/
+		#define DB_MYSQL  /*编译mysql*/
+		
+		#define TIME_FLAG   /*coltime使用文件名时间，注释后使用真实coltime*/
+		
+		#define DEBUG    /*调试模式,打印所有日志，正式环境建议注释*/
+		
+		//#define PEOPLEBANK   /*定义走人行流程  注释走商行流程*/
+
+3.编译程序
+cd $POKA_HOME
+make
+
+4.启动程序
+pokapbrmb.sh start
+
+hegl-test:~ # ps -ef|grep poka
+root      4834     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokadaemon
+root      4836     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokapbrmb pokapbrmb
+root      4965  4929  0 22:17 pts/1    00:00:00 grep poka
+
+
+5.停止程序
+pokapbrmb.sh stop
+
