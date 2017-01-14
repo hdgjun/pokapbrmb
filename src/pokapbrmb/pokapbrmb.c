@@ -51,36 +51,23 @@ int main(int argc, char **argv) {
 	int iRet,i;
 
 	vLog("********************************START**************************");
-
+    i = 0;
 	while(1)
 	{
-		for (i = 0; i < g_param.ThreadSize; i++)
+		while(1)
 		{
 			if(i == 0)
 			{
-				updateMonrule();
-				vLog("updateMonrule() ok!");
 				/*宝嘉fsn转标准fsn*/
 				if(g_param.openTransfom !=0)
 				{
-					if (ESRCH == test_pthread(fsnfiletobase))
+					if(ESRCH == test_pthread(fsnfiletobase))
 					{
 						pthread_create(&fsnfiletobase, &attr,
 								ListTransFormDirThread, (void *)&fsnfiletobase);
 					}
 				}
-				/*将insertdir:fan_insert目录文件放入入库队列，等待入库处理*/
-				if (ESRCH == test_pthread(taskfile))
-				{
-					pthread_create(&taskfile, &attr,
-							ListDirThread, (void *)&taskfile);
-				}
-				/*文件分发线程*/
-                if(ESRCH == test_pthread(switchfile))
-                {
-					pthread_create(&switchfile, &attr,
-							SwitchFileThread, (void *)&switchfile);
-				}
+
 				/*根据路由表转发文件线程*/
 				if (ESRCH == test_pthread(sendfile))
 				{
@@ -91,13 +78,38 @@ int main(int argc, char **argv) {
 				{
 					pthread_create(&clearFile, &attr, CleanFileThread,NULL);
 				}
+
+				if(g_param.ThreadSize > 0)
+				{
+					updateMonrule();
+					vLog("updateMonrule() ok!");
+
+					/*将insertdir:fan_insert目录文件放入入库队列，等待入库处理*/
+					if (ESRCH == test_pthread(taskfile))
+					{
+						pthread_create(&taskfile, &attr,
+								ListDirThread, (void *)&taskfile);
+					}
+					/*文件分发线程*/
+					if(ESRCH == test_pthread(switchfile))
+					{
+						pthread_create(&switchfile, &attr,
+								SwitchFileThread, (void *)&switchfile);
+					}
+				}
 			}
-			/*从队列获取任务，处理文件*/
-			if (ESRCH == test_pthread(fileOpr[i]))
+			if(g_param.ThreadSize > 0)
 			{
-				pthread_create(&fileOpr[i], &attr, HandleFileThread, (void *)i);
+				/*从队列获取任务，处理文件*/
+				if (ESRCH == test_pthread(fileOpr[i]))
+				{
+					pthread_create(&fileOpr[i], &attr, HandleFileThread, (void *)i);
+				}
 			}
-		}
+
+			i++;
+			if(i >= g_param.ThreadSize)break;
+	   }
 		sleep(g_param.SleepTime*60);
 	}
 

@@ -80,7 +80,7 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 	int i;
 	param->SaveImage = -1;
 	param->openTransfom = -1;
-
+    param->ThreadSize = -1;
 	for (i = 0; i <= PARAM_NUM; i++) {
 
 		if (strcmp(szKey[i], DBUSER_KEY) == 0) {
@@ -394,7 +394,7 @@ void UseDefaultValue(Param *param) {
 	if (strlen(param->ImagePath) <= 0) {
 		strcpy(param->ImagePath, param->FileStoreBasePath);
 	}
-	if (param->ThreadSize <= 0 || param->ThreadSize > MAX_THREAD_NUM) {
+	if (param->ThreadSize < 0 || param->ThreadSize > MAX_THREAD_NUM) {
 		param->ThreadSize = DEF_THREAD_SIZE;
 	}
 	if (param->SleepTime <= 0 || param->SleepTime > MAX_SLEEP_TIME) {

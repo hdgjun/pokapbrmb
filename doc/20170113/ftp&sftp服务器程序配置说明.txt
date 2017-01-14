@@ -1,0 +1,16 @@
+当$POKA_HOME/cfg/pkrmb.ini中配置:
+threadsize=0
+
+时，程序可以作为ftp服务器程序，配合路由表的设置完成文件转发功能。
+
+场景 :
+文件流转
+人行0000 fsn_sc_ins/0001 ->  商行0001ftp服务器   fsn_midel -> 商行0001应用服务器  fsn_insert 
+
+人行0000路由表配置一条从fsn_sc_ins/0001到商行fsn_midel的路由
+
+商行0001ftp服务器修改$POKA_HOME/cfg/pkrmb.ini >  threadsize=0
+
+商行0001ftp服务器路由表配置一条从fsn_midel到商行0001应用服务器  fsn_insert路由
+
+商行0001ftp服务器 /fsn_midel:目录名(完整路径)没有强制要求，可以随意取，配置好路由表后，程序会自动创建(须设置在程序有权限的路径)

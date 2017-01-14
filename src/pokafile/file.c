@@ -425,6 +425,8 @@ void *SendTask(void *sp) {
 		memcpy(tBank, route.forwardbank, strlen(route.forwardbank));
 	}
 
+	JudgeSavePathExist(route.localdir);
+
 	int iRet;
 	switch (route.type) {
 	case FTP_UPLOAD:
