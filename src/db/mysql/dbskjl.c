@@ -27,7 +27,7 @@ int DbSKJL(int oprType, DBSKJL *record)
 	switch (oprType)
 	{
 		case DBS_INSERT:
-			sprintf(strSql, "%s '%s','%s','%s','%s',str_to_date('%s','%s'),'%s','NOW()')", insertsql,
+			sprintf(strSql, "%s '%s','%s','%s','%s',str_to_date('%s','%s'),'%s','CURRENT_TIMESTAMP()')", insertsql,
 				tmpData.bankno,
 				tmpData.notno,
 				tmpData.userid,
