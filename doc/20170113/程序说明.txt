@@ -39,7 +39,11 @@ pokapbrmb
 cd $POKA_HOME
 make
 
-5.Æô¶¯³ÌÐò
+5.cd  $POKA_HOME/sbin
+  chmod +x *
+  
+  
+6.Æô¶¯³ÌÐò
 pokapbrmb.sh start
 
 hegl-test:~ # ps -ef|grep poka
@@ -48,6 +52,6 @@ root      4836     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokapb
 root      4965  4929  0 22:17 pts/1    00:00:00 grep poka
 
 
-6.Í£Ö¹³ÌÐò
+7.Í£Ö¹³ÌÐò
 pokapbrmb.sh stop
 
