@@ -11,24 +11,27 @@ dbpassword                                           数据库密码            (必需
 dbservicename                                        数据库服务名（公司常用oracle:orcl,mysql:PokaRmbCB）  (必需配置 )                                                                                
 dbip                                                 数据库服务器ip    (mysql必需配置 )                                                                                                                  
 dbport                                               数据库服务端口                                                                          
-                                                                                                                         
-                                                                                                                                                                                                                            
-imagepath            /home/poka/                      图片文件存储的基本路径（图片文件完整路径：/home/poka/image）                                                                                                     
+                                                                                                                                                                                                                                                                                                                                                 
 saveimage              1                              0:不存储图片 1：存储图片(默认值)                                                                                                           
 logsaveday			   30                                                                                      日志文件存储天数
 imagesaveday           90                             图片存储天数
 filesaveday            90                             fsn文件存储天数
 
 /****************************以下建议使用默认值******************************************************************************************************/  
-threadsize             10                            文件处理线程数       
-filestorebasepath     /home/poka/                    数据文件存储的基本路径(如错误文件完整路径为：/home/poka/fsn_error/ = [filestorebasepath/errordir])                                                                                                                       
-imagedir		      image					        /*冠字号图片存在目录*/                                                                                                                                                  
-switchdir             fsn_put                       /*商行端[文件发送到文件处理目录和转发目录(人行子目录)]               
-       								             	人行端[清分中心文件分发到转发目录，其他文件转发到文件处理目录]*/      						          								                                                                                   
+threadsize             10                            文件处理线程数      
+
+imagepath            /home/poka/                      图片文件存储的基本路径（图片文件完整路径：/home/poka/image）  
+imagedir		      image					        /*冠字号图片存在目录*/     
+
+ 
+filestorebasepath     /home/poka/                    数据文件存储的基本路径
+(如错误文件完整路径为：filestorebasepath/errordir = /home/poka/fsn_error/ )                                                                                                                                                                                                                                                                    
+switchdir             fsn_put                       /*商行端[文件发送到文件处理目录和转发目录(人行子目录)]                    								             	人行端[清分中心文件分发到转发目录，其他文件转发到文件处理目录]*/      						          								                                                                                   
 handledir             fsn_cb_handin                 /*[商行端、人行端共同]文件处理后入库目录*/                           
 insertdir             fsn_insert                    /*[商行端、人行端共同]文件处理目录*/                                 
 sendfiledir           fsn_sc_ins                    /*[商行端、人行端共同]转发目录(目的银行号子目录)  [商行端待上传人行文件存放在该目录的人行银行号子目录中]*/                   
 errordir              fsn_error                     /*[商行端、人行端共同]错误文件目录*/                                 
+
 
 /************************新增********************************************************************************************************************/
 transformdir          fsn_trans                     /*[商行端、人行端共同]poka fsn 转 标准fsn*/      

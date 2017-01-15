@@ -207,10 +207,10 @@ int DownFile(ROUTE *route) {
 
 	if (ruleSize == 0) {
 		ruleSize = 1;
-		if(route->type == SFTP_DOWNLOAD)
-		{
+		//if(route->type == SFTP_DOWNLOAD)
+		//{
 			rule[0].fileextend[0]='1';
-		}
+		//}
 	}
 
 	switch(route->type)

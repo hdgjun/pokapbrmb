@@ -282,31 +282,32 @@ void *HandleFileThread(void *pt) {
 		vLog("Start file:%s  Insert.", df->fileName);
 		df->threadid = id;
 		int iRet;
-		switch (df->fileType) {
-		case FSN_FILE_TYPE:
-			iRet = FSNFile(df);
-			break;
-		case ZIP_FILE_TYPE:
-			iRet = ZIPFile(df);
-			break;
-		case BF_FILE_TYPE:
-			iRet = BFFile(df);
-			break;
-		case BK_FILE_TYPE:
-			iRet = BKFile(df);
-			break;
-		case CT_FILE_TYPE:
-			break;
-		case SK_FILE_TYPE:
-			iRet = SKFile(df);
-			break;
-#ifndef PEOPLEBANK
-		case DK_FILE_TYPE:
-			iRet = DKFile(df);
-			break;
-#endif
-		default:
-			vLog("File type error:%d", df->fileType);
+		switch (df->fileType)
+		{
+			case FSN_FILE_TYPE:
+				iRet = FSNFile(df);
+				break;
+			case ZIP_FILE_TYPE:
+				iRet = ZIPFile(df);
+				break;
+			case BF_FILE_TYPE:
+				iRet = BFFile(df);
+				break;
+			case BK_FILE_TYPE:
+				iRet = BKFile(df);
+				break;
+			case CT_FILE_TYPE:
+				break;
+			case SK_FILE_TYPE:
+				iRet = SKFile(df);
+				break;
+	#ifndef PEOPLEBANK
+			case DK_FILE_TYPE:
+				iRet = DKFile(df);
+				break;
+	#endif
+			default:
+				vLog("File type error:%d", df->fileType);
 		}
 
 		vLog("Finish_file:%s  code[%d] Insert.", df->fileName, iRet);
@@ -340,15 +341,18 @@ void *SendFileThread() {
 		route.lastdate = date;
 		vLog("starttime[%d],latdate[%d]",route.starttime,route.lastdate);
 		iRet = DbRoute(DBS_CURSOR_OPEN, &route);
-		if (iRet != SUCESS) {
+		if (iRet != SUCESS)
+		{
 			vLog("DbRoute   DBS_CURSOR_OPEN error");
 		}
         int co=0;
-		while (1) {
+		while (1)
+		{
 			ro=(ROUTE *)malloc(sizeof(ROUTE));
 			memset(ro,0x00,sizeof(ROUTE));
 			iRet = DbRoute(DBS_FETCH, ro);
-			if (iRet == NODATA || iRet == ERROR) {
+			if (iRet == NODATA || iRet == ERROR)
+			{
 #ifdef DEBUG
 				vLog("DbRoute   DBS_FETCH NODATA [%d]",iRet);
 #endif
@@ -374,7 +378,8 @@ void printRout(ROUTE *route )
 			,route->localdir,route->remotedir);
 
 }
-void *SendTask(void *sp) {
+void *SendTask(void *sp)
+{
 	ROUTE *ro = (ROUTE *) sp;
 	ROUTE route;
 	memset(&route,0x00,sizeof(ROUTE));
@@ -540,6 +545,7 @@ void CoverFiles() {
 
 int CheckFileType(char *fileType)
 {
+	if(fileType == NULL)return ERROR;
 	if (strstr(fileType, FSN_FILE_STRING) != 0) {
 		return FSN_FILE_TYPE;
 	} else if (strstr(fileType, ZIP_FILE_STRING) != 0) {
@@ -563,12 +569,14 @@ int CheckFileType(char *fileType)
 	return ERROR;
 }
 
-void CheckResult(DataType *df, int result) {
+void CheckResult(DataType *df, int result)
+{
 	int iRet;
 	int st = 1;
 	switch (result) {
 	case ERROR:
-		if (df->fileType == ZIP_FILE_TYPE) {
+		if (df->fileType == ZIP_FILE_TYPE)
+		{
 			StopFile(df);
 #ifdef   DEBUG
 			vLog("ZIP_FILE_TYPE error stop :%s", df->fileName);
@@ -577,12 +585,14 @@ void CheckResult(DataType *df, int result) {
 		break;
 	case SUCESS:
 		break;
-	case WARING: {
+	case WARING:
+	{
 		StopFile(df);
 		iRet = TestConnectionDB();
 		if (iRet == ERROR) {
 			DisconnectDB();
-			while (ThreadConnectDB() != SUCESS) {
+			while (ThreadConnectDB() != SUCESS)
+			{
 				sleep(10 * st);
 				st = (st + 1) % 200;
 			}
@@ -594,7 +604,8 @@ void CheckResult(DataType *df, int result) {
 
 }
 
-int MoveFiles(FILEMOVEINFO *pInfo) {
+int MoveFiles(FILEMOVEINFO *pInfo)
+{
 	char CmdStr[500] = { 0 };
 	char ShellName[FILE_PATH_CHARNUM] = { 0 };
 	char pCurPath[FILE_PATH_CHARNUM] = { 0 };
@@ -664,7 +675,8 @@ int MoveFiles(FILEMOVEINFO *pInfo) {
 	return ERROR;
 }
 
-int StartFile(DataType *df) {
+int StartFile(DataType *df)
+{
 	char oldname[MAX_STRING_SIZE];
 	char newname[MAX_STRING_SIZE];
 	sprintf(oldname, "%s/%s", df->filePath, df->fileName);
@@ -675,7 +687,8 @@ int StartFile(DataType *df) {
 	return ERROR;
 }
 
-int StopFile(DataType *df) {
+int StopFile(DataType *df)
+{
 	char oldname[MAX_STRING_SIZE];
 	char newname[MAX_STRING_SIZE];
 	sprintf(newname, "%s/%s", df->filePath, df->fileName);
