@@ -6,7 +6,7 @@ begin
     table_:='BUSINESSLIST_ATM';
     select count(1) into num from user_tables where table_name = upper(table_) ;
     if num = 0 then
-        execute immediate 'ccreate table BUSINESSLIST_ATM
+        execute immediate 'create table BUSINESSLIST_ATM
 													(
 													  ID           NUMBER(30) not null,
 													  BANKNO       VARCHAR2(20),

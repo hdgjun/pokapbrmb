@@ -39,7 +39,8 @@ extern cir_queue_t gQue;
 int main(int argc, char **argv)
 {
 
-	if(JudgeProgramExist(1,APP_NAME) != SUCESS){
+	if(JudgeProgramExist(1,APP_NAME) != SUCESS)
+	{
 		exit(0);
 	}
 
