@@ -65,6 +65,10 @@
 #define	 SFTP_MOVESHELLNAME_STRING	 "movefile_sftp.sh"			//sftp移动文件shell脚本名称
 #define	 FTP_PUTSHELLNAME_STRING	 "putfile_ftp.sh"			//ftp发送文件shell脚本名称
 #define	 SFTP_PUTSHELLNAME_STRING 	 "putfile_sftp.sh"			//sftp发送文件shell脚本名称
+
+#define  FTP_GETMESSGETSHELLNAME_STRING  "getmessage_ftp.sh"
+#define  FTP_DELETEFILESHELLNAME_STRING  "deletefile_ftp.sh"
+
 #define  FTP_GETDIRSHELLNAME_STRING  "getdir_ftp.sh"
 #define  SFTP_GETDIRSHELLNAME_STRING "getdir_sftp.sh"
 #define  DELETE_IMAGE_SHELLNAME_STRING "deleteimage.sh"

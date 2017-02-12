@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <dirent.h>
@@ -33,7 +34,8 @@ static char *GetFtpModel(ROUTE *route)
 	}
 }
 
-int UploadFile(ROUTE *route) {
+int UploadFile(ROUTE *route)
+{
 	DIR* p;
 	struct dirent* dirlist;
 	struct stat filestat;
@@ -171,7 +173,8 @@ void RecoverDir(char *dir)
 	}
 	return;
 }
-int DownFile(ROUTE *route) {
+int DownFile(ROUTE *route)
+{
 	char szFolderPath[FILE_PATH_CHARNUM] = { 0 };
 	char redir[FILE_PATH_CHARNUM] = { 0 };
 	char temTarget[FILE_PATH_CHARNUM] = { 0 };
@@ -181,6 +184,8 @@ int DownFile(ROUTE *route) {
 	char apppath[FILE_PATH_CHARNUM] = { 0 };
 	char result[FILE_PATH_CHARNUM] = { 0 };
     char shname[FILE_PATH_CHARNUM] = { 0 };
+    char shgetfilename[FILE_PATH_CHARNUM] = { 0 };
+    char shdeletename[FILE_PATH_CHARNUM] = { 0 };
 	/*恢复目录状态*/
 	RecoverDir(route->localdir);
 
@@ -194,18 +199,8 @@ int DownFile(ROUTE *route) {
 	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
 	DbRouteRule(&rule, &ruleSize, route->id);
 
-	switch (route->servicecode)
+	if (ruleSize == 0)
 	{
-		case SERVER_CODE_2:
-			sprintf(redir, "%s/%d/", route->remotedir, GetDateInterval(-1));
-			break;
-		case SERVER_CODE_3:
-		default:
-			sprintf(redir, "%s/", route->remotedir);
-	}
-
-
-	if (ruleSize == 0) {
 		ruleSize = 1;
 		//if(route->type == SFTP_DOWNLOAD)
 		//{
@@ -216,7 +211,9 @@ int DownFile(ROUTE *route) {
 	switch(route->type)
 	{
 		case FTP_DOWNLOAD:
-			sprintf(shname,"%s",FTP_GETDIRSHELLNAME_STRING);
+			sprintf(shname,"%s",FTP_GETMESSGETSHELLNAME_STRING);
+			sprintf(shgetfilename,"%s",FTP_GETSHELLNAME_STRING);
+			sprintf(shdeletename,"%s",FTP_DELETEFILESHELLNAME_STRING);
 			break;
 		case SFTP_DOWNLOAD:
 			sprintf(shname,"%s",SFTP_GETDIRSHELLNAME_STRING);
@@ -228,9 +225,22 @@ int DownFile(ROUTE *route) {
 		}
 	}
 	GetProgramPath(apppath,POKA_HOME,DEF_INSTALL_PATH);
-	int i;
 
-	for (i = 0; i < ruleSize; i++) {
+	switch (route->servicecode)
+	{
+		case SERVER_CODE_2:
+			//sprintf(redir, "%s/%d/", route->remotedir, GetDateInterval(-1));
+			//廊坊银行获取atm crs文件专用
+			//return GetLFATM(rule,ruleSize,route,tempDir);
+		case SERVER_CODE_3:
+		default:
+			sprintf(redir, "%s/", route->remotedir);
+	}
+
+	int i;
+	FILE *stream;
+	for (i = 0; i < ruleSize; i++)
+	{
 		vLog("getting file from servicecode:%d[%d],%s  %s",route->servicecode,GetDateInterval(-1),redir,tempDir);
 		sprintf(getfilelist, "%s/%u_%d_%d.list", tempDir, (unsigned int) pthread_self(),
 				GetTimeInt(), i);
@@ -239,9 +249,53 @@ int DownFile(ROUTE *route) {
 				,route->port,tempDir,redir,route->user,route->password
 				,getfilelist,rule[i].fileextend,GetFtpModel(route));
 		system(CmdStr);
+
+		stream = fopen(getfilelist,ONLYREAD_ACCESS_STRING);
+		if(stream == NULL)
+		{
+			vLog("Open file[%s] error[%s]",getfilelist,strerror(errno));
+			continue;
+		}
+
+		char reFile[FILE_PATH_CHARNUM] = {0};
+		while(1)
+		{
+			memset(reFile,0x00,FILE_PATH_CHARNUM);
+			if(NULL == fgets(reFile,FILE_PATH_CHARNUM,stream))
+			{
+				break;
+			}
+			if(strlen(reFile)<=0)
+			{
+				break;
+			}
+
+			strtrim(reFile);
+
+			sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s 1 %s %s"
+			,apppath,SHELL_DIR,shgetfilename,route->ipaddr
+			,route->port,tempDir,redir,route->user,route->password
+			,reFile,GetFtpModel(route));
+			system(CmdStr);
+
+			sprintf(CmdStr,"%s/%s",tempDir,reFile);
+			if(access(CmdStr,0) == 0)
+			{//下载文件成功，准备删除服务器上本地文件
+				vLog("get file[%s] sucess",reFile);
+				sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s 1 %s %s"
+				,apppath,SHELL_DIR,shdeletename,route->ipaddr
+				,route->port,redir,route->user,route->password
+				,reFile,GetFtpModel(route));
+				system(CmdStr);
+			}else{
+				vLog("get file[%s] error[%s]",CmdStr,strerror(errno));
+			}
+		}
+		fclose(stream);
+		DelFileOrDir(1, getfilelist);
 		sprintf(temTarget, "%s/*", tempDir);
 		Move(temTarget, route->localdir);
-		DelFileOrDir(1, getfilelist);
+
 	}
 	DelFileOrDir(0, tempDir);
 

@@ -6,13 +6,12 @@ b=`date +%s`
 
 ip=$1
 port=$2
-ldir=$3
-rdir=$4
-user=$5
-pwd=$6
-list=$7
-filename=$8
-model=$9
+rdir=$3
+user=$4
+pwd=$5
+list=$6
+filename=$7
+model=$8
 
 logfile=ftp_${a}_${b}.log
 
@@ -23,8 +22,7 @@ prompt off
 user ${user} ${pwd}
 binary
 cd ${rdir}
-lcd ${ldir}
-get ${filename}
+delete ${filename}
 close
 bye
 "|ftp -v -n > ${logfile}
