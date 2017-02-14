@@ -27,7 +27,7 @@ static char *GetFtpModel(ROUTE *route);
 
 static char *GetFtpModel(ROUTE *route)
 {
-	if(route->model ==0){
+	if(route->model == 0){
 		return ACTIIVE;
 	}else{
 		return PASSIVE;

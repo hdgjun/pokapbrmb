@@ -319,7 +319,8 @@ void *HandleFileThread(void *pt) {
 	return (void *) 0;
 }
 
-void *SendFileThread() {
+void *SendFileThread()
+{
 
 	vLog("SendFileThread   start");
 
@@ -449,9 +450,11 @@ void *SendTask(void *sp)
 		return (void *) 0;
 	}
 	vLog("SUCESS route[id = %d] get interval [%d] iRet[%d] ", route.id, route.interval,iRet);
-	if(iRet == SUCESS){
+	if(iRet == SUCESS)
+	{
 
-		if(route.interval!=0){
+		if(route.interval!=0)
+		{
 			route.starttime = GetTimeInterval(route.interval);
 		}else{
 			route.lastdate = GetDateInt();
