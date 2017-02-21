@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 			if(i == 0)
 			{
 				/*±¦¼Îfsn×ª±ê×¼fsn*/
-				if(g_param.openTransfom !=0)
+				if(g_param.openTransfom != 0)
 				{
 					if(ESRCH == test_pthread(fsnfiletobase))
 					{
@@ -227,6 +227,11 @@ static int initpath()
 		return ERROR;
 	}
 	sprintf(temPath, "%s/%s/", g_param.FileStoreBasePath,g_param.ErrorDir);
+	if (JudgeSavePathExist(temPath) == ERROR) {
+		return ERROR;
+	}
+
+	sprintf(temPath, "%s/%s/", g_param.ImagePath,g_param.ImageDir);
 	if (JudgeSavePathExist(temPath) == ERROR) {
 		return ERROR;
 	}

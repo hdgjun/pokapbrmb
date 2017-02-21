@@ -202,26 +202,13 @@ begin
                           cycle';
     end if;
 
-    table_:='BUSINESSLIST_ATM_SEQ';
+    table_:='MONEYDATA_ATM_SEQ';
     select count(1) into num from user_sequences where sequence_name = upper(table_) ;
     if num = 0 then
         execute immediate 'create sequence  MONEYDATA_ATM_SEQ
                           minvalue 0
                           maxvalue 9999999999999999999999999999
                           start with 80
-                          increment by 1
-                          cache 20
-                          cycle';
-    end if;
-
-
-    table_:='DATECUT_SEQ';
-    select count(1) into num from user_sequences where sequence_name = upper(table_) ;
-    if num = 0 then
-        execute immediate 'create sequence  DATECUT_SEQ
-                          minvalue 0
-                          maxvalue 9999999999
-                          start with 20
                           increment by 1
                           cache 20
                           cycle';
@@ -303,7 +290,7 @@ begin
                             end;';
     end if;
     
-    table_:='ROUTERULE_TRIGGER';
+    table_:='ROUTE_TRIGGER';
     select count(1) into num from user_triggers where trigger_name = upper(table_) ;
     if num = 0 then
         execute immediate 'create or replace trigger ROUTE_TRIGGER
@@ -312,7 +299,7 @@ begin
                             row
                             begin
                                 select  DATECUT_SEQ.Nextval    into:new.ID from sys.dual;
-                            end';
+                            end;';
     end if;                        
 
     table_:='bundleinfo';

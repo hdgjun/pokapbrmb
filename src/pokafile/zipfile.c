@@ -76,14 +76,3 @@ int CheckDirEmpty(char *dir)
 	}
 	return iRet;
 }
-char *CompressFile(char *srcFile,char *zipFile)
-{
-	char cmd[MAX_STRING_SIZE] = {0};
-	sprintf(cmd,"%s -rj %s %s",ZIPCMD_STRING,zipFile,srcFile);
-	printf("CompressFile CompressStr:%s\n",zipFile);
-#ifdef DEBUG
-	vLog("CompressFile CompressStr:%s\n",zipFile);
-#endif
-	system(cmd);//÷¥––—πÀı√¸¡Ó
-	return zipFile;
-}

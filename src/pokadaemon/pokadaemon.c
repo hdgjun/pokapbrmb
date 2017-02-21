@@ -42,11 +42,19 @@ static int initlog();
 extern char G_LOGPATH[FILE_PATH_CHARNUM];
 char install[100]={0};
 
-int main() 
+int main(int argc, const char *argv[])
 { 
 	FILE *fp; 
 	time_t t; 
+	char tg[FILE_PATH_CHARNUM] = {0};
 
+    if(argc == 1)
+    {
+    	memcpy(tg,TARGET,strlen(TARGET));
+    }else{
+    	memcpy(tg,argv[1],strlen(argv[1]));
+    	strtrim(tg);
+    }
 	init_daemon();//³õÊ¼»¯ÎªDaemon 
 	initlog();
 
@@ -54,26 +62,26 @@ int main()
 	int iret;
 	while(1)
 	{ 		
-		if(SUCESS == JudgeProgramExist(0,TARGET))
+		if(SUCESS == JudgeProgramExist(0,tg))
 		{
-			vLog("Target program[%s] does not run!",TARGET);
+			vLog("Target program[%s] does not run!",tg);
 
 			char szBuf[1024] = {0};
-			sprintf(szBuf, "nohup %s/%s/%s &",install, BIN_DIR, TARGET);
+			sprintf(szBuf, "nohup %s/%s/%s &",install, BIN_DIR, tg);
 
 			int iExecSysRet = system(szBuf);
 			if(iExecSysRet == -1)
 			{
-				vLog("Target program[%s/%s] fail:%s",install,TARGET,strerror(errno));
+				vLog("Target program[%s/%s/%s] fail:%s",install,BIN_DIR,tg,strerror(errno));
 			}
 			else
 			{
-				vLog("Exec Target program[%s/%s] ok",install,TARGET);
+				vLog("Exec Target program[%s/%s/%s] ok",install,BIN_DIR,tg);
 			}
 		}
 		else
 		{
-			vLog("Target program[%s/%s] is running",install,TARGET);
+			vLog("Target program[%s/%s/%s] is running",install,BIN_DIR,tg);
 		}
 		sleep(TIME_SPACE);
 	} 

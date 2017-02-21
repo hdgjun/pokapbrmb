@@ -1,14 +1,12 @@
 TOPDIR=./../..
 
-#TARGET=myftp
-LIB=libpokaftp.a
+TARGET=pokaftp
 
-exclude_files=testftp.c
-
-INCPATH=$(TOPDIR)/include/
 LIBPATH=$(TOPDIR)/lib
-CFLAGS+= -I$(INCPATH)
+EXEPATH=$(TOPDIR)/bin
 
-#LDFLAGS= -L$(TOPDIR)/lib
+
+CFLAGS= -g  -I$(TOPDIR)/include/ 
+LDFLAGS+= -L$(TOPDIR)/lib -lpokalog  -lcommon -lpthread -lrt -lm
 
 include $(TOPDIR)/cfg/Makefile.mk

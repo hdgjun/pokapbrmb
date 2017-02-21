@@ -30,7 +30,7 @@ else
 SRCS:=$(wildcard *.c)
 $(warning  SRCS :$(SRCS))
 SRCS1:=$(filter-out $(exclude_files),$(SRCS))
-OBJS=$(SRCS:%.c=%.o)
+OBJS=$(SRCS1:%.c=%.o)
 endif
 
 $(warning  OBJS :$(OBJS))

@@ -9,8 +9,8 @@
 #define _POKAPBRMB_H_
 
 #define APP_NAME "pokapbrmb"
-#define APP_VERSION   "V2.1.20161220"
-#define POKA_HOME              "POKAHOME"
+#define APP_VERSION   "V2.1.20170216"
+#define POKA_HOME              "POKA_HOME"
 #define SHELL_DIR              "sbin"
 #define CFG_DIR                "cfg"
 #define LOGFOLDER_NAME		   "log"					//日志存储目录名

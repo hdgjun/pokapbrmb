@@ -1,0 +1,34 @@
+[
+		{
+		   "targetbank":"0204",
+		   "forwardbank":"0204",
+		   "ipaddr":"192.168.125.12",
+		   "port":"21",
+		   "user":"poka",
+		   "password":"123456",
+		   "localdir":"/home/poka/hdgjun/",
+		   "remotedir":"/home/poka/hdgjun1/",
+		   "type":"1",
+		   "servicecode":"0",
+		   "lastdate":"20160101",
+		   "starttime":"1",
+		   "inter_val":"100",
+		   "model":"0"
+		},
+		{
+		   "targetbank":"0204",
+		   "forwardbank":"0204",
+		   "ipaddr":"192.168.125.112",
+		   "port":"10001",
+		   "user":"poka",
+		   "password":"123456",
+		   "localdir":"/home/poka/hdgjun/",
+		   "remotedir":"/home/",
+		   "type":"1",
+		   "servicecode":"0",
+		   "lastdate":"20160101",
+		   "starttime":"1",
+		   "inter_val":"100",
+		   "model":"0"
+		}
+]

@@ -1,0 +1,5 @@
+1.新增pokaftp程序,用于ftp服务器传输文件。
+2.新增pokaftp使用的配置文件《route.ini》    (位于cfg目录)
+3.更新《编译说明.txt》
+4.更新《程序说明.txt》
+5.新增《route.ini.配置文件说明.txt》

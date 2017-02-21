@@ -132,7 +132,8 @@ typedef struct FTP_MESSAGE
 	char logname[200+1];
 	FTP_MODE model;
 }FTP_MESSAGE;
-
+void *CleanFileThread();
+char *CompressFile(char *srcFile,char *zipFile);
 int JudgeProgramExist(int flag,const char *appName);
 int test_pthread(pthread_t tid);
 void psleep(int timeOut);

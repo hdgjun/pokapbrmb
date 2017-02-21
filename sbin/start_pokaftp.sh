@@ -1,7 +1,7 @@
 #!/bin/sh
 
 daemonname=pokadaemon
-procname=pokapbrmb
+procname=pokaftp
 
 
 basepath=/home/poka/pokapbrmb/
@@ -20,7 +20,7 @@ case "$1" in
                 then "{daemonname} is running!"
                 else
                      cd ${POKA_HOME}/bin/
-                     nohup ${POKA_HOME}/bin/${daemonname} > /dev/null &  
+                     nohup ${POKA_HOME}/bin/${daemonname} ${procname} > /dev/null &  
                 fi
                
 		;;

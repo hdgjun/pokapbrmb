@@ -1,7 +1,11 @@
 TOPDIR=./..
 
-exclude_dirs=xpp pokaftp main
+exclude_dirs= xpp main
 
-TARGETDIRS=pokapbrmb pokadaemon
-
+ifeq ($(DBTYPE),NO_DB)
+exclude_dirs+= pokapbrmb pokadaemon db pokafile
+TARGETDIRS=pokaftp
+else
+TARGETDIRS=pokapbrmb pokadaemon pokaftp
+endif
 include $(TOPDIR)/cfg/Makefile.mk

@@ -433,15 +433,21 @@ void *SendTask(void *sp)
 
 	JudgeSavePathExist(route.localdir);
 
+	vLog("Get ROUTERULE[%d]",route.id);
+	ROUTERULE rule[MAX_RULE];
+	int ruleSize;
+	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
+	DbRouteRule(&rule, &ruleSize, route.id);
+
 	int iRet;
 	switch (route.type) {
 	case FTP_UPLOAD:
 	case SFTP_UPLOAD:
-		iRet = UploadFile(&route);
+		iRet = UploadFile(&route,&rule,ruleSize);
 		break;
 	case FTP_DOWNLOAD:
 	case SFTP_DOWNLOAD:
-		iRet = DownFile(&route);
+		iRet = DownFile(&route,&rule,ruleSize);
 		break;
 	default:
 		vLog("route[id = %d] get type [%d] error ", route.id, route.type);
@@ -713,4 +719,13 @@ char *GetErrorLocalDir(char *dir, const FILENAME *fn) {
 	memcpy(dir, temDir, strlen(temDir));
 	JudgeSavePathExist(temDir);
 	return dir;
+}
+
+int Start_service(ROUTE *route) {
+	route->status = S_START;
+	return DbRoute(DBS_UPDATE, route);
+}
+int Stop_service(ROUTE *route) {
+	route->status = S_STOP;
+	return DbRoute(DBS_UPDATE, route);
 }

@@ -22,6 +22,16 @@ static int CheckServer(int iFlag,const char *appName);
 static int IsServer(char *pszDir,const char *appName);
 
 
+char *CompressFile(char *srcFile,char *zipFile)
+{
+	char cmd[MAX_STRING_SIZE] = {0};
+	sprintf(cmd,"%s -rj %s %s",ZIPCMD_STRING,zipFile,srcFile);
+	printf("CompressFile CompressStr:%s\n",zipFile);
+	system(cmd);//÷¥––—πÀı√¸¡Ó
+	return zipFile;
+}
+
+
 char *GetProgramPath(char *path,const char *enName,const char *def)
 {
 	char *env = getenv(enName);

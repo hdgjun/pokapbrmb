@@ -34,7 +34,7 @@ static char *GetFtpModel(ROUTE *route)
 	}
 }
 
-int UploadFile(ROUTE *route)
+int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 {
 	DIR* p;
 	struct dirent* dirlist;
@@ -59,13 +59,13 @@ int UploadFile(ROUTE *route)
 	sprintf(tempDir, "%s/%u_%d", szFolderPath, (unsigned int) pthread_self(),
 			time);
 	JudgeSavePathExist(tempDir);
-
+#if 0
 	vLog("Get ROUTERULE[%d]",route->id);
 	ROUTERULE rule[MAX_RULE];
 	int ruleSize;
 	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
 	DbRouteRule(&rule, &ruleSize, route->id);
-
+#endif
 	char *fileType;
 	//int i, iRet;
 	int count = 0;
@@ -173,7 +173,7 @@ void RecoverDir(char *dir)
 	}
 	return;
 }
-int DownFile(ROUTE *route)
+int DownFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 {
 	char szFolderPath[FILE_PATH_CHARNUM] = { 0 };
 	char redir[FILE_PATH_CHARNUM] = { 0 };
@@ -193,18 +193,18 @@ int DownFile(ROUTE *route)
 	sprintf(tempDir, "%s/%u_%d", route->localdir, (unsigned int) pthread_self(),
 			time);
 	JudgeSavePathExist(tempDir);
-
+#if 0
 	ROUTERULE rule[MAX_RULE];
 	int ruleSize;
 	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
 	DbRouteRule(&rule, &ruleSize, route->id);
-
+#endif
 	if (ruleSize == 0)
 	{
 		ruleSize = 1;
 		//if(route->type == SFTP_DOWNLOAD)
 		//{
-			rule[0].fileextend[0]='1';
+			rule->fileextend[0]='1';
 		//}
 	}
 
@@ -247,7 +247,7 @@ int DownFile(ROUTE *route)
 		sprintf(CmdStr,"sh %s/%s/%s %s %s %s %s %s %s %s %s %s"
 				,apppath,SHELL_DIR,shname,route->ipaddr
 				,route->port,tempDir,redir,route->user,route->password
-				,getfilelist,rule[i].fileextend,GetFtpModel(route));
+				,getfilelist,(rule+i)->fileextend,GetFtpModel(route));
 		system(CmdStr);
 
 		stream = fopen(getfilelist,ONLYREAD_ACCESS_STRING);
@@ -341,7 +341,7 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
 			shname, route->ipaddr, route->port, dir, route->remotedir,
 			route->user, route->password, zFile, result,GetFtpModel(route));
-	system(cmd);
+	vLog("system result:%d",system(cmd));
 	vLog("uploag cmd:%s", cmd);
 	rp = fopen(result, ONLYREAD_ACCESS_STRING);
 	if (NULL == rp) {
@@ -416,12 +416,5 @@ static int CheckRule(ROUTERULE *rule, const int ruleSize, const char *fileType) 
 	return SUCESS;
 }
 
-int Start_service(ROUTE *route) {
-	route->status = S_START;
-	return DbRoute(DBS_UPDATE, route);
-}
-int Stop_service(ROUTE *route) {
-	route->status = S_STOP;
-	return DbRoute(DBS_UPDATE, route);
-}
+
 

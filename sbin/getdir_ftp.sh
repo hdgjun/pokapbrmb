@@ -17,13 +17,21 @@ model=$9
 logfile=ftp_${a}_${b}.log
 
 echo "open ${ip} ${port}
+
 passive off
+
 prompt off
+
 user ${user} ${pwd}
+
 binary
+
 cd ${rdir}
+
 ls *${filetype}
+
 close
+
 bye
 "|ftp -v -n > ${logfile}
 
