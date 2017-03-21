@@ -82,8 +82,10 @@ int DbRoute(int oprType, ROUTE *record)
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
 		case DBS_UPDATE1:
 			mysql_query(pcon,"UPDATE ROUTE SET STATUS_ = '1'  where STATUS_='0'");
-		return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",pcon);
-
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE1 ",pcon);
+		case DBS_UPDATE1:
+			mysql_query(pcon,"UPDATE ROUTE SET STARTTIME = 1  where STARTTIME > 230000 and (INTER_VAL is null or INTER_VAL = 0) ");
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE2 ",pcon);
 	}
 	return SUCESS;
 }

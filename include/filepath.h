@@ -1,6 +1,8 @@
 #ifndef _FILEPATH_H_
 #define _FILEPATH_H_
 
+#include <time.h>
+
 int JudgeSavePathExist(char *szFolderPath);
 char *strtrim(char *pstr);
 char *strtrimr(char *pstr);
@@ -18,4 +20,5 @@ int GetTimeInterval(int sec);
 int GetDateInterval(int sec);
 int npow(int n,int m);
 int htoi1(char *s);
+int getInterval(time_t oldt);
 #endif

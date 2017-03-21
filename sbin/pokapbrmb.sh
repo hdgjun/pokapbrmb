@@ -1,6 +1,6 @@
 #!/bin/sh
 
-daemonname=pokadaemon
+daemonname=pokadaemonpb
 procname=pokapbrmb
 
 

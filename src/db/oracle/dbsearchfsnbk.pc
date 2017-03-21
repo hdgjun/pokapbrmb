@@ -1,0 +1,83 @@
+/*
+ * dbsearchfsnbk.pc
+ *
+ *  Created on: 2017Äê3ÔÂ17ÈÕ
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbsearchfsnbk.h"
+
+int DbCheakFsnBk(int oprType,TSEARCHFSNBK *data,int *result)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	TSEARCHFSNBK tmp;
+	int co;
+	EXEC SQL END DECLARE SECTION;
+
+	if(!data)
+	{
+		return ERROR;
+	}
+	memset(&tmp,0x00,31);
+	memcpy(&tmp,data,sizeof(TSEARCHFSNBK));
+
+	switch(oprType)
+	{
+		case DBS_SELECT1:
+			EXEC SQL SELECT COUNT(1)
+			INTO :co
+			FROM SEARCHFSNBK
+			WHERE ORDERID=:tmp.orderId and BUNDLECODE = :tmp.bundleCode and TYPE=:tmp.type;
+			*result = co;
+			return JudgeSqlExecResultLocal(0,"DBS_SELECT1 COUNT(1) SEARCHFSNBK",&sqlca);
+		case DBS_SELECT2:
+			EXEC SQL SELECT COUNT(1)
+			INTO :co
+			FROM SEARCHFSNBK
+			WHERE ORDERID=:tmp.orderId;
+			*result = co;
+			return JudgeSqlExecResultLocal(0,"DBS_SELECT2 COUNT(1) SEARCHFSNBK",&sqlca);
+	}
+	return SUCESS;
+}
+int DbSearchFsnBk(int oprType, TSEARCHFSNBK *data)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	TSEARCHFSNBK tmp;
+	EXEC SQL END DECLARE SECTION;
+
+	if(data)
+	{
+		memset(&tmp,0x00,sizeof(TSEARCHFSNBK));
+		memcpy(&tmp,data,sizeof(TSEARCHFSNBK));
+	}
+
+	switch(oprType)
+	{
+	case DBS_DELETE:
+		EXEC SQL DELETE FROM SEARCHFSNBK WHERE ORDERID=:tmp.orderId;
+		return JudgeSqlExecResultLocal(0,"DELETE SEARCHFSNBK",&sqlca);
+	case DBS_INSERT:
+		EXEC SQL INSERT INTO
+		SEARCHFSNBK(
+			BUNDLECODE,
+			ORDERID,
+			TYPE)
+		VALUES(:tmp.bundleCode,
+			   :tmp.orderId,
+			   :tmp.type);
+		return JudgeSqlExecResultLocal(0,"INSERT SEARCHFSNBK",&sqlca);
+	}
+	return SUCESS;
+}

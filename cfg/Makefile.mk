@@ -43,7 +43,7 @@ $(warning  OBJS :$(OBJS))
 .c.o:
 	$(CC) -c $(CFLAGS) $(LDFLAGS) $^
 	
-all:$(TARGET)  $(LIB) subdirs  tagdirs
+all:$(TARGET) $(SUBTARGET)  $(LIB) subdirs  tagdirs 
 
 $(LIB):$(OBJS) 
 	$(AR)  $@  $^
@@ -53,6 +53,9 @@ $(LIB):$(OBJS)
 $(TARGET):$(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 	$(CP) $@ $(EXEPATH)
+
+$(SUBTARGET):
+	cp $(EXEPATH)/$(TARGET)  $(EXEPATH)/$(SUBTARGET)
 
 tagdirs:$(TARGETDIRS)
 	for dir in $(TARGETDIRS);\

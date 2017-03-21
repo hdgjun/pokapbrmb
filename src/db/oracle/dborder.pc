@@ -1,0 +1,111 @@
+#include "common.h"
+#include "db/db.h"
+#include "db/dborder.h"
+
+int DbTrsOrder(int oprType,char *orderid)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	if(orderid!=NULL)
+	{
+		memcpy(id,orderid,strlen(orderid));
+	}
+	switch (oprType)
+	{
+	   case DBS_CURSOR_OPEN:
+	   {
+			EXEC SQL PREPARE PREPARE_TRS_ORDER FROM "SELECT ORDERID FROM TRS_ORDER WHERE ORDERTYPE='1' AND SENDSTATE='1'";
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN TRS_ORDER PREPARE",&sqlca);
+			EXEC SQL DECLARE CURSOR_TRS_ORDER  CURSOR for PREPARE_TRS_ORDER;
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN TRS_ORDER DECLARE",&sqlca);
+			EXEC SQL OPEN CURSOR_TRS_ORDER;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH CURSOR_TRS_ORDER INTO :id;
+			if (abs(sqlca.sqlcode) == 1403)
+			{
+				return NODATA;
+			}
+			if (abs(sqlca.sqlcode) == 1405)
+			{
+				sqlca.sqlcode = SUCESS;
+			}
+			strtrim(id);
+
+			memcpy(orderid,id,strlen(id));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE CURSOR_TRS_ORDER;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE TRS_ORDER SET
+			SENDSTATE = 2
+			WHERE ORDERID =:id and ORDERTYPE=1;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE TRS_ORDER",&sqlca);
+	}
+	return SUCESS;
+}
+
+int DbTOrderInfo(int oprType,char *orderid)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	if(orderid!=NULL)
+	{
+		memcpy(id,orderid,strlen(orderid));
+	}
+	switch (oprType)
+	{
+	   case DBS_CURSOR_OPEN:
+	   {
+			EXEC SQL PREPARE PREPARE_T_ORDER_INFO FROM "SELECT ORDERID FROM T_ORDERINFO WHERE ORDERTYPE='1' AND SENDSTATE='1'";
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN T_ORDERINFO PREPARE",&sqlca);
+			EXEC SQL DECLARE CURSOR_T_ORDER_INFO  CURSOR for PREPARE_T_ORDER_INFO;
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN T_ORDERINFO DECLARE",&sqlca);
+			EXEC SQL OPEN CURSOR_T_ORDER_INFO;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH CURSOR_T_ORDER_INFO INTO :id;
+			if (abs(sqlca.sqlcode) == 1403)
+			{
+				return NODATA;
+			}
+			if (abs(sqlca.sqlcode) == 1405)
+			{
+				sqlca.sqlcode = SUCESS;
+			}
+			strtrim(id);
+
+			memcpy(orderid,id,strlen(id));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE CURSOR_T_ORDER_INFO;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE T_ORDERINFO SET
+			SENDSTATE = 2
+			WHERE ORDERID =:id and ORDERTYPE=1;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE TRS_ORDER",&sqlca);
+	}
+	return SUCESS;
+}

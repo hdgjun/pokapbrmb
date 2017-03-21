@@ -23,6 +23,8 @@ static int initDataBase();
 static int initThread();
 static void CreateVerText();
 
+
+static pthread_t searchfile;
 static pthread_t cutDate;
 static pthread_t taskfile;
 static pthread_t sendfile;
@@ -86,17 +88,22 @@ int main(int argc, char **argv)
 					updateMonrule();
 					vLog("updateMonrule() ok!");
 
-					/*将insertdir:fan_insert目录文件放入入库队列，等待入库处理*/
+					/*将insertdir:fsn_insert目录文件放入入库队列，等待入库处理*/
 					if (ESRCH == test_pthread(taskfile))
 					{
 						pthread_create(&taskfile, &attr,
 								ListDirThread, (void *)&taskfile);
 					}
-					/*文件分发线程*/
+					/*文件分发线程,扫描fsn_put,(商行)发送一份文件到fsn_insert,同时发送一份文件到fsn_sc_ins/人行银行号/ */
 					if(ESRCH == test_pthread(switchfile))
 					{
 						pthread_create(&switchfile, &attr,
 								SwitchFileThread, (void *)&switchfile);
+					}
+					if(g_param.OnlyPaytoPb != DEF_ONLY_PAY_PB)
+					{
+						pthread_create(&searchfile, &attr,
+								SearchFileThread, (void *)&searchfile);
 					}
 				}
 			}

@@ -225,6 +225,7 @@ int ReadFSNOrBKFileName(const char *szFileName, FILENAME *pfilename);
 int	WriteToSnoTable(FILENAME *fsnFile);
 void CheckDoubtMon(MONEYDATAR *rec);
 int CheckFSNRecode(FILERECORD *fileRecord);
+void *SearchFileThread(void *pt);
 void *ListDirThread(void *pt);
 void *SwitchFileThread(void *pt);
 void *HandleFileThread(void *pt);

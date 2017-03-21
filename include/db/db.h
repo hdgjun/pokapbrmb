@@ -92,9 +92,9 @@ int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,MYSQL *pcon);
 		sleep(10 * SLEEPTIME);\
 		SLEEPTIME++;\
 		SLEEPTIME = SLEEPTIME % 180;\
-	}\
+		}\
 	SLEEPTIME = 1;\
-	vLog("ThreadConnectDB:%d  ok");\
+
 
 int InitDb(char *path);
 int DestroyDb();

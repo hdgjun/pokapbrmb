@@ -88,7 +88,10 @@ int DbRoute(int oprType, ROUTE *record)
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",&sqlca);
 		case DBS_UPDATE1:
 		EXEC SQL UPDATE ROUTE SET STATUS_ = '1'  WHERE STATUS_= '0' OR STATUS_ IS NULL;
-		return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",&sqlca);
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE1 ",&sqlca);
+		case DBS_UPDATE2:
+		EXEC SQL UPDATE ROUTE SET STARTTIME = 1  WHERE STARTTIME > 230000  AND (INTER_VAL IS NULL OR INTER_VAL = 0) ;
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE2 ",&sqlca);
 	}
 	return SUCESS;
 }

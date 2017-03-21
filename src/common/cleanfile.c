@@ -29,7 +29,7 @@ void *CleanFileThread() {
 		vLog("***cmd[%s]", DelQcfStr);
 #endif
 		vLog("Delete log where date < %d", g_param.LogSaveDay);
-		system(DelQcfStr);
+		my_system(DelQcfStr);
 
 		if (g_param.SaveImage == DEF_IMAGE_SAVE)
 		{
@@ -41,7 +41,7 @@ void *CleanFileThread() {
 			vLog("***cmd[%s]", DelQcfStr);
 #endif
 			vLog("Delete image where date < %d", idate);
-			system(DelQcfStr);
+			my_system(DelQcfStr);
 		}
 #ifdef DEBUG
 		vLog(
@@ -55,7 +55,7 @@ void *CleanFileThread() {
 		vLog("***cmd[%s]", DelQcfStr);
 #endif
 		vLog("Delete files where date < %d", idate);
-		system(DelQcfStr);
+		my_system(DelQcfStr);
 #ifdef DEBUG
 		vLog(
 				"**************************************************************************************");

@@ -164,6 +164,41 @@ begin
       execute immediate 'create index  IX_SKJL_BUSINESSDATE on  SKJL (BUSINESSDATE)';
       execute immediate 'create index  IX_SKJL_ACCOUNTNO on  SKJL (ACCOUNTNO)';
     end if;
+    
+    table_:='KUNFILES';
+    select count(1) into num from user_tables where table_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create table  KUNFILES
+                          (
+                            BUNDLECODE  VARCHAR2(30),
+                            TYPE        VARCHAR2(8),
+                            PATH        VARCHAR2(256),
+                            NAME        VARCHAR2(100),
+                            INSERTDATE  DATE
+                          )
+                          partition by range(INSERTDATE) interval (NUMTOYMINTERVAL ( 1,''MONTH''))
+						  (
+						     partition k_mon_1 VALUES LESS THAN (to_date(''2016-11-1'',''YYYY-MM-DD''))
+						  )
+                          ';
+      execute immediate 'alter table KUNFILES
+		  add constraint key_KUNFILES primary key (BUNDLECODE, TYPE)';
+      execute immediate 'create index  IX_KUNFILES_IE on  KUNFILES (INSERTDATE)';
+    end if;
+    
+    table_:='SEARCHFSNBK';
+    select count(1) into num from user_tables where table_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create table  SEARCHFSNBK
+                          (
+                            ID          NUMBER(30) not null,
+                            BUNDLECODE  VARCHAR2(30),
+                            ORDERID     VARCHAR2(30),
+                            TYPE        VARCHAR2(8)
+                          )
+                          ';
+      execute immediate 'alter table  SEARCHFSNBK  add constraint IX_SEARCHFSNBK_ID primary key (ID)';
+    end if;
 
     table_:='ROUTERULE';
     select count(1) into num from user_tables where table_name = upper(table_) ;
@@ -177,6 +212,18 @@ begin
       execute immediate 'alter table  ROUTERULE  add constraint IX_ROUTERULE_ID primary key (ID)';
     end if;
     
+    
+    table_:='SEARCHFSNBK_SEQ';
+    select count(1) into num from user_sequences where sequence_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create sequence  SEARCHFSNBK_SEQ
+                            minvalue 0
+                            maxvalue 9999999999999999999999999999
+                            start with 140
+                            increment by 1
+                            cache 20
+                            cycle';
+    end if;
     
     table_:='BUSINESSLIST_ATM_SEQ';
     select count(1) into num from user_sequences where sequence_name = upper(table_) ;
@@ -224,6 +271,18 @@ begin
                           increment by 1
                           cache 20
                           cycle';
+    end if;
+    
+    table_:='SEARCHFSNBK_TRIGGER';
+    select count(1) into num from user_triggers where trigger_name = upper(table_) ;
+    if num = 0 then
+        execute immediate 'create or replace trigger SEARCHFSNBK_TRIGGER
+                            before insert on SEARCHFSNBK
+                            for each
+                            row
+                            begin
+                                  select  SEARCHFSNBK_SEQ.Nextval    into:new.ID from sys.dual;
+                            end;';
     end if;
  
     table_:='SKJL_TRIGGER';
@@ -304,14 +363,14 @@ begin
 
     table_:='bundleinfo';
     colum_:='id';
-    SELECT COUNT(1)INTO num from cols where table_name = upper(table_) and column_name = upper(colum_);
+    SELECT COUNT(1) INTO num from cols where table_name = upper(table_) and column_name = upper(colum_);
     IF num = 0 THEN
         execute immediate 'alter table bundleinfo add id varchar2(30)';
     END IF;
     
     table_:='monboxaddmon';
     colum_:='id';
-    SELECT COUNT(1)INTO num from cols where table_name = upper(table_) and column_name = upper(colum_);
+    SELECT COUNT(1) INTO num from cols where table_name = upper(table_) and column_name = upper(colum_);
     IF num = 0 THEN
         execute immediate 'alter table monboxaddmon add id varchar2(30)';
     END IF;

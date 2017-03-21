@@ -10,6 +10,7 @@
 #include "db/dbbusinesslistatm.h"
 #include "db/dbperinfo.h"
 #include "db/dbmoneydata.h"
+#include "db/dbkunfiles.h"
 #include "common.h"
 #include "monrule.h"
 
@@ -224,9 +225,29 @@ int MoveFSNFile(FILENAME *fn,int result)
 			GetSucInsLocalDir(dir,fn);
 			sprintf(fe.LocalDesBaseName,"%s",fn->df->fileName);
 			memcpy(fe.LocalDesFilePath,dir,strlen(dir));
+			char c = *(fn->PackageId+9);
+			if(isalpha(c))
+			{
+				TKUNFILES data;
+				memset(&data,0x00,sizeof(TKUNFILES));
+				memcpy(data.bundleCode,fn->PackageId,strlen(fn->PackageId));
+				memcpy(data.path,dir,strlen(dir));
+				memcpy(data.name,fn->df->fileName,strlen(fn->df->fileName));
+
+				if(fn->df->fileType == BK_FILE_TYPE)
+				{
+					sprintf(data.type,"%s",BK_FILE_STRING);
+				}else
+				{
+					sprintf(data.type,"%s",FSN_FILE_STRING);
+				}
+				DbKunFiles(DBS_INSERT,&data);
+				DbsCommit();
+			}
 			break;
 		case WARING:return result;
 	}
+
 	sprintf(fe.FileBaseName,"%s.%s",fn->df->fileName,START_FILE_STRING);
 	memcpy(fe.FilePth,fn->df->filePath,strlen(fn->df->filePath));
 	fe.isRemote = 0;
@@ -252,10 +273,16 @@ char *GetSucInsLocalDir(char *dir,const  FILENAME *fn)
 #endif
 	memcpy(agencyno,fn->AgencyNo,strlen(fn->AgencyNo));
 
-	if(fn->df->fileType == FSN_FILE_TYPE||fn->df->fileType == BK_FILE_TYPE){
-		memcpy(subId,fn->PackageId,10);
+	if(fn->df->fileType == FSN_FILE_TYPE||fn->df->fileType == BK_FILE_TYPE)
+	{
+		char c = *(fn->PackageId+9);
+		if(isalpha(c)){
+			sprintf(subId,"%s",PACKAGE_STRING);
+		}else{
+			memcpy(subId,fn->PackageId,10);
+		}
 		sprintf(temDir,"%s/%s/%s/%s/%s/%s/%s/",g_param.FileStoreBasePath,g_param.handleDir
-					,bankno,agencyno,newDate,subId,fn->PackageId);
+								,bankno,agencyno,newDate,subId,fn->PackageId);
 	}else{
 		sprintf(temDir,"%s/%s/%s/%s/%s/%s/",g_param.FileStoreBasePath,g_param.handleDir
 							,bankno,agencyno,newDate,fn->Percode);

@@ -9,6 +9,7 @@
 #define _COMMON_H_
 
 #include <pthread.h>
+#include "pokaqueue.h"
 
 #define SUCESS 	0
 #define WARING 	1
@@ -76,6 +77,7 @@
 #define	 ZIPCMD_STRING				"zip"					//zip压缩命令字符串
 
 #define  TIMEFILL_STRING			"XXXXXX"
+#define  PACKAGE_STRING             "package"
 
 #define  BANKNO_LEN 					4//银行号位数
 #define  AGENCYNO_LEN 					4//网点号位数
@@ -132,11 +134,15 @@ typedef struct FTP_MESSAGE
 	char logname[200+1];
 	FTP_MODE model;
 }FTP_MESSAGE;
+int my_system(const char * cmd);
 void *CleanFileThread();
-char *CompressFile(char *srcFile,char *zipFile);
+int CompressFile(char *srcFile,char *zipFile);
 int JudgeProgramExist(int flag,const char *appName);
 int test_pthread(pthread_t tid);
 void psleep(int timeOut);
 char *GetProgramPath(char *path,const char *enName,const char *def);
-
+int unZip(DataType *df);
+int CheckDirEmpty(char *dir);
+int CheckFileType(char *fileType);
+int CheckZipFIle(char *path,char *zfile,char *sfile,int size);
 #endif /* COMMON_H_ */

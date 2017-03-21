@@ -92,8 +92,13 @@ void *SwitchFileThread(void *pt)
 #ifdef PEOPLEBANK
 				GetBanknoAndAgencyno(dirlist->d_name, &fn);
 
-				if (CheckSortCenter(fn.BankNo)==SUCESS) {
+				if (CheckSortCenter(fn.BankNo)==SUCESS)
+				{
+#else
+				if(g_param.OnlyPaytoPb == DEF_ONLY_PAY_PB)
+				{
 #endif
+
 				/*[商行]文件发送到转发目录(SendFileDIr=fsn_sc_ins)下的人行子目录 */
 				/*[人行]清分中心文件分发到转发目录*/
 #ifndef PEOPLEBANK
@@ -107,11 +112,14 @@ void *SwitchFileThread(void *pt)
 				sprintf(CmdStr, "cp %s/%s %s/%s.%s", szFolderPath,
 						dirlist->d_name, temTarget, dirlist->d_name,
 						TMP_FILE_STRING);
-				printf("cmd string:%s\n", CmdStr);
 #ifdef DEBUG
+				printf("cmd string:%s\n", CmdStr);
+
 				vLog("cmd string:%s", CmdStr);
 #endif
-				system(CmdStr);
+
+				my_system(CmdStr);
+
 
 #ifndef PEOPLEBANK
 				memset(temName, 0x00, FILE_PATH_CHARNUM);
@@ -144,11 +152,12 @@ void *SwitchFileThread(void *pt)
 #ifdef DEBUG
 				vLog("cmd string:%s", CmdStr);
 #endif
-				system(CmdStr);
+				my_system(CmdStr);
 
-#ifdef PEOPLEBANK
 			}
-#endif
+
+				/*[商行][人行]文件发送到fsn_insert目录 */
+
 				sprintf(CmdStr, "mv %s/%s %s/%s/%s", szFolderPath,
 						dirlist->d_name, g_param.FileStoreBasePath,
 						g_param.InsertDir, dirlist->d_name);
@@ -156,7 +165,7 @@ void *SwitchFileThread(void *pt)
 #ifdef DEBUG
 				vLog("cmd string:%s", CmdStr);
 #endif
-				system(CmdStr);
+				my_system(CmdStr);
 			}
 		}
 		if (p != NULL) {
@@ -186,10 +195,6 @@ void *ListDirThread(void *pt)
 
 	sprintf(szFolderPath, "%s/%s/", g_param.FileStoreBasePath,g_param.InsertDir);
 
-#ifdef   DEBUG
-	vLog("ListDirThread:%s", szFolderPath);
-#endif
-
 	while (1) {
 		if (is_date_cut() == SUCESS) {
 			vLog("ListDirThread:sleep in datecut!");
@@ -198,7 +203,7 @@ void *ListDirThread(void *pt)
 		}
 
 #ifdef   DEBUG
-		vLog("ListDirThread  opendir");
+		vLog("ListDirThread  opendir:%s",szFolderPath);
 #endif
 		p = opendir(szFolderPath);
 		if (p == NULL) {
@@ -331,8 +336,11 @@ void *SendFileThread()
 
 	/*恢复初始状态*/
 	DbRoute(DBS_UPDATE1, NULL);
+	DbRoute(DBS_UPDATE2, NULL);
+	DbsCommit();
 
-	while (1) {
+	while (1)
+	{
 		ROUTE route;
 		ROUTE *ro;
 		unsigned int time = GetTimeInt();
@@ -358,9 +366,6 @@ void *SendFileThread()
 				vLog("DbRoute   DBS_FETCH NODATA [%d]",iRet);
 #endif
 				DbRoute(DBS_CLOSE, NULL);
-#ifdef DEBUG
-				vLog("DbRoute   DBS_CLOSE CURSOR ");
-#endif
 				break;
 			}
 
@@ -371,6 +376,7 @@ void *SendFileThread()
 
 	return (void *) 0;
 }
+
 void printRout(ROUTE *route )
 {
 	vLog("SendTask start:route->id[%d],route->ipaddr[%s],route->port[%s],route->user[%s]\
@@ -393,19 +399,24 @@ void *SendTask(void *sp)
 
 	printRout(&route);
 
-	if (ThreadConnectDB() != SUCESS) {
+	if (ThreadConnectDB() != SUCESS)
+	{
 		return (void *) ERROR;
 	}
 
 	Start_service(&route);
-	if (strlen(route.ipaddr) <= 0) {
+	if (strlen(route.ipaddr) <= 0)
+	{
 		vLog("route[%d]  ipaddr [%s] is null ", route.id, route.ipaddr);
 		Stop_service(&route);
 		DisconnectDB();
 		return (void *) ERROR;
 	}
 
-	if (strlen(route.localdir) <= 0 || access(route.localdir, 0) != 0) {
+	JudgeSavePathExist(route.localdir);
+
+	if (strlen(route.localdir) <= 0 || access(route.localdir, 0) != 0)
+	{
 		vLog("route[%d] can't access localdir [%s] ", route.id,
 				route.localdir);
 		Stop_service(&route);
@@ -413,10 +424,13 @@ void *SendTask(void *sp)
 		return (void *) ERROR;
 	}
 
-	if (strlen(route.forwardbank) > 0) {
+	if (strlen(route.forwardbank) > 0)
+	{
 		memcpy(fBank, route.forwardbank, strlen(route.forwardbank));
-	} else {
-		if (strlen(route.targetbank) > 0) {
+	} else
+	{
+		if (strlen(route.targetbank) > 0)
+		{
 			memcpy(fBank, route.targetbank, strlen(route.targetbank));
 		} else {
 			vLog("route[id = %d] get forwardbank error ", route.id);
@@ -425,13 +439,13 @@ void *SendTask(void *sp)
 			return (void *) ERROR;
 		}
 	}
-	if (strlen(route.targetbank) > 0) {
+	if (strlen(route.targetbank) > 0)
+	{
 		memcpy(tBank, route.targetbank, strlen(route.targetbank));
-	} else {
+	} else
+	{
 		memcpy(tBank, route.forwardbank, strlen(route.forwardbank));
 	}
-
-	JudgeSavePathExist(route.localdir);
 
 	vLog("Get ROUTERULE[%d]",route.id);
 	ROUTERULE rule[MAX_RULE];
@@ -440,20 +454,21 @@ void *SendTask(void *sp)
 	DbRouteRule(&rule, &ruleSize, route.id);
 
 	int iRet;
-	switch (route.type) {
-	case FTP_UPLOAD:
-	case SFTP_UPLOAD:
-		iRet = UploadFile(&route,&rule,ruleSize);
-		break;
-	case FTP_DOWNLOAD:
-	case SFTP_DOWNLOAD:
-		iRet = DownFile(&route,&rule,ruleSize);
-		break;
-	default:
-		vLog("route[id = %d] get type [%d] error ", route.id, route.type);
-		Stop_service(&route);
-		DisconnectDB();
-		return (void *) 0;
+	switch (route.type)
+	{
+		case FTP_UPLOAD:
+		case SFTP_UPLOAD:
+			iRet = UploadFile(&route,&rule,ruleSize);
+			break;
+		case FTP_DOWNLOAD:
+		case SFTP_DOWNLOAD:
+			iRet = DownFile(&route,&rule,ruleSize);
+			break;
+		default:
+			vLog("route[id = %d] get type [%d] error ", route.id, route.type);
+			Stop_service(&route);
+			DisconnectDB();
+			return (void *) 0;
 	}
 	vLog("SUCESS route[id = %d] get interval [%d] iRet[%d] ", route.id, route.interval,iRet);
 	if(iRet == SUCESS)
@@ -462,7 +477,12 @@ void *SendTask(void *sp)
 		if(route.interval!=0)
 		{
 			route.starttime = GetTimeInterval(route.interval);
-		}else{
+			if(route.starttime>230000)
+			{
+				route.starttime = 1;
+			}
+		}else
+		{
 			route.lastdate = GetDateInt();
 		}
 		vLog("SUCESS route[id = %d] get interval [%d]  ", route.id, route.interval);
@@ -474,7 +494,8 @@ void *SendTask(void *sp)
 	return (void *) 0;
 }
 
-int GetBanknoAndAgencyno(const char *szFileName, FILENAME *pfilename) {
+int GetBanknoAndAgencyno(const char *szFileName, FILENAME *pfilename)
+{
 	char strFileName[FILE_PATH_CHARNUM] = { 0 };
 	char *pLeftStr = NULL;
 	char *pReturn1;
@@ -552,31 +573,7 @@ void CoverFiles() {
 
 }
 
-int CheckFileType(char *fileType)
-{
-	if(fileType == NULL)return ERROR;
-	if (strstr(fileType, FSN_FILE_STRING) != 0) {
-		return FSN_FILE_TYPE;
-	} else if (strstr(fileType, ZIP_FILE_STRING) != 0) {
-		return ZIP_FILE_TYPE;
-	} else if (strstr(fileType, BF_FILE_STRING) != 0) {
-		return BF_FILE_TYPE;
-	} else if (strstr(fileType, BK_FILE_STRING) != 0) {
-		return BK_FILE_TYPE;
-	} else if (strstr(fileType, CT_FILE_STRING) != 0) {
-		return CT_FILE_TYPE;
-	} else if (strstr(fileType, START_FILE_STRING) != 0) {
-		return START_FILE_TYPE;
-	}else if (strstr(fileType, SK_FILE_STRING) != 0) {
-		return SK_FILE_TYPE;
-	}
-#ifndef  PEOPLEBANK
-	else if (strstr(fileType, DK_FILE_STRING) != 0) {
-		return DK_FILE_TYPE;
-	}
-#endif
-	return ERROR;
-}
+
 
 void CheckResult(DataType *df, int result)
 {
@@ -631,7 +628,7 @@ int MoveFiles(FILEMOVEINFO *pInfo)
 
 			memset(CmdStr,0x00,sizeof(CmdStr));
 			sprintf(CmdStr,"mv %s/%s %s%s.tmp",pInfo->FilePth,pInfo->FileBaseName,pInfo->FilePth,pInfo->FileBaseName);
-			if(system(CmdStr)!=0) {
+			if(my_system(CmdStr)!=0) {
 				return -1;
 			}
 			memset(CmdStr,0x00,sizeof(CmdStr));
@@ -643,7 +640,7 @@ int MoveFiles(FILEMOVEINFO *pInfo)
 			sprintf(g_LogWords, "cmd string:%s", CmdStr);
 			WriteLog(g_LogWords);
 
-			int iPutFileRet = system(CmdStr);	//调用shell脚本
+			int iPutFileRet = my_system(CmdStr);	//调用shell脚本
 			printf("----------->iPutFileRet:%d\n", iPutFileRet);
 			sprintf(g_LogWords, "iPutFileRet:%d", iPutFileRet);
 			WriteLog(g_LogWords);
@@ -654,7 +651,7 @@ int MoveFiles(FILEMOVEINFO *pInfo)
 			if (0 != iPutMoveFileRet) {
 				memset(CmdStr,0x00,sizeof(CmdStr));
 				sprintf(CmdStr,"mv %s/%s.tmp %s%s",pInfo->FilePth,pInfo->FileBaseName,pInfo->FilePth,pInfo->FileBaseName);
-				system(CmdStr);
+				my_system(CmdStr);
 				sprintf(g_LogWords, "remote move file:%s/%s err\n",pInfo->FilePth,pInfo->FileBaseName);
 				WriteLog(g_LogWords);
 				return -1;

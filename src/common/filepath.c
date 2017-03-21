@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+
 #include "switch.h"
 #include "common.h"
 #include "filepath.h"
@@ -43,7 +43,7 @@ int DelFileOrDir(unsigned int uiFileDirFlag,const char *szFileDirPath)
 			return ERROR;
 	}
 
-	iExecSysRet = system(strDelCmd);
+	iExecSysRet = my_system(strDelCmd);
 	if(iExecSysRet == -1)
 	{
 		printf("Delete %s fail:%s\n",szFileDirPath,strerror(errno));
@@ -62,7 +62,7 @@ int Move(const char *src,const char *des)
 	sprintf(cmd,"mv %s %s",src,des);
 
 	printf("upload_put_cmd:%s\n",cmd);
-	return system(cmd);
+	return my_system(cmd);
 }
 
 int GetTimeInterval(int sec)
@@ -77,6 +77,41 @@ int GetTimeInterval(int sec)
 			now.tm_min+1,
 			now.tm_sec);
 	return atoi(ti);
+}
+#if 0
+int getInterval(time_t *oldt)
+{
+	time_t ntime;
+	char strNow[12+1] = {0};
+	char strOld[12+1] = {0};
+
+	ntime = time(0);
+	struct tm tnow = {0};
+
+	localtime_r(&ntime,&tnow);
+	sprintf(strNow,"%4d%02d%02d%02d%02d%02d",1900+tnow.tm_year,
+			tnow.tm_mon+1,tnow.tm_mday,
+			tnow.tm_hour,tnow.tm_min,tnow.tm_sec);
+
+	struct tm told = {0};
+	localtime_r(oldt,&told);
+
+	sprintf(strOld,"%4d%02d%02d%02d%02d%02d",1900+told.tm_year,
+			told.tm_mon+1,told.tm_mday,
+			told.tm_hour,told.tm_min,told.tm_sec);
+	printf("old time[%s],cur time[%s]\n",strOld,strNow);
+	return atoi(strNow) - atoi(strOld);
+}
+#endif
+
+int getInterval(time_t oldt)
+{
+	time_t ntime;
+
+	ntime = time(0);
+
+	printf("old time[%d],cur time[%d]\n",oldt,ntime);
+	return ntime - oldt;
 }
 
 int GetDateInterval(int sec)
@@ -244,7 +279,7 @@ int JudgeSavePathExist(char *szFolderPath)
 	{
 		sprintf(sz, "%s%s", "mkdir -m 755 -p ", szFolderPath);
 		printf("sz = %s\n", sz);
-		return system(sz);
+		return my_system(sz);
 	}
 	else
 	{

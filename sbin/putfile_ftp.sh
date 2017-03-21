@@ -1,74 +1,116 @@
 #!/bin/bash
 
+ftpIp=$1
+ftpPort=$2
+localPath=$3
+ftpRemotePath=$4
+ftpUser=$5
+ftpPwd=$6
+fileName=$7
+result=$8
+model=$9
+
+
 a=`date +%s`
 
 b=`date +%s`
 
-ip=$1
-port=$2
-ldir=$3
-rdir=$4
-user=$5
-passwd=$6
-file=$7
-result=$8
-model=$9
-logfile=${ldir}/ftp_${a}_${b}.log
+logfile=$localPath/ftp_${a}_${b}.log
 
 echo "error" > ${result}
 
-echo "
-open ${ip} ${port}  
+expect <<!
 
-passive ${model}  
+set timeout 60
 
-prompt off   
+log_file $logfile
 
-user ${user} ${passwd}   
+spawn -noecho ftp -i $ftpIp $ftpPort
 
-binary
-   
-mdir ${rdir}   
+expect { 
+timeout {exit 1}
+"onnection refused" {exit 1}
+"ervice not available" {exit 1}
+"*ame"
+}
 
-pwd 
- 
-cd ${rdir} 
+send "$ftpUser\r"
 
-pwd 
- 
-lcd ${ldir} 
+expect {
+timeout  {exit 1}
+"*assword:"
+}
 
-put ${file} ${file}.tmp 
+send "$ftpPwd\r"
 
-rename ${file}.tmp ${file}
- 
-close 
+expect {
+timeout {exit 1}
+"*assword" {exit 1}
+"ogin failed" {exit 1}
+"ftp>"
+}
 
-bye 
-" |ftp -v -n > ${logfile}
+send "binary\r"
 
-str=`cat ${logfile}|grep Windows_NT`
+#设定lcd,cd
+expect "ftp>"
 
+send "lcd $localPath\r"
+
+expect "ftp>"
+
+send "cd $ftpRemotePath\r"
+
+expect {
+timeout {exit 1}
+"ftp>"
+}
+
+send "delete $fileName\r"
+
+expect {
+timeout {exit 1}
+"ftp>"
+}
+
+send "delete ${fileName}.tmp\r"
+
+expect {
+timeout {exit 1}
+"ftp>"
+}
+#上传文件
+send "put $fileName  ${fileName}.tmp\r"
+
+expect {
+timeout {exit 1}
+"ailed to open file" {exit 1}
+"ftp>"
+}
+
+send "rename ${fileName}.tmp $fileName\r"
+
+expect {
+timeout {exit 1}
+"ailed to open file" {exit 1}
+"ftp>"
+}
+
+send "close\r"
+
+expect "ftp>"
+
+send "bye\r"
+interact
+expect eof
+!
+
+str=`cat ${logfile}|grep 100%`
 if [ -z "$str" ]
 then
-    echo "unix"            
-    cotr=`cat ${logfile}|grep '150 Ok to send data'`
-    if [ -z "$cotr" ]
-    then
-         echo "error" > ${result}
-    else
-         echo "sucess" > ${result}
-
-    fi
+       echo "error" > ${result}
 else
-    cotr=`cat ${logfile}|grep '226 Transfer complete'`
-    if [ -z "$cotr" ]
-    then
-         echo "error" > ${result}
-    else
-         echo "sucess" > ${result} 
-     
-    fi
+      echo "sucess" > ${result};
 fi
 
-rm  ${logfile}
+rm $logfile

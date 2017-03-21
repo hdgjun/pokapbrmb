@@ -16,19 +16,184 @@
 #include <signal.h>
 #include "switch.h"
 #include "common.h"
-
+#include "pokafile.h"
 
 static int CheckServer(int iFlag,const char *appName);
 static int IsServer(char *pszDir,const char *appName);
 
 
-char *CompressFile(char *srcFile,char *zipFile)
+int my_system(const char * cmd)
+{
+	FILE * fp;
+	int res;
+	char buf[2048];
+
+	if (cmd == NULL)
+	{
+		printf("my_system cmd is NULL!\n");
+		return ERROR;
+	}
+	if ((fp = popen(cmd, "r") ) == NULL)
+	{
+		perror("popen");
+		printf("popen error: %s/n", strerror(errno));
+		return ERROR;
+	}
+	else
+	{
+		while(fgets(buf, sizeof(buf), fp))
+		{
+			printf("%s", buf);
+		}
+		if ( (res = pclose(fp)) == -1)
+		{
+			printf("close popen file pointer fp error!\n"); return res;
+		}
+		else if (res == 0)
+		{
+			return res;
+		}
+		else
+		{
+			printf("popen res is :%d\n", res); return res;
+		}
+	}
+}
+
+int CheckFileType(char *fileType)
+{
+	if(fileType == NULL)return ERROR;
+	if (strstr(fileType, FSN_FILE_STRING) != 0) {
+		return FSN_FILE_TYPE;
+	} else if (strstr(fileType, ZIP_FILE_STRING) != 0) {
+		return ZIP_FILE_TYPE;
+	} else if (strstr(fileType, BF_FILE_STRING) != 0) {
+		return BF_FILE_TYPE;
+	} else if (strstr(fileType, BK_FILE_STRING) != 0) {
+		return BK_FILE_TYPE;
+	} else if (strstr(fileType, CT_FILE_STRING) != 0) {
+		return CT_FILE_TYPE;
+	} else if (strstr(fileType, START_FILE_STRING) != 0) {
+		return START_FILE_TYPE;
+	}else if (strstr(fileType, SK_FILE_STRING) != 0) {
+		return SK_FILE_TYPE;
+	}
+#ifndef  PEOPLEBANK
+	else if (strstr(fileType, DK_FILE_STRING) != 0) {
+		return DK_FILE_TYPE;
+	}
+#endif
+	return ERROR;
+}
+
+int unZip(DataType *df)
+{
+	char cmd[MAX_STRING_SIZE] = {0};
+	char udir[CUR_STRING_SIZE] = {0};
+	char srcfile[CUR_STRING_SIZE] = {0};
+	int iRet = SUCESS;
+
+	sprintf(udir,"%s/%s_%s/", df->filePath,df->fileName,START_FILE_STRING);
+	sprintf(srcfile,"%s/%s", df->filePath,df->fileName);
+	sprintf(cmd, "unzip -o %s -d %s", srcfile,udir);
+
+	my_system(cmd);
+	if(access(udir,0)!=0)
+	{
+		return ERROR;
+	}
+	memset(cmd,0x00,MAX_STRING_SIZE);
+	sprintf(cmd, "mv %s/* %s", udir,df->filePath);
+	my_system(cmd);
+	if(CheckDirEmpty(udir) == ERROR)
+	{
+		iRet = ERROR;
+	}
+	memset(cmd,0x00,MAX_STRING_SIZE);
+	sprintf(cmd, "rm -rf %s/", udir);
+	my_system(cmd);
+
+    if(iRet == SUCESS)
+    {
+		memset(cmd,0x00,MAX_STRING_SIZE);
+		sprintf(cmd, "rm -rf %s", srcfile);
+		my_system(cmd);
+    }
+
+	return iRet;
+}
+
+int CheckDirEmpty(char *dir)
+{
+	DIR* p;
+	struct dirent* dirlist;
+	struct stat filestat;
+	char indir[FILE_PATH_CHARNUM] = { 0 };
+	p = opendir(dir);
+	if (p == NULL) {
+		return SUCESS;
+	}
+	int iRet = SUCESS;
+	while ((dirlist = readdir(p)) != NULL) {
+		sprintf(indir, "%s/%s", dir, dirlist->d_name);
+		stat(indir, &filestat);
+		if (S_ISREG(filestat.st_mode)) {
+			if (p != NULL) {
+				closedir(p);
+				p = NULL;
+			}
+			return ERROR;
+		}
+	}
+	if (p != NULL) {
+		closedir(p);
+		p = NULL;
+	}
+	return iRet;
+}
+int CheckZipFIle(char *path,char *zfile,char *sfile,int size)
+{
+	char cmd[MAX_STRING_SIZE] = {0};
+	char udir[CUR_STRING_SIZE] = {0};
+	char srcfile[CUR_STRING_SIZE] = {0};
+	char srczipfile[CUR_STRING_SIZE] = {0};
+	struct stat filestat;
+	int iRet = SUCESS;
+
+	int time = GetTimeInt();
+
+	sprintf(udir,"%s/%u_%d/", path,(unsigned int) pthread_self(),time);
+	sprintf(srczipfile,"%s/%s", path,zfile);
+	sprintf(cmd, "unzip -o %s -d %s", srczipfile,udir);
+	my_system(cmd);
+
+	if(access(udir,0)!=0)
+	{
+		return ERROR;
+	}
+
+	sprintf(srcfile,"%s/%s",udir,sfile);
+
+	stat(srcfile, &filestat);
+	int cusize = filestat.st_size;
+
+	memset(cmd,0x00,MAX_STRING_SIZE);
+	sprintf(cmd, "rm -rf %s/", udir);
+	my_system(cmd);
+
+	if(cusize == size)
+	{
+		return SUCESS;
+	}else{
+		return ERROR;
+	}
+}
+int CompressFile(char *srcFile,char *zipFile)
 {
 	char cmd[MAX_STRING_SIZE] = {0};
 	sprintf(cmd,"%s -rj %s %s",ZIPCMD_STRING,zipFile,srcFile);
-	printf("CompressFile CompressStr:%s\n",zipFile);
-	system(cmd);//÷¥––—πÀı√¸¡Ó
-	return zipFile;
+	printf("CompressFile CompressStr:%s\n",cmd);
+	return my_system(cmd);
 }
 
 

@@ -1,0 +1,160 @@
+#include "common.h"
+#include "db/db.h"
+#include "db/dbtbundle.h"
+
+int DbTRSBundleByOrder(cir_queue_t *q, char *order)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char ord[30+1];
+	char bundle[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	char *resu;
+	if(!order)
+	{
+		return ERROR;
+	}
+
+	if(!q)
+	{
+		init_cir_queue(q);
+	}
+
+	sprintf(strSql,"SELECT BUNDLECODE FROM TRS_BUNDLE WHERE ORDERID=%s ",order);
+	EXEC SQL PREPARE PREPARE_TRS_BUNDLE FROM :strSql;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"TRS_BUNDLE PREPARE",&sqlca);
+	EXEC SQL DECLARE CURSOR_TRS_BUNDLE CURSOR for PREPARE_TRS_BUNDLE;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"TRS_BUNDLE DECLARE",&sqlca);
+	EXEC SQL OPEN CURSOR_TRS_BUNDLE;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"OPEN TRS_BUNDLE",&sqlca);
+
+	while(1)
+	{
+		EXEC SQL FETCH CURSOR_TRS_BUNDLE INTO :bundle;
+		if (abs(sqlca.sqlcode) == 1403)
+		{
+			break;
+		}
+		if (abs(sqlca.sqlcode) == 1405)
+		{
+			break;
+		}
+		strtrim(bundle);
+		resu = (char *)malloc(strlen(bundle)+1);
+		memset(resu,0x00,strlen(bundle)+1);
+		memcpy(resu,bundle,strlen(bundle));
+		push_cir_queue(q, resu);
+	}
+	EXEC SQL CLOSE CURSOR_TRS_BUNDLE;
+	return SUCESS;
+}
+int DbTRSBundleGetCount(int *cSize, char *order)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	int co;
+	EXEC SQL END DECLARE SECTION;
+
+	if(!order)
+	{
+		return ERROR;
+	}
+	memset(id,0x00,31);
+	memcpy(id,order,strlen(order));
+
+	EXEC SQL SELECT COUNT(1)
+	INTO :co
+	FROM TRS_BUNDLE
+	WHERE ORDERID=:id;
+    *cSize = co;
+	return JudgeSqlExecResultLocal(0,"SELECT COUNT(DISTINCE BUNDLECODE) TRS_BUNDLE",&sqlca);
+}
+
+
+int DbTBundleByOrder(cir_queue_t *q, char *order)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char ord[30+1];
+	char bundle[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	char *resu;
+	if(!order)
+	{
+		return ERROR;
+	}
+
+	if(!q)
+	{
+		init_cir_queue(q);
+	}
+
+	sprintf(strSql,"SELECT BUNDLECODE FROM TMP_BUNDLES WHERE ORDERID=%s ",order);
+	EXEC SQL PREPARE PREPARE_TMP_BUNDLE FROM :strSql;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"TMP_BUNDLES PREPARE",&sqlca);
+	EXEC SQL DECLARE CURSOR_TMP_BUNDLE CURSOR for PREPARE_TMP_BUNDLE;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"TMP_BUNDLES DECLARE",&sqlca);
+	EXEC SQL OPEN CURSOR_TMP_BUNDLE;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"OPEN TMP_BUNDLES",&sqlca);
+
+	while(1)
+	{
+		EXEC SQL FETCH CURSOR_TMP_BUNDLE INTO :bundle;
+		if (abs(sqlca.sqlcode) == 1403)
+		{
+			break;
+		}
+		if (abs(sqlca.sqlcode) == 1405)
+		{
+			break;
+		}
+		strtrim(bundle);
+		resu = (char *)malloc(strlen(bundle)+1);
+		memset(resu,0x00,strlen(bundle)+1);
+		memcpy(resu,bundle,strlen(bundle));
+		push_cir_queue(q, resu);
+	}
+	EXEC SQL CLOSE CURSOR_TMP_BUNDLE;
+	return SUCESS;
+}
+int DbTBundleGetCount(int *cSize, char *order)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	int co;
+	EXEC SQL END DECLARE SECTION;
+
+	if(!order)
+	{
+		return ERROR;
+	}
+	memset(id,0x00,31);
+	memcpy(id,order,strlen(order));
+
+	EXEC SQL SELECT COUNT(1)
+	INTO :co
+	FROM TMP_BUNDLE
+	WHERE ORDERID=:id;
+    *cSize = co;
+	return JudgeSqlExecResultLocal(0,"SELECT COUNT(DISTINCE BUNDLECODE) TMP_BUNDLES",&sqlca);
+}

@@ -393,11 +393,12 @@ static void *sendThread()
 					continue;
 				}
 				Start_ftp_service(ro);
+				//SendTaskThread((void *) (ro));
 				pthread_create(&service, &attr, SendTaskThread, (void *) (ro));
 			}
 
 		}
-		sleep(60);
+		sleep(10);
 	}
 
 	return (void *) 0;
@@ -413,12 +414,15 @@ void *SendTaskThread(void *sp)
 	printRout(route);
 
 	Start_ftp_service(route);
+
 	if (strlen(route->ipaddr) <= 0)
 	{
 		vLog("route[%d]  ipaddr [%s] is null ", route->id, route->ipaddr);
 		Stop_ftp_service(route);
 		return (void *) ERROR;
 	}
+
+	JudgeSavePathExist(route->localdir);
 
 	if (strlen(route->localdir) <= 0 || access(route->localdir, 0) != 0) {
 		vLog("route[%d] can't access localdir [%s] ", route->id,
@@ -443,8 +447,6 @@ void *SendTaskThread(void *sp)
 	} else {
 		memcpy(tBank, route->forwardbank, strlen(route->forwardbank));
 	}
-
-	JudgeSavePathExist(route->localdir);
 
 	vLog("Get ROUTERULE[%d]",route->id);
 	ROUTERULE rule[MAX_RULE];
@@ -475,6 +477,9 @@ void *SendTaskThread(void *sp)
 		if(route->interval!=0)
 		{
 			route->starttime = GetTimeInterval(route->interval);
+			if(route->starttime>230000){
+				route->starttime = 1;
+			}
 		}else{
 			route->lastdate = GetDateInt();
 		}

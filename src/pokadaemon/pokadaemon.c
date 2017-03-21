@@ -69,7 +69,7 @@ int main(int argc, const char *argv[])
 			char szBuf[1024] = {0};
 			sprintf(szBuf, "nohup %s/%s/%s &",install, BIN_DIR, tg);
 
-			int iExecSysRet = system(szBuf);
+			int iExecSysRet = my_system(szBuf);
 			if(iExecSysRet == -1)
 			{
 				vLog("Target program[%s/%s/%s] fail:%s",install,BIN_DIR,tg,strerror(errno));

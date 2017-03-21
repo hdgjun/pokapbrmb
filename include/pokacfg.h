@@ -12,7 +12,7 @@
 #define  DATE_START                 1
 #define  DATE_END                   0
 
-
+#define  DEF_ONLY_PAY_PB            0                 /*默认发送所有文件到人行，仅商行端使用的配置项*/
 #define  DEF_LOG_SAVE_DAY           30                /*默认日志保存天数*/
 #define  DEF_FILE_SAVE_DAY          90                /*默认文件保存天数*/
 #define  DEF_IMAGE_SAVE_DAY         90                /*默认图片保存天数*/
@@ -61,6 +61,7 @@
 #define  TRANSFORM_DIR_KEY           "transformdir"
 #define  TRANSFORM_FIN_DIR_KEY       "transformfindir"
 #define  OPEN_TRANSFORM__KEY         "opentransform"
+#define  ONLY_PAY_PB_KEY             "onlypaytopb"
 //参数结构体
 typedef struct t_Param
 {
@@ -89,6 +90,7 @@ typedef struct t_Param
 	int  ThreadSize;
 	int  SleepTime;
 	int  SaveImage;
+	int  OnlyPaytoPb;
 }Param,*pParam;
 
 Param g_param;

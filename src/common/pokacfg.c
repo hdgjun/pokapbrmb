@@ -81,6 +81,7 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 	param->SaveImage = -1;
 	param->openTransfom = -1;
     param->ThreadSize = -1;
+    param->OnlyPaytoPb = -1;
 	for (i = 0; i <= PARAM_NUM; i++) {
 
 		if (strcmp(szKey[i], DBUSER_KEY) == 0) {
@@ -198,12 +199,13 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 			strcpy(param->transformFinDir,szValue[i]);
 			continue;
 		}
-#if 0
-		if(strcmp(szKey[i],LOCALNEEDSAVEIMAGE_STRING) == 0)
+
+		if(strcmp(szKey[i],ONLY_PAY_PB_KEY) == 0)
 		{
-			strcpy(param->LocalNeedSaveSnoImage,szValue[i]);
+			param->OnlyPaytoPb = atoi(szValue[i]);
 			continue;
 		}
+#if 0
 		if(strcmp(szKey[i],HAVESORTCENTER_STRING) == 0)
 		{
 			strcpy(param->HaveSortCenter,szValue[i]);
@@ -427,6 +429,9 @@ void UseDefaultValue(Param *param) {
 	}
 	if (strlen(param->transformFinDir) <= 0) {
 		strcpy(param->transformFinDir, DEF_TRANSFORM_FIN_DIR);
+	}
+	if (param->OnlyPaytoPb < 0) {
+		param->OnlyPaytoPb = DEF_ONLY_PAY_PB;
 	}
 }
 //ÅÐ¶Ï²ÎÊý

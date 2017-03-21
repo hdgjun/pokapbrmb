@@ -21,7 +21,13 @@
 #define ACTIIVE "off"
 
 static int CheckRule(ROUTERULE *rule, const int ruleSize, const char *fileType);
+
+#if 0
 static int Upload(const char *dir, const ROUTE *route, int batch);
+#endif
+
+static int Upload(const char *dir, const ROUTE *route, char *file,int batch);
+
 static int StroeFiles(const char *dir, const ROUTE *route);
 static char *GetFtpModel(ROUTE *route);
 
@@ -34,6 +40,126 @@ static char *GetFtpModel(ROUTE *route)
 	}
 }
 
+int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
+{
+	DIR* p;
+	struct dirent* dirlist;
+	struct stat filestat;
+	char szFolderPath[FILE_PATH_CHARNUM] = { 0 };
+	char indir[FILE_PATH_CHARNUM] = { 0 };
+	char temTarget[FILE_PATH_CHARNUM] = { 0 };
+	char CmdStr[FILE_PATH_CHARNUM] = { 0 };
+	char tempDir[FILE_PATH_CHARNUM] = { 0 };
+	char zpath[FILE_PATH_CHARNUM] = { 0 };
+	char zname[FILE_PATH_CHARNUM] = { 0 };
+
+	sprintf(szFolderPath, "%s", route->localdir);
+	p = opendir(szFolderPath);
+	if (p == NULL) {
+		printf("SwitchFile_Thread Open dir %s fail:%s\n", szFolderPath,
+				strerror(errno));
+		vLog("SwitchFile_Thread Open dir %s fail:%s", szFolderPath,
+				strerror(errno));
+		return ERROR;
+	}
+	int time = GetTimeInt();
+	sprintf(tempDir, "%s/%u_%d", szFolderPath, (unsigned int) pthread_self(),
+			time);
+	JudgeSavePathExist(tempDir);
+
+	char *fileType;
+
+	vLog("starting upload dir:%s", route->localdir);
+	int batch = 0;
+	int iRet;
+	while ((dirlist = readdir(p)) != NULL)
+	{
+		sprintf(indir, "%s/%s", szFolderPath, dirlist->d_name);
+		stat(indir, &filestat);
+		if (S_ISREG(filestat.st_mode)) {
+			iRet = getInterval(filestat.st_mtime);
+			if(iRet < 60)
+			{
+				vLog("file modify time[%d]",iRet);
+				continue;
+			}
+			fileType = strrchr(dirlist->d_name, '.');
+			if (CheckRule(rule, ruleSize, fileType) == ERROR)
+			{
+				continue;
+			}
+
+			if(CheckFileType(fileType) == ZIP_FILE_TYPE)
+			{
+				sprintf(CmdStr, "mv %s %s/%s.tmp", indir, tempDir, dirlist->d_name);
+				my_system(CmdStr);
+				sprintf(CmdStr, "mv %s/%s.tmp %s/%s", tempDir, dirlist->d_name, tempDir, dirlist->d_name);
+				my_system(CmdStr);
+			}else{
+				memset(zpath,0x00,sizeof(zpath));
+				memset(zname,0x00,sizeof(zname));
+				sprintf(zname,"%s.zip.tmp",dirlist->d_name);
+				sprintf(zpath,"%s.zip.tmp",indir);
+				CompressFile(indir, zpath);
+				if(CheckZipFIle(szFolderPath,zname, dirlist->d_name,filestat.st_size)==SUCESS)
+				{//生成zip成功
+					DelFileOrDir(1, indir);
+					sprintf(CmdStr, "mv %s.zip.tmp %s.zip", indir, indir);
+					my_system(CmdStr);
+				}else
+				{//生成zip失败
+					DelFileOrDir(1, zname);
+				}
+				continue;
+			}
+			batch++;
+			if (Upload(tempDir, route, dirlist->d_name,batch) == ERROR)
+			{
+				if (p != NULL)
+				{
+					closedir(p);
+					p = NULL;
+				}
+				sprintf(temTarget, "%s/*", tempDir);
+				Move(temTarget, szFolderPath);
+				vLog("Upload error ,delete dir:%s", tempDir);
+				DelFileOrDir(0, tempDir);
+				return ERROR;
+			} else
+			{
+				StroeFiles(tempDir, route);
+			}
+
+		}else
+		{
+			if((strstr(dirlist->d_name,"_")!=0)&&(strstr(tempDir,dirlist->d_name))==0)
+			{
+				vLog("error dir [%s] ",dirlist->d_name);
+				sprintf(temTarget, "%s/%s/ftp*.log", szFolderPath,dirlist->d_name);
+				DelFileOrDir(1, temTarget);
+				sprintf(temTarget, "%s/%s/*.result", szFolderPath,dirlist->d_name);
+				DelFileOrDir(1, temTarget);
+				sprintf(temTarget, "%s/%s/*", szFolderPath,dirlist->d_name);
+				Move(temTarget, szFolderPath);
+				vLog("Upload error ,delete dir:%s", temTarget);
+				sprintf(temTarget, "%s/%s/", szFolderPath,dirlist->d_name);
+				DelFileOrDir(0, temTarget);
+			}
+		}
+
+	}
+
+	DelFileOrDir(0, tempDir);
+	if (p != NULL)
+	{
+		closedir(p);
+		p = NULL;
+	}
+
+	return SUCESS;
+}
+
+#if 0
 int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 {
 	DIR* p;
@@ -59,13 +185,7 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 	sprintf(tempDir, "%s/%u_%d", szFolderPath, (unsigned int) pthread_self(),
 			time);
 	JudgeSavePathExist(tempDir);
-#if 0
-	vLog("Get ROUTERULE[%d]",route->id);
-	ROUTERULE rule[MAX_RULE];
-	int ruleSize;
-	memset(&rule, 0x00, sizeof(ROUTERULE) * MAX_RULE);
-	DbRouteRule(&rule, &ruleSize, route->id);
-#endif
+
 	char *fileType;
 	//int i, iRet;
 	int count = 0;
@@ -76,18 +196,44 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 		stat(indir, &filestat);
 		if (S_ISREG(filestat.st_mode)) {
 			fileType = strrchr(dirlist->d_name, '.');
-			if (CheckRule(rule, ruleSize, fileType) == ERROR) {
+			if (CheckRule(rule, ruleSize, fileType) == ERROR)
+			{
+				continue;
+			}if(CheckFileType(fileType)==START_FILE_TYPE)
+			{
+				char oldname[MAX_STRING_SIZE] = {0};
+				char newname[MAX_STRING_SIZE] = {0};
+				char temname[MAX_STRING_SIZE] = {0};
+				memcpy(temname,dirlist->d_name,strlen(dirlist->d_name) - strlen(fileType));
+				sprintf(newname, "%s/%s", szFolderPath, temname);
+				sprintf(oldname, "%s/%s", szFolderPath, dirlist->d_name);
+				rename(oldname, newname);
+				continue;
+			}
+			if(strstr(dirlist->d_name,"PACK_")!= 0)
+			{
+				sprintf(CmdStr, "mv %s/%s %s/%s.%s", szFolderPath,dirlist->d_name,
+				szFolderPath,dirlist->d_name,START_FILE_STRING);
+				my_system(CmdStr);
+				DataType df;
+				memset(&df,0x00,sizeof(df));
+				memcpy(df.fileName,dirlist->d_name,strlen(dirlist->d_name));
+				memcpy(df.filePath,szFolderPath,strlen(szFolderPath));
+				unZip(&df);
 				continue;
 			}
 			sprintf(CmdStr, "mv %s %s/%s", indir, tempDir, dirlist->d_name);
-			system(CmdStr);
+			my_system(CmdStr);
 			count++;
 
-			if (count == 20) {
+			if (count == 1)
+			{
 				count = 0;
 				/*分批压缩上传*/
-				if (Upload(tempDir, route, batch) == ERROR) {
-					if (p != NULL) {
+				if (Upload(tempDir, route, batch) == ERROR)
+				{
+					if (p != NULL)
+					{
 						closedir(p);
 						p = NULL;
 					}
@@ -96,15 +242,22 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 					vLog("Upload error ,delete dir:%s", tempDir);
 					DelFileOrDir(0, tempDir);
 					return ERROR;
-				} else {
-					batch++;
+				} else
+				{
+					batch =(++batch)%1000;
 					StroeFiles(tempDir, route);
 				}
 			}
-		}else{
-			if((strstr(dirlist->d_name,"_")!=0)&&(strstr(tempDir,dirlist->d_name))==0){
+		}else
+		{
+			if((strstr(dirlist->d_name,"_")!=0)&&(strstr(tempDir,dirlist->d_name))==0)
+			{
 				vLog("error dir [%s] ",dirlist->d_name);
 				sprintf(temTarget, "%s/%s/PACK_*", szFolderPath,dirlist->d_name);
+				DelFileOrDir(1, temTarget);
+				sprintf(temTarget, "%s/%s/*.log", szFolderPath,dirlist->d_name);
+				DelFileOrDir(1, temTarget);
+				sprintf(temTarget, "%s/%s/*.result", szFolderPath,dirlist->d_name);
 				DelFileOrDir(1, temTarget);
 				sprintf(temTarget, "%s/%s/*", szFolderPath,dirlist->d_name);
 				Move(temTarget, szFolderPath);
@@ -115,9 +268,12 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 		}
 
 	}
-	if (count != 0) {
-		if (Upload(tempDir, route, batch) == ERROR) {
-			if (p != NULL) {
+	if (count != 0)
+	{
+		if (Upload(tempDir, route, batch) == ERROR)
+		{
+			if (p != NULL)
+			{
 				closedir(p);
 				p = NULL;
 			}
@@ -125,19 +281,22 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 			Move(temTarget, szFolderPath);
 			DelFileOrDir(0, tempDir);
 			return ERROR;
-		} else {
+		} else
+		{
 			StroeFiles(tempDir, route);
 		}
 	}
 
 	DelFileOrDir(0, tempDir);
-	if (p != NULL) {
+	if (p != NULL)
+	{
 		closedir(p);
 		p = NULL;
 	}
 
 	return SUCESS;
 }
+#endif
 
 void RecoverDir(char *dir)
 {
@@ -248,7 +407,7 @@ int DownFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 				,apppath,SHELL_DIR,shname,route->ipaddr
 				,route->port,tempDir,redir,route->user,route->password
 				,getfilelist,(rule+i)->fileextend,GetFtpModel(route));
-		system(CmdStr);
+		my_system(CmdStr);
 
 		stream = fopen(getfilelist,ONLYREAD_ACCESS_STRING);
 		if(stream == NULL)
@@ -276,7 +435,7 @@ int DownFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 			,apppath,SHELL_DIR,shgetfilename,route->ipaddr
 			,route->port,tempDir,redir,route->user,route->password
 			,reFile,GetFtpModel(route));
-			system(CmdStr);
+			my_system(CmdStr);
 
 			sprintf(CmdStr,"%s/%s",tempDir,reFile);
 			if(access(CmdStr,0) == 0)
@@ -286,7 +445,7 @@ int DownFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 				,apppath,SHELL_DIR,shdeletename,route->ipaddr
 				,route->port,redir,route->user,route->password
 				,reFile,GetFtpModel(route));
-				system(CmdStr);
+				my_system(CmdStr);
 			}else{
 				vLog("get file[%s] error[%s]",CmdStr,strerror(errno));
 			}
@@ -301,8 +460,8 @@ int DownFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 
 	return SUCESS;
 }
-
-static int Upload(const char *dir, const ROUTE *route, int batch) {
+static int Upload(const char *dir, const ROUTE *route, char *file,int batch)
+{
 	char zFile[FILE_PATH_CHARNUM] = { 0 };
 	char zpath[FILE_PATH_CHARNUM] = { 0 };
 	char files[FILE_PATH_CHARNUM] = { 0 };
@@ -316,12 +475,9 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 
 	int time = GetTimeInt();
 
-	sprintf(zFile, "PACK_%u_%d_%d.zip", (unsigned int) pthread_self(), time, batch);
-	sprintf(zpath, "%s/%s", dir, zFile);
-	sprintf(files, "%s/*", dir);
-	CompressFile(files, zpath);
-	sprintf(result, "%s/%u_%d_%d.result", dir, (unsigned int) pthread_self(),
-			time, batch);
+	sprintf(zFile, "%s", file);
+
+	sprintf(result, "%s/%u_%d_%d.result", dir, (unsigned int) pthread_self(),time,batch);
 
 	switch(route->type)
 	{
@@ -341,8 +497,10 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
 			shname, route->ipaddr, route->port, dir, route->remotedir,
 			route->user, route->password, zFile, result,GetFtpModel(route));
-	vLog("system result:%d",system(cmd));
+	vLog("system result:%d",my_system(cmd));
 	vLog("uploag cmd:%s", cmd);
+
+
 	rp = fopen(result, ONLYREAD_ACCESS_STRING);
 	if (NULL == rp) {
 		DelFileOrDir(1, zpath);
@@ -367,6 +525,77 @@ static int Upload(const char *dir, const ROUTE *route, int batch) {
 	DelFileOrDir(1, zpath);
 	return iRet;
 }
+#if 0
+static int Upload(const char *dir, const ROUTE *route, int batch) {
+	char zFile[FILE_PATH_CHARNUM] = { 0 };
+	char zpath[FILE_PATH_CHARNUM] = { 0 };
+	char files[FILE_PATH_CHARNUM] = { 0 };
+	char cmd[FILE_PATH_CHARNUM * 10] = { 0 };
+	char apppath[FILE_PATH_CHARNUM] = { 0 };
+	char result[FILE_PATH_CHARNUM] = { 0 };
+	char shname[FILE_PATH_CHARNUM] = { 0 };
+	FILE *rp = NULL;
+
+	GetProgramPath(apppath,POKA_HOME,DEF_INSTALL_PATH);
+
+	int time = GetTimeInt();
+
+	sprintf(zFile, "PACK_%u_%d_%d.zip", (unsigned int) pthread_self(), time, batch);
+	sprintf(zpath, "%s/%s", dir, zFile);
+	sprintf(files, "%s/*", dir);
+	vLog("CompressFile[%s][%s]:%d",files,zpath,CompressFile(files, zpath));
+	sprintf(result, "%s/%u_%d_%d.result", dir, (unsigned int) pthread_self(),
+			time, batch);
+    sleep(1);
+
+
+	switch(route->type)
+	{
+		case FTP_UPLOAD:
+			sprintf(shname,"%s",FTP_PUTSHELLNAME_STRING);
+			break;
+		case SFTP_UPLOAD:
+			sprintf(shname,"%s",SFTP_PUTSHELLNAME_STRING);
+			break;
+		default:
+		{
+			vLog("route[%d] type[%d] not in (ftp(0|1) | sftp(3|4)) error",route->id,route->type);
+			return ERROR;
+		}
+	}
+	
+	sprintf(cmd, "sh %s/%s/%s %s %s %s %s %s %s %s %s %s ", apppath, SHELL_DIR,
+			shname, route->ipaddr, route->port, dir, route->remotedir,
+			route->user, route->password, zFile, result,GetFtpModel(route));
+	vLog("system result:%d",my_system(cmd));
+	vLog("uploag cmd:%s", cmd);
+
+
+	rp = fopen(result, ONLYREAD_ACCESS_STRING);
+	if (NULL == rp) {
+		DelFileOrDir(1, zpath);
+		vLog("Open resule file:%s error");
+		return ERROR;
+	}
+
+	char readbuf[FILE_PATH_CHARNUM] = { 0 };
+	unsigned int ireadsize = 0;
+	ireadsize = fread(readbuf, sizeof(char), FILE_PATH_CHARNUM, rp);
+
+	fclose(rp);
+	rp = NULL;
+	vLog("result %s :%s", result, readbuf);
+	int iRet;
+	if (strstr(readbuf, FTP_SUCESS) != 0) {
+		iRet = SUCESS;
+	} else {
+		iRet = ERROR;
+	}
+	DelFileOrDir(1, result);
+	DelFileOrDir(1, zpath);
+	return iRet;
+}
+#endif
 
 static int StroeFiles(const char *dir, const ROUTE *route) {
 	DIR* p;
@@ -392,6 +621,10 @@ static int StroeFiles(const char *dir, const ROUTE *route) {
 			sprintf(desDir, "%s/%s", desName, dirlist->d_name);
 			Move(indir, desDir);
 		}
+	}
+	if(p){
+		closedir(p);
+		p = NULL;
 	}
 	return SUCESS;
 }

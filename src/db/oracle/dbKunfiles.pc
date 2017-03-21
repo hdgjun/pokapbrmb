@@ -1,0 +1,66 @@
+/*
+ * dbKunfiles.pc
+ *
+ *  Created on: 2017Äê3ÔÂ17ÈÕ
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbkunfiles.h"
+
+int DbKunFiles(int oprType,TKUNFILES *data)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	TKUNFILES tmp;
+	int co = 0;
+	EXEC SQL END DECLARE SECTION;
+
+	int iRet;
+	if(data)
+	{
+		memset(&tmp,0x00,sizeof(TKUNFILES));
+		memcpy(&tmp,data,sizeof(TKUNFILES));
+	}
+	switch(oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL SELECT COUNT(1) INTO :co FROM KUNFILES
+			WHERE BUNDLECODE =:tmp.bundleCode
+			AND  TYPE=:tmp.type;
+
+			iRet = JudgeSqlExecResultLocal(0,"SELECT COUNT KUNFILES",&sqlca);
+			if(iRet != SUCESS)
+			{
+				return iRet;
+			}
+			if(co == 0)
+			{
+				EXEC SQL INSERT INTO KUNFILES
+				(
+					BUNDLECODE,
+					TYPE,
+					PATH,
+					NAME,
+					INSERTDATE
+				)
+				VALUES(:tmp.bundleCode,:tmp.type,:tmp.path,:tmp.name,SYSDATE);
+			}else
+			{
+				EXEC SQL UPDATE KUNFILES SET PATH=:tmp.path
+				WHERE BUNDLECODE =:tmp.bundleCode AND TYPE=:tmp.type;;
+			}
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT KUNFILES ",&sqlca);
+		case DBS_SELECT:
+			EXEC SQL SELECT PATH,NAME INTO :tmp.path ,:tmp.name FROM KUNFILES
+			WHERE BUNDLECODE =:tmp.bundleCode
+			AND  TYPE=:tmp.type;
+			memcpy(data,&tmp,sizeof(TKUNFILES));
+			return JudgeSqlExecResultLocal(0,"DBS_SELECT KUNFILES ",&sqlca);
+	}
+	return SUCESS;
+}
