@@ -13,12 +13,12 @@ typedef struct T_BagInfo
 {
 	char BagCode[20+1];					//袋标签
 	char BankId[20+1];					//银行号
-	char BagDate[20];		//装袋时间
+	char BagDate[20+1];		//装袋时间
 	char BagBagId[25];					//装袋员
 	char BagCheckId[20+1];				//装袋复核员
 	char BundleCode[30+1];				//捆标签
-	char BundleDate[20];	//打捆时间
-	char InsertDate[20];
+	char BundleDate[20+1];	//打捆时间
+	char InsertDate[20+1];
 	char Writestatus;
 	char Putstatus;
 	char FileName[60+1];

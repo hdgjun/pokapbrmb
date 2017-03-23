@@ -75,7 +75,7 @@ int DbTOrderInfo(int oprType,char *orderid)
 	{
 	   case DBS_CURSOR_OPEN:
 	   {
-			EXEC SQL PREPARE PREPARE_T_ORDER_INFO FROM "SELECT ORDERID FROM T_ORDERINFO WHERE ORDERTYPE='1' AND SENDSTATE='1'";
+			EXEC SQL PREPARE PREPARE_T_ORDER_INFO FROM "SELECT ORDERID FROM T_ORDERINFO WHERE ORDERTYPE='1' AND STATE='1'";
 			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN T_ORDERINFO PREPARE",&sqlca);
 			EXEC SQL DECLARE CURSOR_T_ORDER_INFO  CURSOR for PREPARE_T_ORDER_INFO;
 			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN T_ORDERINFO DECLARE",&sqlca);
@@ -103,7 +103,7 @@ int DbTOrderInfo(int oprType,char *orderid)
 			return SUCESS;
 		case DBS_UPDATE:
 			EXEC SQL UPDATE T_ORDERINFO SET
-			SENDSTATE = 2
+			STATE = 2
 			WHERE ORDERID =:id and ORDERTYPE=1;
 			return JudgeSqlExecResultLocal(0,"DBS_UPDATE TRS_ORDER",&sqlca);
 	}

@@ -39,9 +39,12 @@ int DbSKJL(int oprType, DBSKJL *record)
 				tmpData.businessdate,
 				"yyyy-mm-dd hh24:mi:ss",
 				tmpData.accountno);
-			vLogErrReal(__FILE__, __func__, __LINE__, MESSAGE,"sql[%s]",strSql);
 			EXEC SQL EXECUTE IMMEDIATE :strSql;
 		return JudgeSqlExecResultLocal(0,"DBS_INSERT DbSKJL ",&sqlca);
+
+		case DBS_DELETE:
+			EXEC SQL DELETE FROM SKJL WHERE INSERTDATE < to_date(:tmpData.insertdate,'yyyymmdd');
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE SKJL",&sqlca);
 	}
    return SUCESS;
 }

@@ -56,6 +56,10 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 				);
 
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+
+		case DBS_DELETE:
+			EXEC SQL DELETE FROM BAGINFO WHERE INSERTDATE < to_date(:tmpData.InsertDate,'yyyymmdd');
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE BAGINFO",&sqlca);
 	}
 	return SUCESS;
 }

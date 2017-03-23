@@ -12,7 +12,8 @@
 #define  DATE_START                 1
 #define  DATE_END                   0
 
-#define  DEF_ONLY_PAY_PB            0                 /*默认发送所有文件到人行，仅商行端使用的配置项*/
+#define  DEF_DB_SAVE_DAY            100               /*数据库中数据保存天数，默认为100天*/
+#define  DEF_ONLY_PAY_PB            1                 /*默认仅发送交款调拨文件到人行，仅商行端使用的配置项*/
 #define  DEF_LOG_SAVE_DAY           30                /*默认日志保存天数*/
 #define  DEF_FILE_SAVE_DAY          90                /*默认文件保存天数*/
 #define  DEF_IMAGE_SAVE_DAY         90                /*默认图片保存天数*/
@@ -62,6 +63,7 @@
 #define  TRANSFORM_FIN_DIR_KEY       "transformfindir"
 #define  OPEN_TRANSFORM__KEY         "opentransform"
 #define  ONLY_PAY_PB_KEY             "onlypaytopb"
+#define  DB_SAVE_DAY_KEY             "dbsaveday"
 //参数结构体
 typedef struct t_Param
 {
@@ -91,6 +93,7 @@ typedef struct t_Param
 	int  SleepTime;
 	int  SaveImage;
 	int  OnlyPaytoPb;
+	int  DbSaveDay;
 }Param,*pParam;
 
 Param g_param;

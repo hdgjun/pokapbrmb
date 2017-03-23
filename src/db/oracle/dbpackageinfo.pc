@@ -48,6 +48,9 @@ int DbPackageinfo(int oprType, DBPACKAGEINFO *fileRecord)
 				 );
 
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+		case DBS_DELETE:
+			 EXEC SQL DELETE FROM PACKAGEINFO WHERE INSERTDATE < to_date(:tmpData.insertdate,'yyyymmdd');
+			 return JudgeSqlExecResultLocal(0,"DBS_DELETE PACKAGEINFO",&sqlca);
 	}
 	return SUCESS;
 }

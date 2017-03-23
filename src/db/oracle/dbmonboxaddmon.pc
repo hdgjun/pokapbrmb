@@ -55,6 +55,9 @@ int DbMonboxaddmon(int oprType, MONBOXADDMON *record)
 #endif
 		EXEC SQL EXECUTE IMMEDIATE :strSql;
 		return JudgeSqlExecResultLocal(0,"DBS_INSERT DbMonboxaddmon ",&sqlca);
+		case DBS_DELETE:
+		EXEC SQL DELETE FROM MONBOXADDMON WHERE OPERTIME < to_date(:tmpData.opertime,'yyyymmdd');
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE MONBOXADDMON",&sqlca);
 	}
 	return SUCESS;
 }

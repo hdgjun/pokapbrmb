@@ -82,6 +82,7 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 	param->openTransfom = -1;
     param->ThreadSize = -1;
     param->OnlyPaytoPb = -1;
+    param->DbSaveDay = -1;
 	for (i = 0; i <= PARAM_NUM; i++) {
 
 		if (strcmp(szKey[i], DBUSER_KEY) == 0) {
@@ -205,12 +206,13 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 			param->OnlyPaytoPb = atoi(szValue[i]);
 			continue;
 		}
-#if 0
-		if(strcmp(szKey[i],HAVESORTCENTER_STRING) == 0)
+
+		if(strcmp(szKey[i],DB_SAVE_DAY_KEY) == 0)
 		{
-			strcpy(param->HaveSortCenter,szValue[i]);
+			param->DbSaveDay = atoi(szValue[i]);
 			continue;
 		}
+#if 0
 		if(strcmp(szKey[i],SORTCENTERNO_STRING) == 0)
 		{
 			strcpy(param->SortCenterNo,szValue[i]);
@@ -433,6 +435,10 @@ void UseDefaultValue(Param *param) {
 	if (param->OnlyPaytoPb < 0) {
 		param->OnlyPaytoPb = DEF_ONLY_PAY_PB;
 	}
+	if (param->DbSaveDay < 0) {
+		param->DbSaveDay = DEF_DB_SAVE_DAY;
+	}
+
 }
 //ÅÐ¶Ï²ÎÊý
 void JudgeParam(Param *param) {

@@ -65,6 +65,11 @@ int DbBundleinfo(int oprType, BUNDLEINFO *record)
 #endif
 			mysql_query(pcon, strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
+
+		case DBS_DELETE:
+		sprintf(strSql,"DELETE FROM BUNDLEINFO WHERE ADDMONTIME <str_to_date('%s','%s')",tmpData.addmontime,"%Y-%m-%d %H:%i:%s";
+		mysql_query(pcon, strSql);
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE ",pcon);
 	}
 	return SUCESS;
 }

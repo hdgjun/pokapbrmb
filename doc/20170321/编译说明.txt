@@ -1,0 +1,53 @@
+1.编译mysql版本程序pokapbrmb�?
+                vi $POKA_HOME/makefile
+                                                  注释     'DBTYPE=NO_DB'
+                                                 注释     'DBTYPE=DB_ORACLE'
+		                         定义      'DBTYPE=DB_MYSQL'      
+		       
+		        vi $POKA_HOME/cfg/Makefile.db
+		                       检�?LID_MSQL'�?IN_MSQL'设置的路径是否正�?注意64位机器使用lib64)    
+		                       
+2.编译oracle版本程序pokapbrmb�?
+                vi $POKA_HOME/makefile
+				 注释     'DBTYPE=NO_DB'
+                                                 注释     'DBTYPE=DB_MYSQL'
+		                         定义      'DBTYPE=DB_ORACLE'      
+		          
+  执行             env|grep ORACLE_HOME
+ 如果没有显示任何信息:
+  vi /etc/profile 
+写入 
+      export ORACLE_BASE=/opt/oracle
+      export ORACLE_HOME=$ORACLE_BASE/product/10gR1/db
+      export PATH=$ORACLE_HOME/bin:$PATH
+      export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+保存/etc/profile
+
+执行命令: 
+	source /etc/profile 
+		      
+		                       
+		                       
+3.商行版本pokapbrmb�?
+ 		 vi $POKA_HOME/makefile
+                            注释     'export BANKTYPE=PEOPLEBANK'                      	                                   
+		   
+4.人行版本pokapbrmb�?
+ 		 vi $POKA_HOME/makefile
+                            定义     'export BANKTYPE=PEOPLEBANK' 				
+
+5.vi $POKA_HOME/makefile  
+ 注释 export DEBUG=DEBUG     可以少打日志
+
+6.pokaftp编译�?
+a.当编译oracle或mysql版本pokapbrmb时会在bin目录自动编译pokaftp程序
+b.当服务器没有安装oracle或mysql时，须单独编译pokaftp:
+				vi $POKA_HOME/makefile
+                                                 定义  'DBTYPE=NO_DB'
+                                                 注释     'DBTYPE=DB_ORACLE'
+		                         注释      'DBTYPE=DB_MYSQL'  
+
+
+
+
+

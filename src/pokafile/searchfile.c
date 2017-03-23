@@ -218,6 +218,7 @@ int GetFile(TSEARCHFSNBK *file)
 	sprintf(tmpc,"cp %s/%s %s",data.path,data.name,path1);
 	my_system(tmpc);
 
+	vLog(tmpc);
 	if(access(path1,0) == 0)
 	{
 		sprintf(tmpc,"mv %s %s",path1,path2);

@@ -22,7 +22,7 @@ typedef struct t_Dbskjl
 	char percode[30+1];
 	char businessdate[19+1];
 	char accountno[30+1];
-    char insertdate[19+1];
+    char insertdate[20+1];
 }DBSKJL, *pSkjl;
 
 int DbSKJL(int oprType, DBSKJL *record);

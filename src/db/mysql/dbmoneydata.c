@@ -54,6 +54,11 @@ int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
 				);
 			 mysql_query(pcon, strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
+
+		case DBS_DELETE:
+			sprintf(strSql,"DELETE FROM MONEYDATA WHERE OPERDATE <str_to_date('%s','%s')",tmpData.operdate,"%Y-%m-%d %H:%i:%s";
+			mysql_query(pcon, strSql);
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE ",pcon);
 	}
    return SUCESS;
 }
@@ -100,6 +105,12 @@ int DbsDoubtMoneydata(int oprType,MONEYDATAR *fileRecord)
 				);
 			 mysql_query(pcon, strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
+
+		case DBS_DELETE:
+			sprintf(strSql,"DELETE FROM DOUBTMONEYDATA WHERE OPERDATE <str_to_date('%s','%s')",tmpData.operdate,"%Y-%m-%d %H:%i:%s";
+			mysql_query(pcon, strSql);
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE ",pcon);
+
 	}
    return SUCESS;
 }

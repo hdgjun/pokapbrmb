@@ -1,0 +1,39 @@
+/**************************************************route.ini参数说明**********************************************************************************************/
+route.ini文件格式如下：
+[
+		{
+		   "targetbank":"0204",
+		   "forwardbank":"0204",
+		   "ipaddr":"192.168.125.12",
+		   "port":"21",
+		   "user":"poka",
+		   "password":"123456",
+		   "localdir":"/home/poka/hdgjun/",
+		   "remotedir":"/home/poka/hdgjun1/",
+		   "type":"0",
+		   "servicecode":"0",
+		   "lastdate":"20160101",
+		   "starttime":"1",
+		   "inter_val":"100",
+		   "model":"0"
+		},{
+		   "targetbank":"0204",
+		   "forwardbank":"0204",
+		   "ipaddr":"192.168.125.12",
+		   "port":"21",
+		   "user":"poka",
+		   "password":"123456",
+		   "localdir":"/home/poka/hdgjun/",
+		   "remotedir":"/home/poka/hdgjun1/",
+		   "type":"0",
+		   "servicecode":"0",
+		   "lastdate":"20160101",
+		   "starttime":"1",
+		   "inter_val":"100",
+		   "model":"0"
+		}
+]
+
+上面例子配置了两条路由信息，{}之间是一条完整的路由信息，路由信息之间使用","分隔；注意  []  不能少。
+
+路由信息的字段与路由表基本相同，参考《路由配置说明.txt》

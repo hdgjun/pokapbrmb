@@ -26,7 +26,7 @@
 #include "pokalog.h"
 
 #define APP_NAME 				"pokadeamon"
-#define APP_VERSION   			"V2.1.20161220"
+#define APP_VERSION   			"V2.1.20170321"
 #define TARGET                  "pokapbrmb"
 #define POKA_HOME              	"POKAHOME"
 #define SHELL_DIR              	"sbin"

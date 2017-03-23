@@ -37,6 +37,10 @@ int DbSKJL(int oprType, DBSKJL *record)
 				tmpData.accountno);
 			 mysql_query(pcon, strSql);
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
+		case DBS_DELETE:
+			sprintf(strSql,"DELETE FROM SKJL WHERE INSERTDATE <str_to_date('%s','%s')",tmpData.insertdate,"%Y-%m-%d %H:%i:%s";
+			mysql_query(pcon, strSql);
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE ",pcon);
 	}
    return SUCESS;
 }

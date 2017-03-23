@@ -377,3 +377,43 @@ begin
 
 end;
 /
+
+CREATE OR REPLACE Procedure DELETE_MONEYDATA_PARTITION(
+v_max_date         in varchar2)is
+  v_cur_name varchar2(20);
+  v_name varchar2(20);
+  v_date_str varchar2(200);
+  
+  v_date date;
+  v_sqlexec            VARCHAR2(2000); --DDL”Ôæ‰±‰¡ø
+  cursor cur_utp is
+    select *
+    from (select   utp.partition_name,
+                   utp.high_value,
+                   utp.partition_position
+              from user_tab_partitions utp
+             where utp.table_name = 'MONEYDATA'
+             order by utp.partition_position desc
+            ) utp;     
+begin
+     for utp in cur_utp loop
+         v_cur_name := utp.partition_name;
+         v_date_str := substr(utp.high_value,11,10);
+         v_date := to_date(v_date_str,'YYYY-MM-DD');
+         v_date_str := to_char(v_date,'YYYYMMDD');
+   
+         if (v_date_str<v_max_date) then
+            
+            v_sqlexec := 'ALTER TABLE MONEYDATA DROP PARTITION '||v_cur_name;
+            dbms_output.put_line('v_sqlexec:='||v_sqlexec);
+            DBMS_Utility.Exec_DDL_Statement(v_SqlExec);
+         end if;
+     end loop;
+     
+     commit;
+Exception
+  when OTHERS then
+    dbms_output.put_line('The SQLCode is: '||SQLCODE);
+    dbms_output.put_line('The SQLERRM is: '||SQLERRM);
+end DELETE_MONEYDATA_PARTITION;
+/

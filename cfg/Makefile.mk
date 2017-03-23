@@ -38,7 +38,7 @@ $(warning  OBJS :$(OBJS))
 
 .SUFFIXES: .sqc .pc .c .o
 .pc.c:
-	$(PROC) $< $(DBFLAGS) include=$(DBINCLUD)
+	$(PROC) $< $(DBFLAGS) include=$(DBINCLUD) SQLCHECK=FULL USERID=$(DBUSR)/$(DBPWD)@$(DBNAME)
 #	$(CC) -c $(CFLAGS) $(LDFLAGS) $^
 .c.o:
 	$(CC) -c $(CFLAGS) $(LDFLAGS) $^

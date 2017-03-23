@@ -52,6 +52,11 @@ int DbMonboxaddmon(int oprType, MONBOXADDMON *record)
 #endif
 		mysql_query(pcon, strSql);
 		return JudgeSqlExecResultLocal(0,"DBS_INSERT ",pcon);
+
+		case DBS_DELETE:
+		sprintf(strSql,"DELETE FROM MONBOXADDMON WHERE OPERTIME <str_to_date('%s','%s')",tmpData.opertime,"%Y-%m-%d %H:%i:%s";
+		mysql_query(pcon, strSql);
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE ",pcon);
 	}
 	return SUCESS;
 }

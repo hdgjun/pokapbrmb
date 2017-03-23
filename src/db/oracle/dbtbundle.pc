@@ -153,7 +153,7 @@ int DbTBundleGetCount(int *cSize, char *order)
 
 	EXEC SQL SELECT COUNT(1)
 	INTO :co
-	FROM TMP_BUNDLE
+	FROM TMP_BUNDLES
 	WHERE ORDERID=:id;
     *cSize = co;
 	return JudgeSqlExecResultLocal(0,"SELECT COUNT(DISTINCE BUNDLECODE) TMP_BUNDLES",&sqlca);

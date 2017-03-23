@@ -1,0 +1,76 @@
+
+/*****************************************************路由配置*********************************************************************************************************************************************************************************/
+ROUTE表：
+ID	     TARGETBANK        FORWARDBANK         IPADDR          PORT_        USER_       PASSWORD_    LOCALDIR        REMOTEDIR         TYPE_                SERVICECODE         LASTDATE         STARTTIME              INTER_VAL       STATUS_   model_
+
+编号                      目的银行号                                      转发银行号                                  转发银行ip	                 转发银行端口                  用户名                           密码                                本地目录                            远程目录                    类型(0:ftp上传1:ftp下载)        服务类型()            上次执行日期                              开始时间(格式hhmmss)        执行间隔(秒)      状态                   ftp模式
+                                                                                                                                  																																																																																										  (2:sftp上传3:sftp下载)
+	                                                                                必填                                                必填                            不填默认使用21                  必填                              必填                               必填                                        必填                                          必填                                                                                                                                                                                    必填                                                    必填                                                         默认主动模式(0) 被动模式(1)                                               
+
+ROUTERULE表：
+ID        ROUTEID           FILEEXTEND
+编号                 对应ROUTE表ID       文件名后缀（如：FSN,BK,zip注意大小写）
+             
+路由触发时间说明：
+
+1：STARTTIME与INTER_VAL组合 ：
+    STARTTIME开始时间如设置为101010表示10点10分10秒后开始；INTER_VAL触发间隔，单位秒，如设置为100表示100秒后再次执行。
+    
+2：LASTDATE、STARTTIME与INTER_VAL组合（每天执行一次）：
+   INTER_VAL必需为0，LASTDATE上次执行日期，当LASTDATE等于当天日期表示当天已经执行完成；当LASTDATE不等与当天日期，STARTTIME后开始触发执行。
+
+************************************************************	
+SERVICECODE业务类型：
+为以后特殊业务使用，当前实现（SERVICECODE=2,廊坊银行atm、crs文件获取时使用）
+************************************************************
+
+ROUTERULE表使用：如果对应ruote.id规则在routerule表中有配置，表示只上传\下载规则内的文件类型，反之在远程目录上传\下载所有类型文件（除了tmp文件）。
+
+
+/*******************************************/
+以下例子银行号等随手写的，配置根据具体情况
+/*******************************************/
+
+例一（廊坊银行获取atm、crs文件）：             
+route表： 
+ID	     TARGETBANK        FORWARDBANK         IPADDR                PORT            USER       PASSWORD    LOCALDIR             REMOTEDIR         TYPE            SERVICECODE                  LASTDATE         STARTTIME          INTER_VAL       STATUS   
+1	        	                 0204	       192.168.125.112	    10001       	poka	     123456	 /home/poka/fsn_put/     /home/dir/	        1	               2	                   20161231	      111212	             0	            1	          
+          
+每天11:12:12(STARTTIME)后，在服务器 192.168.125.112:10001(IPADDR:PORT)目录/home/dir/(REMOTEDIR)下载文件到本地目录/home/poka/fsn_put/(LOCALDIR)	          
+注意：TYPE=1,SERVICECODE=2,INTER_VAL=0，fsn_put目录参考配置文件说明（key值:switchdir）		              
+
+例二（商业银行将文件上传人行入库，每个商业银行要给人行传文件必需配置）	        
+route表： 
+ID	     TARGETBANK        FORWARDBANK         IPADDR          PORT        USER       PASSWORD            LOCALDIR                  REMOTEDIR                 TYPE            SERVICECODE         LASTDATE         STARTTIME          INTER_VAL       STATUS
+2	        	               0204	       192.168.125.112	    10001      poka	     123456	       /home/poka/fsn_sc_ins/0204/    /home/poka/fsn_put/	        0	               	                        	      1212	               100	            1	          	          
+	          
+配置完规则后，到00:12:12(STARTTIME)后开始执行，将/home/poka/fsn_sc_ins/0204/(LOCALDIR)文件上传到服务器192.168.125.112:10001(IPADDRIPADDR)目录/home/poka/fsn_put/(REMOTEDIR),执行完后STARTTIME+100(INTER_VAL),100(INTER_VAL)秒后再次执行.         	
+注意：0204 (FORWARDBANK) 人行银行号。商业银行入库完后的文件待上传人行文件存在/home/poka/fsn_sc_ins/0204/(参考配置文件)
+
+例三（人行将0205在清分中心文件清的文件或0205取款文件下发0205）	        
+route表： 
+ID	     TARGETBANK        FORWARDBANK         IPADDR          PORT        USER       PASSWORD          LOCALDIR                  REMOTEDIR                 TYPE            SERVICECODE         LASTDATE         STARTTIME          INTER_VAL       STATUS
+3	        	               0205	         192.168.125.113	    10001       	poka	     123456	 /home/poka/fsn_sc_ins/0205/    /home/poka/fsn_put/	           0	               	                        	         11212	               100	            1	  
+
+配置完规则后，到01:12:12(STARTTIME)后开始执行，将/home/poka/fsn_sc_ins/0205/(LOCALDIR)文件上传到服务器192.168.125.113:10001(IPADDRIPADDR)目录/home/poka/fsn_insert/(REMOTEDIR),执行完后STARTTIME+100(INTER_VAL),100(INTER_VAL)秒后再次执行. 
+
+
+
+例三（0206通过0205发送文件到0207，0205不处理入库）	        
+
+0206配置
+route表： 
+ID	     TARGETBANK        FORWARDBANK         IPADDR          PORT        USER       PASSWORD          LOCALDIR                  REMOTEDIR                            TYPE            SERVICECODE         LASTDATE         STARTTIME          INTER_VAL       STATUS
+3	        	0207               0205	      192.168.125.114  10001       	poka	     123456	 /home/poka/fsn_sc_ins/0207/    /home/poka/fsn_sc_ins/0207/	           0	               	                        	         11212	               100	            1	  
+
+配置完规则后，到01:12:12(STARTTIME)后开始执行，将/home/poka/fsn_sc_ins/0207/(LOCALDIR)文件上传到服务器192.168.125.114:10001(IPADDRIPADDR)目录//home/poka/fsn_sc_ins/0207/(REMOTEDIR),执行完后STARTTIME+100(INTER_VAL),100(INTER_VAL)秒后再次执行. 
+
+0205配置
+route表： 
+ID	     TARGETBANK        FORWARDBANK         IPADDR          PORT        USER       PASSWORD          LOCALDIR                  REMOTEDIR                                                     TYPE            SERVICECODE         LASTDATE         STARTTIME          INTER_VAL       STATUS
+4	        	               0207	         192.168.125.113	10001      poka	     123456	      /home/poka/fsn_sc_ins/0207/     /home/poka/fsn_insert/（0207入库后不上传人行）	                      0	               	                  	                  11212	               100	            1	  
+                                                                                                                               或者/home/poka/fsn_put/ （0207入库后上传人行）
+                                                                                                                               
+配置完规则后，到01:12:12(STARTTIME)后开始执行，将/home/poka/fsn_sc_ins/0207/(LOCALDIR)文件上传到服务器192.168.125.114:10001(IPADDRIPADDR)目录(REMOTEDIR),执行完后STARTTIME+100(INTER_VAL),100(INTER_VAL)秒后再次执行. 
+
+        	                    

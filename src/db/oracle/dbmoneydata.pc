@@ -11,6 +11,9 @@ int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
 
 	EXEC SQL BEGIN DECLARE SECTION;
 	MONEYDATAR  tmpData;
+	int co;
+	char db_name[20];
+	char date[21];
 	EXEC SQL END DECLARE SECTION;
 
 	memset(&tmpData, 0x00, sizeof(MONEYDATAR));
@@ -67,6 +70,32 @@ int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
 				:tmpData.agencyno
 				 );
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+		case DBS_DELETE:
+			 EXEC SQL SELECT
+				COUNT(1)
+			 INTO
+				 :co
+			 FROM
+			 USER_TAB_PARTITIONS
+			 WHERE TABLE_NAME ='MONEYDATA';
+			 if(co<=0){
+				 EXEC SQL DELETE FROM MONEYDATA WHERE OPERDATE < to_date(:tmpData.operdate,'yyyymmdd');
+				 return JudgeSqlExecResultLocal(0,"DBS_DELETE MONEYDATA1",&sqlca);
+			 }else{
+				 memset(db_name,0x00,sizeof(db_name));
+				 memcpy(db_name,g_param.DBUser,strlen(g_param.DBUser));
+
+				 memset(date,0x00,sizeof(date));
+				 memcpy(date,tmpData.operdate,strlen(tmpData.operdate));
+			//	 EXEC SQL AT :db_name EXECUTE
+				 EXEC SQL EXECUTE
+				        BEGIN
+							DELETE_MONEYDATA_PARTITION(:date);
+				        END;
+				 END-EXEC;
+				 return JudgeSqlExecResultLocal(0,"DBS_DELETE MONEYDATA2",&sqlca);
+			 }
+
 	}
    return SUCESS;
 }
@@ -136,6 +165,10 @@ int DbsDoubtMoneydata(int oprType,MONEYDATAR *fileRecord)
 				:tmpData.agencyno
 				 );
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+
+		case DBS_DELETE:
+		 EXEC SQL DELETE FROM DOUBTMONEYDATA WHERE OPERDATE < to_date(:tmpData.operdate,'yyyymmdd');
+		 return JudgeSqlExecResultLocal(0,"DBS_DELETE DOUBTMONEYDATA",&sqlca);
 	}
    return SUCESS;
 }

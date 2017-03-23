@@ -69,6 +69,10 @@ int DbBundleinfo(int oprType, BUNDLEINFO *record)
 #endif
 			EXEC SQL EXECUTE IMMEDIATE :strSql;
 			return JudgeSqlExecResultLocal(0,"DBS_INSERT DbBundleinfo ",&sqlca);
+
+		case DBS_DELETE:
+		EXEC SQL DELETE FROM BUNDLEINFO WHERE ADDMONTIME < to_date(:tmpData.addmontime,'yyyymmdd');
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE BUNDLEINFO",&sqlca);
 	}
 	return SUCESS;
 }

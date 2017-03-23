@@ -24,6 +24,12 @@ export DBTYPE
 ifeq ($(DBTYPE),DB_ORACLE)
 	export IN_DB=$(IN_ORA)
 	export LID_DB=$(LID_ORA)
+	DBNAME=$(shell awk 'FS="=" {if ($$0~/^dbservicename/) print $$2}' $(TOPDIR)/cfg/pkrmb.ini)
+	DBUSR=$(shell awk 'FS="=" {if ($$0~/^dbuser/) print $$2}' $(TOPDIR)/cfg/pkrmb.ini)
+	DBPWD=$(shell awk 'FS="=" {if ($$0~/^dbpassword/) print $$2}' $(TOPDIR)/cfg/pkrmb.ini)
+	export DBNAME
+	export DBPWD
+	export DBUSR
 else
 	ifeq ($(DBTYPE),DB_MYSQL)
 		export IN_DB=$(IN_MSQL)
