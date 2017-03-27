@@ -1,0 +1,48 @@
+/*
+ * dbsendfile.c
+ *
+ *  Created on: 2017Äê3ÔÂ28ÈÕ
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbsendfile.h"
+
+
+int DbSendFile(int oprType, SENDFILE *re)
+{
+	struct sqlca sqlca;
+	sql_context ctx;
+	ctx = (sql_context)pthread_getspecific(p_Thread_key);
+	EXEC SQL CONTEXT USE :ctx;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	SENDFILE  tmpData;
+	char strCmd[1024];
+	EXEC SQL END DECLARE SECTION;
+
+	if(re)
+	{
+		memset(&tmpData, 0x00, sizeof(SENDFILE));
+		memcpy(&tmpData, re, sizeof(SENDFILE));
+	}
+	memset(strCmd,0x00,1024);
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+		sprintf(strCmd, "MERGE INTO sendfile T1 USING (SELECT '%s' as filename, '%s' as bankno, SYSDATE as senddate, to_date('%s', 'yyyymmdd') as checkdate, '1' as sendstate from dual) T2 ON (T1.filename = T2.filename) WHEN MATCHED THEN UPDATE SET T1.bankno = T2.bankno, T1.senddate = T2.senddate, T1.checkdate = T2.checkdate, T1.sendstate = T2.sendstate WHEN NOT MATCHED THEN INSERT (filename, bankno, senddate, checkdate, sendstate) VALUES(T2.filename, T2.bankno, T2.senddate, T2.checkdate, T2.sendstate)",
+				tmpData.filename,tmpData.bankno, tmpData.checkdate);
+		EXEC SQL EXECUTE IMMEDIATE :strCmd;
+		return JudgeSqlExecResultLocal(0,"DBS_INSERT sendfile",&sqlca);
+
+		case DBS_DELETE:
+		sprintf(strCmd, "DELETE FROM sendfile WHERE senddate < to_date(%s,'yyyymmdd')",
+				tmpData.senddate);
+		EXEC SQL EXECUTE IMMEDIATE :strCmd;
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE sendfile",&sqlca);
+	}
+
+	return SUCESS;
+}
+

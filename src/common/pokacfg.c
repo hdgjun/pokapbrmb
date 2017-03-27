@@ -212,12 +212,13 @@ void FillParamStruct(char szKey[PARAM_NUM][MAX_STRING_SIZE],
 			param->DbSaveDay = atoi(szValue[i]);
 			continue;
 		}
-#if 0
-		if(strcmp(szKey[i],SORTCENTERNO_STRING) == 0)
+
+		if(strcmp(szKey[i],PAY_CENTER_KEY) == 0)
 		{
-			strcpy(param->SortCenterNo,szValue[i]);
+			strcpy(param->center,szValue[i]);
 			continue;
 		}
+#if 0
 		if(strcmp(szKey[i],NEDCOMPAREDOUBTSNO_STRING) == 0)
 		{
 			strcpy(param->NeedCompareDoubtSno,szValue[i]);

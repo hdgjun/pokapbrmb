@@ -64,6 +64,7 @@
 #define  OPEN_TRANSFORM__KEY         "opentransform"
 #define  ONLY_PAY_PB_KEY             "onlypaytopb"
 #define  DB_SAVE_DAY_KEY             "dbsaveday"
+#define  PAY_CENTER_KEY             "paycenter"
 //参数结构体
 typedef struct t_Param
 {
@@ -85,6 +86,7 @@ typedef struct t_Param
 	char ImageDir[MIN_STRING_SIZE];
 	char transformDir[MIN_STRING_SIZE];
 	char transformFinDir[MIN_STRING_SIZE];
+	char center[MIN_STRING_SIZE];
 	int  openTransfom;
 	int  LogSaveDay;
 	int  FileSaveDay;

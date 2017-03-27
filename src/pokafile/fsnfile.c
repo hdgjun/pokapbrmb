@@ -275,12 +275,7 @@ char *GetSucInsLocalDir(char *dir,const  FILENAME *fn)
 
 	if(fn->df->fileType == FSN_FILE_TYPE||fn->df->fileType == BK_FILE_TYPE)
 	{
-		char c = *(fn->PackageId+9);
-		if(isalpha(c)){
-			sprintf(subId,"%s",PACKAGE_STRING);
-		}else{
-			memcpy(subId,fn->PackageId,10);
-		}
+		memcpy(subId,fn->PackageId,10);
 		sprintf(temDir,"%s/%s/%s/%s/%s/%s/%s/",g_param.FileStoreBasePath,g_param.handleDir
 								,bankno,agencyno,newDate,subId,fn->PackageId);
 	}else{

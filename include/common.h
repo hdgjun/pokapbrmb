@@ -77,7 +77,7 @@
 #define	 ZIPCMD_STRING				"zip"					//zip压缩命令字符串
 
 #define  TIMEFILL_STRING			"XXXXXX"
-#define  PACKAGE_STRING             "package"
+//#define  PACKAGE_STRING             "package"
 
 #define  BANKNO_LEN 					4//银行号位数
 #define  AGENCYNO_LEN 					4//网点号位数

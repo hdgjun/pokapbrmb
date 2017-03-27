@@ -226,6 +226,7 @@ int	WriteToSnoTable(FILENAME *fsnFile);
 void CheckDoubtMon(MONEYDATAR *rec);
 int CheckFSNRecode(FILERECORD *fileRecord);
 void *SearchFileThread(void *pt);
+void *SearchPayThread(void *pt);
 void *ListDirThread(void *pt);
 void *SwitchFileThread(void *pt);
 void *HandleFileThread(void *pt);

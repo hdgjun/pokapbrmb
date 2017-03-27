@@ -19,6 +19,15 @@
 #include "db/dbpackageinfo.h"
 #include "db/dbskjl.h"
 #include "db/dbmoneydataatm.h"
+#include "db/dbkunfiles.h"
+
+#ifdef PEOPLEBANK
+
+#ifdef DB_ORACLE
+#include "db/dbsendfile.h"
+#endif
+
+#endif
 
 static DATECUT g_dc;
 
@@ -64,6 +73,22 @@ static void cleanDBOldData()
 
 	DbsMoneydata(DBS_DELETE,&monar);
 	DbsCommit();
+
+	TKUNFILES kun = {0};
+	sprintf(kun.insertdate,"%d",date);
+	DbKunFiles(DBS_DELETE,&kun);
+	DbsCommit();
+
+#ifdef PEOPLEBANK
+
+#ifdef DB_ORACLE
+	SENDFILE sfile = {0};
+	sprintf(sfile.senddate,"%d",date);
+	DbSendFile(DBS_DELETE,&sfile);
+	DbsCommit();
+#endif
+
+#endif
 
 	vLog("delete db data finished");
 }

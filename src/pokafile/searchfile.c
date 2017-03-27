@@ -22,7 +22,7 @@
 #include "db/dbtbundle.h"
 #include "db/dbsearchfsnbk.h"
 #include "db/dbkunfiles.h"
-
+#include "db/dbbaginfo.h"
 
 typedef struct _data_fun
 {
@@ -33,7 +33,104 @@ typedef struct _data_fun
 }data_fun;
 
 void Doit(data_fun *fs);
-int GetFile(TSEARCHFSNBK *file);
+int GetFile(TSEARCHFSNBK *file,char *bankNO);
+
+void *SearchPayThread(void *pt)
+{
+	pthread_t *th = (pthread_t *) pt;
+
+	TRY_CONNECT_DB
+
+	int iRet;
+
+	BAGINFO bag;
+	TSEARCHFSNBK tmp;
+	int res;
+
+	while(1)
+	{
+		memset(&bag,0x00,sizeof(BAGINFO));
+		iRet = DbBaginfo(DBS_CURSOR_OPEN, &bag);
+		if (iRet != SUCESS)
+		{
+			vLog("DbBaginfo   DBS_CURSOR_OPEN error");
+			break;
+		}
+		int co=0;
+		while (1)
+		{
+			memset(&bag,0x00,sizeof(BAGINFO));
+			iRet = DbBaginfo(DBS_FETCH, &bag);
+			if (iRet == NODATA || iRet == ERROR)
+			{
+#ifdef DEBUG
+				vLog("DbBaginfo   DBS_FETCH NODATA [%d]",iRet);
+#endif
+				DbBaginfo(DBS_CLOSE, NULL);
+				break;
+			}
+
+			memset(&tmp,0x00,sizeof(TSEARCHFSNBK));
+			memcpy(tmp.orderId,bag.BundleCode,strlen(bag.BundleCode));
+			memcpy(tmp.bundleCode,bag.BundleCode,strlen(bag.BundleCode));
+			sprintf(tmp.type,"FSN");
+
+			iRet = DbCheakFsnBk(DBS_SELECT1,&tmp,&res);
+			if(iRet != SUCESS)
+			{
+#ifdef DEBUG
+vLog("FSN file not find[%d]",iRet);
+#endif
+				continue;
+			}
+			if(res == 0)
+			{
+				GetFile(&tmp,bag.BankId);
+			}
+
+			sprintf(tmp.type,"BK");
+			iRet = DbCheakFsnBk(DBS_SELECT1,&tmp,&res);
+			if(iRet != SUCESS)
+			{
+#ifdef DEBUG
+vLog("BK file not find[%d]",iRet);
+#endif
+				continue;
+			}
+			if(res == 0)
+			{
+				GetFile(&tmp,bag.BankId);
+			}
+
+			memset(&tmp,0x00,sizeof(TSEARCHFSNBK));
+			memcpy(tmp.orderId,bag.BundleCode,strlen(bag.BundleCode));
+			iRet = DbCheakFsnBk(DBS_SELECT2,&tmp,&res);
+			if(iRet != SUCESS)
+			{
+				continue;
+			}
+
+			#ifdef DEBUG
+			vLog("order[%s] search files[%d]",bag.BundleCode,res);
+			#endif
+
+			if(res == 2)
+			{
+				DbBaginfo(DBS_UPDATE,&bag);
+				DbSearchFsnBk(DBS_DELETE,&tmp);
+				DbsCommit();
+			}
+
+		}
+		sleep(10);
+	}
+
+	if (th != NULL)
+	{
+		memset(th, 0x00, sizeof(pthread_t));
+	}
+	return (void *)SUCESS;
+}
 
 void *SearchFileThread(void *pt)
 {
@@ -57,7 +154,7 @@ void *SearchFileThread(void *pt)
 		funs.bundleGetByOrder=DbTBundleByOrder;
 		Doit(&funs);
 
-		sleep(600);
+		sleep(60);
 	}
 
 	if (th != NULL)
@@ -147,7 +244,7 @@ vLog("FSN file not find[%d]",iRet);
 			}
 			if(res == 0)
 			{
-				GetFile(&tmp);
+				GetFile(&tmp,g_param.PBno);
 			}
 
 			sprintf(tmp.type,"BK");
@@ -161,7 +258,7 @@ vLog("BK file not find[%d]",iRet);
 			}
 			if(res == 0)
 			{
-				GetFile(&tmp);
+				GetFile(&tmp,g_param.PBno);
 			}
 
 		}
@@ -186,7 +283,7 @@ vLog("BK file not find[%d]",iRet);
 	}
 }
 
-int GetFile(TSEARCHFSNBK *file)
+int GetFile(TSEARCHFSNBK *file,char *bankNO)
 {
 	int iRet;
 	char tmpc[512] = {0};
@@ -210,7 +307,7 @@ int GetFile(TSEARCHFSNBK *file)
 	strtrim(data.name);
 	strtrim(data.path);
 
-	sprintf(path,"%s/%s/%s",g_param.FileStoreBasePath,g_param.SendFileDIr,g_param.PBno);
+	sprintf(path,"%s/%s/%s",g_param.FileStoreBasePath,g_param.SendFileDIr,bankNO);
 	JudgeSavePathExist(path);
 
 	sprintf(path1,"%s/%s.tmp",path,data.name);

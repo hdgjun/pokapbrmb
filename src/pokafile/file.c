@@ -19,6 +19,13 @@
 #include "common.h"
 #include "pokapbrmb.h"
 
+#ifdef PEOPLEBANK
+
+#ifdef DB_ORACLE
+#include "db/dbsendfile.h"
+#endif
+
+#endif
 
 extern cir_queue_t gQue;
 extern Param g_param;
@@ -69,10 +76,12 @@ void *SwitchFileThread(void *pt)
 			sprintf(indir, "%s/%s", szFolderPath, dirlist->d_name);
 			stat(indir, &filestat);
 
-			if (S_ISREG(filestat.st_mode)) {
+			if (S_ISREG(filestat.st_mode))
+			{
 				fileType = strrchr(dirlist->d_name, '.');
 				if (((tp = CheckFileType(fileType)) == ERROR)
-						|| tp == START_FILE_TYPE) {
+						|| tp == START_FILE_TYPE)
+				{
 					continue;
 				}
 
@@ -120,6 +129,17 @@ void *SwitchFileThread(void *pt)
 
 				my_system(CmdStr);
 
+#ifdef PEOPLEBANK
+#ifdef DB_ORACLE
+				SENDFILE sfile;
+				memset(&sfile,0x00,sizeof(SENDFILE));
+				memcpy(sfile.filename,dirlist->d_name,strlen(dirlist->d_name));
+				memcpy(sfile.bankno,fn.AgencyNo,strlen(fn.AgencyNo));
+				sprintf(sfile.checkdate,"%d",GetDateInt());
+				DbSendFile(DBS_INSERT,&sfile);
+				DbsCommit();
+#endif
+#endif
 
 #ifndef PEOPLEBANK
 				memset(temName, 0x00, FILE_PATH_CHARNUM);
@@ -264,7 +284,8 @@ void *ListDirThread(void *pt)
 	return (void *) SUCESS;
 }
 
-void *HandleFileThread(void *pt) {
+void *HandleFileThread(void *pt)
+{
 	DataType *df;
 
 	int id = (int) pt;
@@ -704,8 +725,15 @@ int StopFile(DataType *df)
 	}
 	return ERROR;
 }
-int CheckSortCenter(char *bankno) {
-	return SUCESS;
+int CheckSortCenter(char *bankno)
+{
+
+    vLog("g_param.center[%s], bankno[%s]",g_param.center, bankno);
+	if(strstr(g_param.center, bankno) != 0)
+	{
+		return SUCESS;
+	}
+	return ERROR;
 }
 char *GetErrorLocalDir(char *dir, const FILENAME *fn) {
 	char temDir[FILE_PATH_CHARNUM] = { 0 };

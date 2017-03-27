@@ -61,6 +61,9 @@ int DbKunFiles(int oprType,TKUNFILES *data)
 			AND  TYPE=:tmp.type;
 			memcpy(data,&tmp,sizeof(TKUNFILES));
 			return JudgeSqlExecResultLocal(0,"DBS_SELECT KUNFILES ",&sqlca);
+		case DBS_DELETE:
+			EXEC SQL DELETE FROM KUNFILES WHERE INSERTDATE < to_date(:tmp.insertdate,'yyyymmdd');
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE KUNFILES",&sqlca);
 	}
 	return SUCESS;
 }

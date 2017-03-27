@@ -77,6 +77,7 @@ int main(int argc, char **argv)
 				{
 					pthread_create(&sendfile, &attr, SendFileThread,NULL);
 				}
+
 				/*清理旧文件*/
 				if (ESRCH == test_pthread(clearFile))
 				{
@@ -100,11 +101,16 @@ int main(int argc, char **argv)
 						pthread_create(&switchfile, &attr,
 								SwitchFileThread, (void *)&switchfile);
 					}
+#ifndef PEOPLEBANK
 					if(g_param.OnlyPaytoPb != DEF_ONLY_PAY_PB)
 					{
 						pthread_create(&searchfile, &attr,
 								SearchFileThread, (void *)&searchfile);
 					}
+#else
+					pthread_create(&searchfile, &attr,
+							SearchPayThread, (void *)&searchfile);
+#endif
 				}
 			}
 			if(g_param.ThreadSize > 0)

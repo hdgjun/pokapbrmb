@@ -26,6 +26,37 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 
 	switch (oprType)
 	{
+	case DBS_CURSOR_OPEN:
+		{
+			EXEC SQL DECLARE cur_baginfo1 CURSOR FOR SELECT BANKID,BUNDLECODE FROM BAGINFO
+			WHERE  PUTSTATUS='1' AND BUNDLECODE IS NOT NULL ORDER BY BANKID;
+			EXEC SQL OPEN cur_baginfo1;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN BAGINFO",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH cur_baginfo1
+			INTO :tmpData.BankId,
+				 :tmpData.BundleCode;
+			if (abs(sqlca.sqlcode) == 1403)
+			{
+				return NODATA;
+			}
+			if (abs(sqlca.sqlcode) == 1405)
+			{
+				sqlca.sqlcode = SUCESS;
+			}
+			strtrim(tmpData.BankId);
+			strtrim(tmpData.BundleCode);
+			memcpy(fileRecord,&tmpData,sizeof(BAGINFO));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE cur_baginfo1;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE BAGINFO SET PUTSTATUS=0 WHERE BUNDLECODE=:tmpData.BundleCode;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE BAGINFO",&sqlca);
 		case DBS_INSERT:
 			EXEC SQL INSERT INTO BAGINFO
 			(
@@ -55,7 +86,7 @@ int DbBaginfo(int oprType, BAGINFO *fileRecord)
 				:tmpData.FileName
 				);
 
-			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT BAGINFO",&sqlca);
 
 		case DBS_DELETE:
 			EXEC SQL DELETE FROM BAGINFO WHERE INSERTDATE < to_date(:tmpData.InsertDate,'yyyymmdd');
