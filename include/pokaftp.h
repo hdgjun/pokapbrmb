@@ -4,7 +4,7 @@
 #define APP_NAME "pokaftp"
 
 #define ROUTE_CONFILE_NAME   "route.ini"
-#define APP_VERSION   "V2.1.20170321"
+#define APP_VERSION   "V2.1.20170417"
 #define POKA_HOME              "POKA_HOME"
 #define SHELL_DIR              "sbin"
 #define CFG_DIR                "cfg"

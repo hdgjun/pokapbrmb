@@ -384,6 +384,7 @@ static void *sendThread()
 			vLog("cur time[%d],cur date[%d],route[%d] start after[%d]",time,date,ro->id,ro->starttime);
 			if(ro->status == S_STOP)
 			{
+#if 0
 				if(ro->starttime > time)
 				{
 					continue;
@@ -392,6 +393,14 @@ static void *sendThread()
 				{
 					continue;
 				}
+
+#endif
+
+				if(ro->interval == 0 && (ro->lastdate == date || ro->starttime > time))
+				{
+					continue;
+				}
+
 				Start_ftp_service(ro);
 				//SendTaskThread((void *) (ro));
 				pthread_create(&service, &attr, SendTaskThread, (void *) (ro));
@@ -476,10 +485,12 @@ void *SendTaskThread(void *sp)
 
 		if(route->interval!=0)
 		{
+#if 0
 			route->starttime = GetTimeInterval(route->interval);
 			if(route->starttime>230000){
 				route->starttime = 1;
 			}
+#endif
 		}else{
 			route->lastdate = GetDateInt();
 		}

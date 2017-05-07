@@ -9,7 +9,7 @@
 #define _POKAPBRMB_H_
 
 #define APP_NAME "pokapbrmb"
-#define APP_VERSION   "V2.1.20170321"
+#define APP_VERSION   "V2.1.20170417"
 #define POKA_HOME              "POKA_HOME"
 #define SHELL_DIR              "sbin"
 #define CFG_DIR                "cfg"

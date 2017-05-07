@@ -104,7 +104,7 @@ void *SwitchFileThread(void *pt)
 				if (CheckSortCenter(fn.BankNo)==SUCESS)
 				{
 #else
-				if(g_param.OnlyPaytoPb == DEF_ONLY_PAY_PB)
+				if(g_param.OnlyPaytoPb != DEF_ONLY_PAY_PB)
 				{
 #endif
 
@@ -497,15 +497,18 @@ void *SendTask(void *sp)
 
 		if(route.interval!=0)
 		{
+#if 0
 			route.starttime = GetTimeInterval(route.interval);
 			if(route.starttime>230000)
 			{
 				route.starttime = 1;
 			}
+#endif
 		}else
 		{
 			route.lastdate = GetDateInt();
 		}
+
 		vLog("SUCESS route[id = %d] get interval [%d]  ", route.id, route.interval);
 	}else{
 		vLog("SendTask error:id[%d]",route.id);

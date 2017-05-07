@@ -27,8 +27,9 @@ int DbRoute(int oprType, ROUTE *record)
 		case DBS_CURSOR_OPEN:
 		sprintf(strSql,"SELECT ID,TARGETBANK,FORWARDBANK,USER_,PASSWORD_,\
 				LOCALDIR,REMOTEDIR,TYPE_,SERVICECODE,STARTTIME,INTER_VAL ,\
-				STATUS_,LASTDATE,IPADDR,PORT_,MODEL_ FROM ROUTE WHERE (STATUS_ = '1' OR STATUS_ IS NULL) AND STARTTIME < %d \
-				AND (LASTDATE <> '%d' OR LASTDATE IS NULL)",temData.starttime,temData.lastdate);
+				STATUS_,LASTDATE,IPADDR,PORT_,MODEL_ FROM ROUTE WHERE ((STATUS_ = 1 OR STATUS_ IS NULL) \
+				AND INTER_VAL = 0 AND STARTTIME < %d  AND (LASTDATE <> '%d' OR LASTDATE IS NULL)) \
+				OR ((STATUS_ = 1 OR STATUS_ IS NULL) AND (INTER_VAL <> 0))",temData.starttime,temData.lastdate);
 		mysql_query(pcon,strSql);
 		printf("%s",strSql);
 		ctx->result =  mysql_store_result(pcon);

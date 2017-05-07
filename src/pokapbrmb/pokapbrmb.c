@@ -102,8 +102,8 @@ int main(int argc, char **argv)
 								SwitchFileThread, (void *)&switchfile);
 					}
 #ifndef PEOPLEBANK
-					if(g_param.OnlyPaytoPb != DEF_ONLY_PAY_PB)
-					{
+					if(g_param.OnlyPaytoPb == DEF_ONLY_PAY_PB)
+					{//如果等于1，仅发送交款文件
 						pthread_create(&searchfile, &attr,
 								SearchFileThread, (void *)&searchfile);
 					}
