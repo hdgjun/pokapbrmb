@@ -1,0 +1,71 @@
+/*
+ * dbmonrule.c
+ *
+ *  Created on: 2017年1月12日
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbmonrule.h"
+EXEC SQL INCLUDE SQLCA;
+int DbMonRule(int oprType, MONRULEARRY *re)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	struct
+	{
+		struct
+		{
+			char MonHead[12+1];			//可疑冠字号
+			char MonVer[20+1];			//版别
+			char MonVal[5+1];			//币值以角为单位
+		} data[100];
+		int size;
+	}  tmpData;
+
+	char mHead[12+1];
+	char mVer[20+1];
+	char mVal[5+1];
+
+	EXEC SQL END DECLARE SECTION;
+
+	if(re)
+	{
+		memset(&tmpData, 0x00, sizeof(MONRULEARRY));
+		memcpy(&tmpData, re, sizeof(MONRULEARRY));
+	}
+
+	switch (oprType)
+	{
+		case DBS_SELECT:
+		EXEC SQL DECLARE cur_doubtsnoinfo CURSOR FOR SELECT MONHEAD,NVL(MONTYPE,'0'),MONVAL FROM MONRULE WHERE MONSTATUS='0';
+		EXEC SQL OPEN cur_doubtsnoinfo;
+		tmpData.size=0;
+		while(1)
+		{
+			EXEC SQL FETCH cur_doubtsnoinfo INTO :mHead,:mVer,:mVal;
+			if( sqlca.sqlcode == 100)
+			{
+				break;
+			}
+			else
+			{
+				memcpy(tmpData.data[tmpData.size].MonHead,mHead,strlen(mHead));
+				memcpy(tmpData.data[tmpData.size].MonVer,mHead,strlen(mVer));
+				memcpy(tmpData.data[tmpData.size].MonVal,mHead,strlen(mVal));
+
+				strtrim(tmpData.data[tmpData.size].MonHead);//去除空格
+				strtrim(tmpData.data[tmpData.size].MonVer);
+				strtrim(tmpData.data[tmpData.size].MonVal);
+				tmpData.size++;
+			}
+
+		}
+		EXEC SQL CLOSE cur_doubtsnoinfo;
+
+		memcpy(re,&tmpData,sizeof(MONRULEARRY));
+		return JudgeSqlExecResultLocal(0,"DBS_SELECT  MONRULE",&sqlca);
+	}
+	return SUCESS;
+}

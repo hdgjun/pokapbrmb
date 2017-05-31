@@ -8,10 +8,22 @@
 #ifdef DB_ORACLE
 #include <sqlca.h>
 #endif
+
 #ifdef DB_MYSQL
 #include <mysql.h>
+#endif
+
+#ifdef DB_DB2
+#include <sqlca.h>
+#include <sql.h>
+#include <sqlenv.h>
+#include <sqlsystm.h>
+#include <sqlutil.h>
+#include <db2ApiDf.h>
+#include <sqlda.h>
 
 #endif
+
 #include <pthread.h>
 
 extern  pthread_key_t p_Thread_key;
@@ -82,7 +94,16 @@ typedef struct t_mysqlctx
 int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,MYSQL *pcon);
 #endif
 
+#ifdef DB_DB2
+int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca);
+struct context
+{
+ void *ctx;
+ int count;
+ int commit;
+};
 
+#endif
 #define TRY_CONNECT_DB  \
 	int SLEEPTIME = 1;\
 	while (1) {\

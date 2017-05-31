@@ -1,0 +1,119 @@
+/*
+ * dbbusinesslistatm.c
+ *
+ *  Created on: 2016Äê12ÔÂ26ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+#include "db/dbbusinesslistatm.h"
+#include "common.h"
+
+EXEC SQL INCLUDE SQLCA;
+
+int DbBusinessListAtm(int oprType, ATMBUSINESSLIST *record)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char id[100];
+		char bankno[20+1];
+		char netno[20+1];
+		char percode[30+1];
+	    char accountno[30+1];
+	    char businessdate[20+1];
+	    char businessid[50+1];
+	    char moneytotal[21+1];
+	    char inorout;
+	    char coreid[30+1];
+	    char remark[200+1];
+	    char inserdate[20+1];
+	}  tmpData;
+
+	int co;
+	EXEC SQL END DECLARE SECTION;
+
+	if(record){
+		memset(&tmpData, 0x00, sizeof(ATMBUSINESSLIST));
+		memcpy(&tmpData, record, sizeof(ATMBUSINESSLIST));
+	}
+	int iRet;
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT INTO BUSINESSLIST_ATM
+			   (BANKNO,
+				NETNO,
+				PERCODE,
+				ACCOUNTNO,
+				BUSINESSDATE,
+				BUSINESSID,
+				MONEYTOTAL,
+				INOROUT,
+				COREID,
+				REMARK,
+				INSERTDATE)
+			VALUES(
+				:tmpData.bankno,
+				:tmpData.netno,
+				:tmpData.percode,
+				:tmpData.accountno,
+				to_date(:tmpData.businessdate,
+				'yyyymmddhh24miss'),
+				:tmpData.businessid,
+				:tmpData.moneytotal,
+				:tmpData.inorout,
+				:tmpData.coreid,
+				:tmpData.remark,
+				 current_timestamp
+				);
+			 return JudgeSqlExecResultLocal(0,"DBS_INSERT BUSINESSLIST_ATM",&sqlca);
+
+		case DBS_SEL_ONE_ROW:
+			  EXEC SQL SELECT
+			  	  ID
+			  INTO
+				 :tmpData.id
+			  FROM
+			  BUSINESSLIST_ATM
+			  WHERE
+			  NETNO=:tmpData.netno and
+			  ACCOUNTNO=:tmpData.accountno and
+			  BUSINESSDATE=to_date(:tmpData.businessdate,'yyyymmddhh24miss') and
+			  PERCODE=:tmpData.percode and
+			  BUSINESSID=:tmpData.businessid;
+			  return JudgeSqlExecResultLocal(0,"DBS_SEL_ONE_ROW ",&sqlca);
+		case DBS_DELETE:
+			 EXEC SQL DELETE
+			 FROM
+			 BUSINESSLIST_ATM
+			 WHERE
+			 NETNO=:tmpData.netno and
+			 ACCOUNTNO=:tmpData.accountno and
+			 BUSINESSDATE=to_date(:tmpData.businessdate,'yyyymmddhh24miss') and
+			 PERCODE=:tmpData.percode and
+			 BUSINESSID=:tmpData.businessid;
+			 return JudgeSqlExecResultLocal(0,"DBS_DELETE  BUSINESSLIST_ATM",&sqlca);
+		case DBS_SELECT1:
+			 EXEC SQL SELECT
+				COUNT(1)
+			 INTO
+				 :co
+			 FROM
+			 BUSINESSLIST_ATM
+			 WHERE
+			 NETNO=:tmpData.netno and
+			 ACCOUNTNO=:tmpData.accountno and
+			 BUSINESSDATE=to_date(:tmpData.businessdate,'yyyymmddhh24miss') and
+			 PERCODE=:tmpData.percode and
+			 BUSINESSID=:tmpData.businessid;
+
+			 if(co>=1){
+				 return ERROR;
+			 }else{
+				 return SUCESS;
+			 }
+	}
+	return SUCESS;
+}

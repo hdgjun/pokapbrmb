@@ -29,6 +29,13 @@
 
 #endif
 
+#ifdef DB_DB2
+
+#include "pokapbrmb.h"
+
+#define INIT_SH  "db2_add_partition.sh"
+#endif
+
 static DATECUT g_dc;
 
 /*delete db old data*/
@@ -149,6 +156,17 @@ int update_date_cup()
 			DbsCommit();
 			vLog("start data cut");
 			cleanDBOldData();
+
+#ifdef DB_DB2
+			char CurPath[FILE_PATH_CHARNUM] = { 0 };
+			GetProgramPath(CurPath,POKA_HOME,DEF_INSTALL_PATH);
+			char sbin[FILE_PATH_CHARNUM] = { 0 };
+			sprintf(sbin,"%s/%s/",CurPath,SHELL_DIR);
+			char cmd[500] = {0};
+			sprintf(cmd,"sh %s/%s MONEYDATA",sbin,INIT_SH);
+			printf("******************  %s\n",cmd);
+			system(cmd);
+#endif
 		}
 	}
 

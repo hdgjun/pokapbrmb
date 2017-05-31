@@ -1,0 +1,59 @@
+/*
+ * dbdatecut.c
+ *
+ *  Created on: 2016Äê12ÔÂ26ÈÕ
+ *      Author: Administrator
+ */
+
+#include "db/db.h"
+#include "db/dbdatecut.h"
+#include "common.h"
+
+EXEC SQL INCLUDE SQLCA;
+
+int DbDateCut(int oprType, DATECUT *re)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+		struct
+		{
+			 int id;
+			 int lastdate;
+			 int curdate;
+			 int status;
+			 int cuttime;
+			 int endtime;
+		}tmpData ={0};
+	EXEC SQL END DECLARE SECTION;
+
+	if(re){
+		memset(&tmpData, 0x00, sizeof(DATECUT));
+		memcpy(&tmpData, re, sizeof(DATECUT));
+	}
+	switch (oprType)
+	{
+		case DBS_SELECT:
+			EXEC SQL SELECT
+			    *
+			INTO :tmpData
+			FROM DATECUT;
+			memcpy(re,&tmpData,sizeof(DATECUT));
+			return JudgeSqlExecResultLocal(0,"DBS_SELECT  DATECUT ",&sqlca);
+		case DBS_INSERT:
+			EXEC SQL INSERT INTO
+			DATECUT(LASTDATE,CURDATE,STATUS,CUTTIME,ENDTIME)
+			VALUES(:tmpData.lastdate,:tmpData.curdate,:tmpData.status,:tmpData.cuttime,:tmpData.endtime);
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT  DATECUT",&sqlca);
+		case DBS_UPDATE:
+			EXEC SQL UPDATE  DATECUT SET
+			 LASTDATE=:tmpData.lastdate,
+			 CURDATE=:tmpData.curdate,
+			 STATUS=:tmpData.status,
+			 CUTTIME=:tmpData.cuttime,
+			 ENDTIME=:tmpData.endtime
+			 WHERE 1=1;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE  DATECUT ",&sqlca);
+	}
+	return SUCESS;
+}

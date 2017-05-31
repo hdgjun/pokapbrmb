@@ -1,0 +1,63 @@
+/*
+ * dbpackageinfo.pc
+ *
+ *  Created on: 2016Äê12ÔÂ25ÈÕ
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbpackageinfo.h"
+EXEC SQL INCLUDE SQLCA;
+int DbPackageinfo(int oprType, DBPACKAGEINFO *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char packageId[24+1];
+		char bundleId[24+1];
+		char operatorid[20+1];
+		char opertime[20+1];
+		char checker[20+1];
+		char insertdate[20+1];
+		char fileName[60+1];
+		char remark[512+1];
+	}  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(DBPACKAGEINFO));
+	memcpy(&tmpData, fileRecord, sizeof(DBPACKAGEINFO));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+				PACKAGEINFO(
+				  PACKAGEID ,
+				  BUNDLEID  ,
+				  OPERATORID,
+				  OPERTIME  ,
+				  CHECKER   ,
+				  FILENAME  ,
+				  REMARK,
+				  INSERTDATE
+				)
+				VALUES(
+				:tmpData.packageId,
+				:tmpData.bundleId,
+				:tmpData.operatorid,
+				 to_date(:tmpData.opertime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.checker,
+				:tmpData.fileName,
+				:tmpData.remark,
+				 current_timestamp
+				 );
+
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+		case DBS_DELETE:
+			 EXEC SQL DELETE FROM PACKAGEINFO WHERE INSERTDATE < to_date(:tmpData.insertdate,'yyyymmdd');
+			 return JudgeSqlExecResultLocal(0,"DBS_DELETE PACKAGEINFO",&sqlca);
+	}
+	return SUCESS;
+}

@@ -1,0 +1,133 @@
+#include "db/db.h"
+#include "db/dbmoneydataatm.h"
+#include "common.h"
+EXEC SQL INCLUDE SQLCA;
+int DbsMoneydataAtm(int oprType, ATMRECODE *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char id[100];
+		char percode[24+1];
+		char coltime[20+1];
+		char mon[20+1];
+		char montype[3+1];
+		char monval[8+1];
+		char monver[4+1];
+		char trueflag;
+		char quanlity[2+1];
+		char operdate[20+1];
+		char imagepath[256+1];
+		char businesstype[4+1];
+		char bankno[20+1];
+		char agencyno[20+1];
+		char businessid[30+1];
+		char reserve1[50+1];
+		char reserve2[40+1];
+	} tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+    if(fileRecord)
+    {
+		memset(&tmpData, 0x00, sizeof(ATMRECODE));
+		memcpy(&tmpData, fileRecord, sizeof(ATMRECODE));
+    }
+	switch (oprType)
+	{
+		case DBS_DELETE:
+			 EXEC SQL DELETE FROM MONEYDATA_ATM WHERE OPERDATE < to_date(:tmpData.operdate,'yyyymmdd');
+			 return JudgeSqlExecResultLocal(0,"DBS_DELETE MONEYDATA_ATM",&sqlca);
+	}
+
+   return SUCESS;
+}
+
+int FromTmpToAtm(const char *tn,const char *id)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char strSql[300+256*21] = {0};
+	EXEC SQL END DECLARE SECTION;
+
+	sprintf(strSql,"INSERT INTO MONEYDATA_ATM(PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,QUANLITY,IMAGEPATH,BUSINESSTYPE,BANKNO,AGENCYNO,BUSINESSID,OPERDATE,RESERVE1,RESERVE2 )(select PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,QUANLITY,IMAGEPATH,BUSINESSTYPE,BANKNO,AGENCYNO,B.ID AS BUSINESSID,B.OPERDATE AS OPERDATE,RESERVE1,RESERVE2 from  %s A, (select '%s' as id, current_timestamp as OPERDATE from DUAL) B)",tn,id);
+	EXEC SQL EXECUTE IMMEDIATE :strSql;
+
+	return JudgeSqlExecResultLocal(0,"DBS_INSERT TEMP",&sqlca);
+}
+
+int TmpDbsMoneydataAtm(int oprType,const char *tn,ATMRECODE *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char id[100];
+		char percode[24+1];
+		char coltime[20+1];
+		char mon[20+1];
+		char montype[3+1];
+		char monval[8+1];
+		char monver[4+1];
+		char trueflag;
+		char quanlity[2+1];
+		char operdate[20+1];
+		char imagepath[256+1];
+		char businesstype[4+1];
+		char bankno[20+1];
+		char agencyno[20+1];
+		char businessid[30+1];
+		char reserve1[50+1];
+		char reserve2[40+1];
+	}  tmpData;
+	char strSql[300+256*21] = {0};
+	char sqlstmt[1024];
+	EXEC SQL END DECLARE SECTION;
+
+
+
+	if(fileRecord){
+		memset(&tmpData, 0x00, sizeof(ATMRECODE));
+		memcpy(&tmpData, fileRecord, sizeof(ATMRECODE));
+	}
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			sprintf(sqlstmt,"INSERT INTO %s(ID,PERCODE,COLTIME,MON,MONTYPE,MONVAL,MONVER,TRUEFLAG,OPERDATE,IMAGEPATH,BUSINESSTYPE,BANKNO,AGENCYNO) VALUES(0,:v1,to_date(:v2,'yyyymmddhh24miss'),:v3,:v4,:v5,:v6,:v7,current_timestamp,:v8,:v9,:v10,:v11)",tn);
+			EXEC SQL PREPARE mystmt FROM :sqlstmt;
+			EXEC SQL EXECUTE mystmt USING
+			:tmpData.percode,
+			:tmpData.coltime,
+			:tmpData.mon,
+			:tmpData.montype,
+			:tmpData.monval,
+			:tmpData.monver,
+			:tmpData.trueflag,
+			:tmpData.imagepath,
+			:tmpData.businesstype,
+			:tmpData.bankno,
+			:tmpData.agencyno;
+
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT TEMP",&sqlca);
+		case DBS_CREATE_TEMP:
+			sprintf(strSql,"DECLARE GLOBAL TEMPORARY TABLE %s  AS (SELECT * FROM MONEYDATA_ATM WHERE 1=0) DEFINITION ONLY WITH REPLACE",tn);
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+			return JudgeSqlExecResultLocal(0,"DBS_CREATE_TEMP",&sqlca);
+		case DBS_SELECT:
+			sprintf(strSql,"select count(1) from %s ",tn);
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+			if(abs(sqlca.sqlcode)==942){
+				return ERROR;
+			}else{
+				return SUCESS;
+			}
+		case DBS_TRUNCATE:
+			sprintf(strSql,"truncate table %s ",tn);
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+			return JudgeSqlExecResultLocal(0,"DBS_TRUNCATE",&sqlca);
+	}
+	return SUCESS;
+}

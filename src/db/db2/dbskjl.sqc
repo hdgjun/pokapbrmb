@@ -1,0 +1,57 @@
+/*
+ * dbskjl.c
+ *
+ *  Created on: 2017Äê1ÔÂ13ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+#include "db/dbskjl.h"
+#include "common.h"
+#include "pokalog.h"
+#include "filepath.h"
+EXEC SQL INCLUDE SQLCA;
+static const char insertsql[] = "INSERT INTO SKJL(BANKNO,NETNO,USERID,PERCODE,BUSINESSDATE,ACCOUNTNO,INSERTDATE) VALUES(";
+
+int DbSKJL(int oprType, DBSKJL *record)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char strSql[300+256*21] = {0};
+
+	 struct
+	{
+	    int id;
+		char bankno[20+1];
+		char notno[20+1];
+		char userid[8+1];
+		char percode[30+1];
+		char businessdate[19+1];
+		char accountno[30+1];
+	    char insertdate[20+1];
+	}  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(DBSKJL));
+	memcpy(&tmpData, record, sizeof(DBSKJL));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			sprintf(strSql, "%s '%s','%s','%s','%s',to_date('%s','%s'),'%s',current_timestamp)", insertsql,
+				tmpData.bankno,
+				tmpData.notno,
+				tmpData.userid,
+				tmpData.percode,
+				tmpData.businessdate,
+				"yyyy-mm-dd hh24:mi:ss",
+				tmpData.accountno);
+			EXEC SQL EXECUTE IMMEDIATE :strSql;
+		return JudgeSqlExecResultLocal(0,"DBS_INSERT DbSKJL ",&sqlca);
+
+		case DBS_DELETE:
+			EXEC SQL DELETE FROM SKJL WHERE INSERTDATE < to_date(:tmpData.insertdate,'yyyymmdd');
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE SKJL",&sqlca);
+	}
+   return SUCESS;
+}

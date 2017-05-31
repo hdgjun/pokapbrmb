@@ -1,0 +1,9 @@
+1.更改路由表（路由配置文件）使用方式：
+	
+a.INTER_VAL != 0 ：
+    每次扫描表触发一次。
+   
+b. LASTDATE、STARTTIME与INTER_VAL组合（每天执行一次）：
+   INTER_VAL必需为0，LASTDATE上次执行日期，当LASTDATE等于当天日期表示当天已经执行完成；当LASTDATE不等与当天日期，STARTTIME后开始触发执行。
+	
+2.更新（《路由配置说明.txt》）

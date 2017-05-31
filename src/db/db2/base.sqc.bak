@@ -1,0 +1,168 @@
+/*
+ * base.sqc
+ *
+ *  Created on: 2016年12月22日
+ *      Author: Administrator
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include <errno.h>
+#include <pthread.h>
+#include "db/db.h"
+#include "allcommon.h"
+#include "pokalog.h"
+
+EXEC SQL INCLUDE SQLCA;
+
+extern Param g_param;
+//#define INIT_SCR   "initmysql.sql"
+
+int ConnectDB();
+
+int InitDb(char *path)
+{
+	pthread_key_create(&p_Thread_key, NULL);
+	sqleSetTypeCtx(SQL_CTX_MULTI_MANUAL);
+
+	return SUCESS;
+}
+int DestroyDb(){
+	return SUCESS;
+}
+
+int ConnectDB()
+{
+	struct sqlca sqlca;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char tempDb2Database9[20] = { 0 };
+	char tempDb2User9[20] = { 0 };
+	char tempDb2Db2Password9[20] = { 0 };
+	EXEC SQL END DECLARE SECTION;
+
+	strcpy(tempDb2Database9, g_param.DBServiceName);
+	strcpy(tempDb2User9, g_param.DBUser);
+	strcpy(tempDb2Db2Password9, g_param.DBPassword);
+
+	EXEC SQL CONNECT
+	TO :tempDb2Database9
+	USER :tempDb2User9
+	USING: tempDb2Db2Password9;
+
+	return JudgeSqlExecResultLocal(0, "connect to  db2",&sqlca);
+}
+
+int ThreadConnectDB()
+{
+	struct context *context;
+	struct sqlca sqlca;
+	int rc;
+
+	context = (struct context *) pthread_getspecific(p_Thread_key);
+
+	if (context == NULL)
+	{
+		context = (struct context *) malloc(sizeof(struct context));
+	}
+
+	rc = sqleBeginCtx(&context->ctx, SQL_CTX_CREATE_ONLY, NULL,&sqlca);
+	if(rc != 0 ||sqlca.sqlcode!=0)
+		return ERROR;
+	rc = sqleAttachToCtx(context->ctx, NULL, &sqlca);
+
+	if(rc != 0 ||sqlca.sqlcode!=0)
+		return ERROR;
+
+	rc = ConnectDB();
+
+	if(rc != 0 ||sqlca.sqlcode!=0)
+		return ERROR;
+
+	pthread_setspecific(p_Thread_key, (void *) context);
+
+	return SUCESS;
+}
+int DisconnectDB(){
+	struct context *context;
+	struct sqlca sqlca;
+	int rc;
+	context = (struct context *) pthread_getspecific(p_Thread_key);
+	if (context == NULL)
+	{
+		return SUCESS;
+	}
+
+	EXEC SQL CONNECT RESET;
+	rc = sqleDetachFromCtx(context->ctx, NULL, &sqlca);
+
+	free(context);
+	pthread_setspecific(p_Thread_key, (void *) 0);
+	return SUCESS;
+}
+int TestConnectionDB()
+{
+	struct sqlca sqlca;
+	struct context *context;
+
+	context = (struct context *) pthread_getspecific(p_Thread_key);
+
+	if (context == NULL)
+	{
+		return ERROR;
+	}
+	EXEC SQL BEGIN DECLARE SECTION;
+	int tmpVerRecordNum11;
+	EXEC SQL END DECLARE SECTION;
+	EXEC SQL
+	SELECT COUNT(*)
+	INTO :tmpVerRecordNum11 FROM
+	SYSIBM.SYSVERSIONS;	//获取数据库版本
+
+	return JudgeSqlExecResultLocal(0, "TestConnection db2",&sqlca);
+}
+
+int DbsCommit()
+{
+	struct sqlca sqlca;
+	struct context *context;
+	context = (struct context *) pthread_getspecific(p_Thread_key);
+
+	if (context == NULL)
+	{
+		return ERROR;
+	}
+
+	EXEC SQL COMMIT;
+	return JudgeSqlExecResultLocal(0, "DbsCommit db2",&sqlca);
+}
+
+int DbsRollback()
+{
+	return SUCESS;
+}
+
+int	JudgeSqlExecResultLocal(int iFlag,char *szExecText,struct sqlca *sqlca)
+{
+  if(sqlca->sqlcode == 100){
+     return NODATA;
+  }
+	if (sqlca->sqlcode!= 0) {
+		printf("[%s fail]%d/%s\n",
+				szExecText,
+				sqlca->sqlcode,
+				sqlca->sqlerrmc);
+		vLog("[%s fail] sqlcode:[%d] sqlerrmc:[%s]",
+				szExecText,
+				sqlca->sqlcode,
+				sqlca->sqlerrmc);
+		return ERROR;
+	} else {
+		if (0 == iFlag) {
+			vLog("%s ok!",szExecText);
+		}
+	}
+	return SUCESS;
+}
+

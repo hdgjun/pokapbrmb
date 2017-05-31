@@ -5,3 +5,8 @@ IN_ORA=-I $(ORACLE_HOME)/precomp/public/ -I $(ORACLE_HOME)/rdbms/public/
 
 LID_MSQL= -L /usr/lib/mysql/  -ldl -lm -ldbmysql -lmysqlclient
 IN_MSQL= -I /usr/include/mysql/
+
+
+
+LID_DB2= -L $(DB2_HOME)/lib64  -ldl -lm -ldb2 -lpokadb2
+IN_DB2= -I $(DB2_HOME)/include/

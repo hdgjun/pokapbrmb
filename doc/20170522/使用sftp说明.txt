@@ -1,0 +1,72 @@
+使用sftp 需安装expect
+
+检查系统，看expect是否已经安装
+
+[root@rhel ~]# rpm -qa|grep expect
+
+expect没有安装，则下载安装.
+
+expect下载地址:https://sourceforge.net/projects/expect/
+
+expect依赖于tcl/tk，因此在安装expect之前先安装tcl/tk。
+
+tcl/tk的下载面页：
+http://www.tcl.tk/software/tcltk/downloadnow84.html 
+ 
+下载		tcl8420-src.zip  与  tk8420-src.zip
+
+检查系统，看tcl是否已经安装。
+
+[root@rhel ~]# rpm -qa|grep tcl
+
+
+tcl已经安装的情况：
+
+1.然后根据参数，运行./configure
+
+2.执行
+make
+
+3.执行
+make install
+     
+tcl没有安装的情况：
+
+第一步，安装tcl
+下载tcl8420-src.zip
+解压tcl8420-src.zip
+cd tcl8420-src
+./configure
+make
+make install
+
+第二步，安装tk
+
+下载tk8420-src.zip
+解压tk8420-src.zip
+cd tk8420-src
+./configure
+make
+make install
+
+第三步，安装expect
+
+下载expect5.45.tar.gz
+解压expect5.45.tar.gz
+cd expect5.45
+./configure
+make
+make install
+
+
+如果执行configure报错：
+checking for Tcl private headers... checking for tclInt.h... no 
+configure: error: Can't find Tcl private headers
+
+进入tcl源代码的根目录，把子目录unix下面的tclUnixPort.h copy到子目录generic中 
+再次运行configure脚本，并指定tcl的头文件所在目录：
+./configure --with-tclinclude=../tcl8420-src/generic
+make
+make install
+
+ 

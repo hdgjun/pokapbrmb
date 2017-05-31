@@ -1,0 +1,11 @@
+关于配置的修改，参考《配置文件说明.txt》
+
+默认该功能关闭(opentransform=0)  打开该功能修改配置文件 $POKA_HOME/cfg/pkrmb.ini,添加或修改opentransform=1
+
+默认扫描目录fsn_trans           更换目录修改配置文件 $POKA_HOME/cfg/pkrmb.ini,添加或修改 transformdir=目录名
+
+默认转化后文件存放目录fsn_trans_fin           更换目录修改配置文件 $POKA_HOME/cfg/pkrmb.ini,添加或修改 transformfindir=目录名
+
+过程：
+1.文件源将fsn文件传到fsn_trans
+2.配置路由，从fsn_trans_fin取文件传到目标服务器指定目录

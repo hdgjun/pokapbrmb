@@ -1,0 +1,75 @@
+/*
+ * dbmonboxaddmon.c
+ *
+ *  Created on: 2017Äê1ÔÂ9ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+#include "db/dbmonboxaddmon.h"
+#include "common.h"
+#include "switch.h"
+
+EXEC SQL INCLUDE SQLCA;
+
+int DbMonboxaddmon(int oprType, MONBOXADDMON *record)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char strSql[1024] = {0};
+	 struct
+	{
+		char scanid[24+1];
+		char flag;
+		char monboxid[11+1];
+		char remark[512+1];
+		char opertime[20+1];
+		char operatorid[20+1];
+		char checker[20+1];
+		char insertdate[20+1];
+		char filename[60+1];
+	}  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	if(record)
+	{
+		memset(&tmpData, 0x00, sizeof(MONBOXADDMON));
+		memcpy(&tmpData, record, sizeof(MONBOXADDMON));
+	}
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+#ifdef BFNEW
+		sprintf(strSql,"INSERT INTO MONBOXADDMON(SCANID,FLAG,MONBOXID,REMARK,OPERTIME,OPERATORID,CHECKER,FILENAME,ID) VALUES('%s', '0', '%s', '%s', to_date('%s','%s'), '%s','%s','%s','%s')",
+				tmpData.scanid,
+				tmpData.monboxid,
+				"",
+				tmpData.opertime,
+				"yyyy-mm-dd hh24:mi:ss",
+				tmpData.operatorid,
+				tmpData.checker,
+				tmpData.filename,
+				tmpData.id
+				);
+#else
+		sprintf(strSql,"INSERT INTO MONBOXADDMON(SCANID,FLAG,MONBOXID,REMARK,OPERTIME,OPERATORID,CHECKER,FILENAME) VALUES('%s', '0', '%s', '%s', to_date('%s','%s'), '%s','%s','%s')",
+						tmpData.scanid,
+						tmpData.monboxid,
+						"",
+						tmpData.opertime,
+						"yyyy-mm-dd hh24:mi:ss",
+						tmpData.operatorid,
+						tmpData.checker,
+						tmpData.filename
+						);
+#endif
+		EXEC SQL EXECUTE IMMEDIATE :strSql;
+		return JudgeSqlExecResultLocal(0,"DBS_INSERT DbMonboxaddmon ",&sqlca);
+		case DBS_DELETE:
+		EXEC SQL DELETE FROM MONBOXADDMON WHERE OPERTIME < to_date(:tmpData.opertime,'yyyymmdd');
+		return JudgeSqlExecResultLocal(0,"DBS_DELETE MONBOXADDMON",&sqlca);
+	}
+	return SUCESS;
+}
+

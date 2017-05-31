@@ -1,0 +1,216 @@
+#include "db/db.h"
+#include "db/dbmoneydata.h"
+#include "common.h"
+#include "pokafile.h"
+EXEC SQL INCLUDE SQLCA;
+
+int DbsMoneydata(int oprType, MONEYDATAR *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char percode[24+1];
+		char coltime[20+1];
+		char mon[12+1];
+		char montype[3+1];
+		char monval[3+1];
+		char monver[4+1];
+		char trueflag;
+		char quanlity[2+1];
+		char imagesno[500+1];
+		char operatorid[20+1];
+		char operdate[20+1];
+		char bundleid[24+1];
+		char checker[20+1];
+		char imagepath[256+1];
+		char businesstype[4+1];
+		char monboxid[24+1];
+		char atmid[24+1];
+		char addmonoperator[20+1];
+		char addmonchecker[20+1];
+		char testimagechar[500+1];
+		int seqid;
+		char bankno[20+1];
+		char agencyno[20+1];
+		char filename[60+1];
+		char packageid[24+1];
+	}  tmpData;
+	int co;
+	char db_name[20];
+	char date[21];
+	char strStmt[1024];
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(MONEYDATAR));
+	memcpy(&tmpData, fileRecord, sizeof(MONEYDATAR));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+			   MONEYDATA(
+				PERCODE,
+				COLTIME,
+				MON,
+				MONTYPE,
+				MONVAL,
+				MONVER,
+				TRUEFLAG,
+				OPERATORID,
+				OPERDATE,
+				BUNDLEID,
+				PACKAGEID,
+				CHECKER,
+				IMAGEPATH,
+				BUSINESSTYPE,
+				MONBOXID,
+				ATMID,
+				ADDMONOPERATOR,
+				ADDMONCHECKER,
+				BANKNO,
+				FILENAME,
+				AGENCYNO
+				)
+				VALUES(
+				:tmpData.percode,
+				 to_date(:tmpData.coltime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.mon,
+				:tmpData.montype,
+				:tmpData.monval,
+				:tmpData.monver,
+				:tmpData.trueflag,
+				:tmpData.operatorid,
+				 current_timestamp,
+				:tmpData.bundleid,
+				:tmpData.packageid,
+				:tmpData.checker,
+				:tmpData.imagepath,
+				:tmpData.businesstype,
+				:tmpData.monboxid,
+				:tmpData.atmid,
+				:tmpData.addmonoperator,
+				:tmpData.addmonchecker,
+				:tmpData.bankno,
+				:tmpData.filename,
+				:tmpData.agencyno
+				 );
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+		case DBS_DELETE:
+			 EXEC SQL SELECT
+				COUNT(1)
+			 INTO
+				 :co
+			 FROM
+			 SYSCAT.DATAPARTITIONS
+			 WHERE TABNAME ='MONEYDATA';
+			 if(co<=0){
+				 EXEC SQL DELETE FROM MONEYDATA WHERE OPERDATE < to_date(:tmpData.operdate,'yyyymmdd');
+				 return JudgeSqlExecResultLocal(0,"DBS_DELETE MONEYDATA1",&sqlca);
+			 }else{
+				 sprintf(strStmt,"CALL DELETE_MONEYDATA_PARTITION(%s)",tmpData.operdate);
+				 EXEC SQL EXECUTE IMMEDIATE :strStmt;
+				 return JudgeSqlExecResultLocal(0,"DBS_DELETE MONEYDATA2",&sqlca);
+			 }
+
+	}
+   return SUCESS;
+}
+
+int DbsDoubtMoneydata(int oprType,MONEYDATAR *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char percode[24+1];
+		char coltime[20+1];
+		char mon[12+1];
+		char montype[3+1];
+		char monval[3+1];
+		char monver[4+1];
+		char trueflag;
+		char quanlity[2+1];
+		char imagesno[500+1];
+		char operatorid[20+1];
+		char operdate[20+1];
+		char bundleid[24+1];
+		char checker[20+1];
+		char imagepath[256+1];
+		char businesstype[4+1];
+		char monboxid[24+1];
+		char atmid[24+1];
+		char addmonoperator[20+1];
+		char addmonchecker[20+1];
+		char testimagechar[500+1];
+		int seqid;
+		char bankno[20+1];
+		char agencyno[20+1];
+		char filename[60+1];
+		char packageid[24+1];
+	}  tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	memset(&tmpData, 0x00, sizeof(MONEYDATAR));
+	memcpy(&tmpData, fileRecord, sizeof(MONEYDATAR));
+
+	switch (oprType)
+	{
+		case DBS_INSERT:
+			EXEC SQL INSERT  INTO
+			DOUBTMONEYDATA(
+				PERCODE,
+				COLTIME,
+				MON,
+				MONTYPE,
+				MONVAL,
+				MONVER,
+				TRUEFLAG,
+				OPERATORID,
+				OPERDATE,
+				BUNDLEID,
+				PACKAGEID,
+				CHECKER,
+				IMAGEPATH,
+				BUSINESSTYPE,
+				MONBOXID,
+				ATMID,
+				ADDMONOPERATOR,
+				ADDMONCHECKER,
+				BANKNO,
+				FILENAME,
+				AGENCYNO
+				)
+				VALUES(
+				:tmpData.percode,
+				 to_date(:tmpData.coltime,'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.mon,
+				:tmpData.montype,
+				:tmpData.monval,
+				:tmpData.monver,
+				:tmpData.trueflag,
+				:tmpData.operatorid,
+				 current_timestamp,
+				:tmpData.bundleid,
+				:tmpData.packageid,
+				:tmpData.checker,
+				:tmpData.imagepath,
+				:tmpData.businesstype,
+				:tmpData.monboxid,
+				:tmpData.atmid,
+				:tmpData.addmonoperator,
+				:tmpData.addmonchecker,
+				:tmpData.bankno,
+				:tmpData.filename,
+				:tmpData.agencyno
+				 );
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT ",&sqlca);
+
+		case DBS_DELETE:
+		 EXEC SQL DELETE FROM DOUBTMONEYDATA WHERE OPERDATE < to_date(:tmpData.operdate,'yyyymmdd');
+		 return JudgeSqlExecResultLocal(0,"DBS_DELETE DOUBTMONEYDATA",&sqlca);
+	}
+   return SUCESS;
+}

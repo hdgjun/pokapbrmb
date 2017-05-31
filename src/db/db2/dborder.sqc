@@ -1,0 +1,94 @@
+#include "common.h"
+#include "db/db.h"
+#include "db/dborder.h"
+EXEC SQL INCLUDE SQLCA;
+int DbTrsOrder(int oprType,char *orderid)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	if(orderid!=NULL)
+	{
+		memcpy(id,orderid,strlen(orderid));
+	}
+	switch (oprType)
+	{
+	   case DBS_CURSOR_OPEN:
+	   {
+			EXEC SQL DECLARE CURSOR_TRS_ORDER  CURSOR FOR SELECT ORDERID FROM TRS_ORDER WHERE ORDERTYPE='1' AND SENDSTATE='1';
+
+			EXEC SQL OPEN CURSOR_TRS_ORDER;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH CURSOR_TRS_ORDER INTO :id;
+			if (abs(sqlca.sqlcode) == 100)
+			{
+				return NODATA;
+			}
+			strtrim(id);
+
+			memcpy(orderid,id,strlen(id));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE CURSOR_TRS_ORDER;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE TRS_ORDER SET
+			SENDSTATE = 2
+			WHERE ORDERID =:id and ORDERTYPE=1;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE TRS_ORDER",&sqlca);
+	}
+	return SUCESS;
+}
+
+int DbTOrderInfo(int oprType,char *orderid)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char id[30+1];
+	char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+	if(orderid!=NULL)
+	{
+		memcpy(id,orderid,strlen(orderid));
+	}
+	switch (oprType)
+	{
+	   case DBS_CURSOR_OPEN:
+	   {
+			EXEC SQL DECLARE CURSOR_T_ORDER_INFO  CURSOR for SELECT ORDERID FROM T_ORDERINFO WHERE ORDERTYPE='1' AND STATE='1';
+	
+			EXEC SQL OPEN CURSOR_T_ORDER_INFO;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH CURSOR_T_ORDER_INFO INTO :id;
+			if (abs(sqlca.sqlcode) == 100)
+			{
+				return NODATA;
+			}
+
+			strtrim(id);
+
+			memcpy(orderid,id,strlen(id));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE CURSOR_T_ORDER_INFO;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE T_ORDERINFO SET
+			STATE = 2
+			WHERE ORDERID =:id and ORDERTYPE=1;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE TRS_ORDER",&sqlca);
+	}
+	return SUCESS;
+}

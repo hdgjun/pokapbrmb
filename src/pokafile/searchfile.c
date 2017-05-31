@@ -53,7 +53,7 @@ void *SearchPayThread(void *pt)
 		iRet = DbBaginfo(DBS_CURSOR_OPEN, &bag);
 		if (iRet != SUCESS)
 		{
-			vLog("DbBaginfo   DBS_CURSOR_OPEN error");
+			vLog("DbBaginfo DBS_CURSOR_OPEN error");
 			break;
 		}
 		int co=0;

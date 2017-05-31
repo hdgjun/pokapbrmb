@@ -1,0 +1,66 @@
+项目目录结构:
+
+pokapbrmb
+     |
+     |---------/bin         编译后可执行程序 pokapbrmb、pokadaemon 生成的目的地
+     |
+     |---------/cfg         配置文件目录
+     |
+     |---------/sbin        shell脚本目录
+     |
+     |---------/lib         程序使用的库的目录
+     |
+     |---------/include     程序头文件目录
+     |
+     |---------/src         程序源码目录
+     |
+     |---------/log         日志文件目录
+     |
+     |---------/doc         文档目录
+     |
+     |---------makefile      
+     
+     
+程序默认安装路径：/home/poka/pokapbrmb/
+
+安装程序过程：
+1.环境变量设置 
+  vi /etc/profile 
+写入 
+      export POKA_HOME=/home/poka/pokapbrmb/  
+      export PATH=$POKA_HOME/bin:$POKA_HOME/sbin:$PATH
+保存/etc/profile
+
+执行命令: 
+	source /etc/profile
+
+2.修改配置文件            
+$POKA_HOME/cfg/pkrmb.ini  参考《pkrmb.ini.配置文件说明.txt》
+$POKA_HOME/cfg/route.ini  参考《route.ini.配置文件说明.txt》  
+
+3.修改$POKA_HOME/makefile   参考《编译说明.txt》
+
+4.编译程序
+cd $POKA_HOME
+make clean
+make
+
+5.cd  $POKA_HOME/sbin
+  chmod +x *
+  
+  
+6.启动程序
+pokapbrmb.sh start   《应用服务器》
+或
+start_pokaftp.sh start 《ftp服务器》
+
+hegl-test:~ # ps -ef|grep poka
+root      4834     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokadaemon
+root      4836     1  0 22:15 ?        00:00:00 /home/poka/pokapbrmb//bin/pokapbrmb pokapbrmb
+root      4965  4929  0 22:17 pts/1    00:00:00 grep poka
+
+
+7.停止程序
+pokapbrmb.sh stop  《应用服务器》
+或
+start_pokaftp.sh stop  《ftp服务器》

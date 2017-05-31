@@ -80,7 +80,9 @@ int UploadFile(ROUTE *route,ROUTERULE *rule,int ruleSize)
 			iRet = getInterval(filestat.st_mtime);
 			if(iRet < 60)
 			{
+#ifdef DEBUG
 				vLog("file modify time[%d]",iRet);
+#endif
 				continue;
 			}
 			fileType = strrchr(dirlist->d_name, '.');

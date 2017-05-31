@@ -1,0 +1,44 @@
+/*
+ * dbrouterule.c
+ *
+ *  Created on: 2016Äê12ÔÂ28ÈÕ
+ *      Author: Administrator
+ */
+
+#include "db/db.h"
+#include "db/dbrouterule.h"
+#include "common.h"
+#include "pokalog.h"
+EXEC SQL INCLUDE SQLCA;
+int DbRouteRule(ROUTERULE *record,int *size,int id)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	char extend[20] = {0};
+	int sid;
+	EXEC SQL END DECLARE SECTION;
+
+	sid = id;
+    int count=0;
+    int iRet;
+	EXEC SQL DECLARE cur_t_route_rule CURSOR FOR
+	SELECT FILEEXTEND FROM ROUTERULE WHERE ROUTEID=:sid;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN DbRouteRule PREPARE",&sqlca);
+	EXEC SQL OPEN cur_t_route_rule;
+	if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN DbRouteRule OPEN",&sqlca);
+	while(1)
+	{
+		EXEC SQL FETCH cur_t_route_rule INTO :extend;
+		if ((iRet=JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN DbRouteRule OPEN",&sqlca))!=SUCESS)
+		{
+			EXEC SQL CLOSE cur_t_route_rule;
+			*size = count;
+			return  iRet;
+		}
+		memcpy((record+count)->fileextend,extend,strlen(extend));
+		count++;
+	}
+
+	return SUCESS;
+}

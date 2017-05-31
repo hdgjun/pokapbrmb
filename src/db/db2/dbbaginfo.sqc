@@ -1,0 +1,106 @@
+/*
+ * dbbaginfo.c
+ *
+ *  Created on: 2016年12月25日
+ *      Author: Administrator
+ */
+#include "common.h"
+#include "db/db.h"
+#include "db/dbbaginfo.h"
+
+EXEC SQL INCLUDE SQLCA;
+
+int DbBaginfo(int oprType, BAGINFO *fileRecord)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+		struct
+		{
+			char BagCode[20+1];					//袋标签
+			char BankId[20+1];					//银行号
+			char BagDate[20+1];		//装袋时间
+			char BagBagId[25];					//装袋员
+			char BagCheckId[20+1];				//装袋复核员
+			char BundleCode[30+1];				//捆标签
+			char BundleDate[20+1];	//打捆时间
+			char InsertDate[20+1];
+			char Writestatus;
+			char Putstatus;
+			char FileName[60+1];
+		}tmpData;
+	EXEC SQL END DECLARE SECTION;
+
+	if(fileRecord)
+	{
+		memset(&tmpData, 0x00, sizeof(BAGINFO));
+		memcpy(&tmpData, fileRecord, sizeof(BAGINFO));
+	}
+
+	switch (oprType)
+	{
+	case DBS_CURSOR_OPEN:
+		{
+			EXEC SQL DECLARE cur_baginfo1 CURSOR FOR SELECT BANKID,BUNDLECODE FROM BAGINFO
+			WHERE  PUTSTATUS='1' AND BUNDLECODE IS NOT NULL ORDER BY BANKID;
+			EXEC SQL OPEN cur_baginfo1;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN BAGINFO",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH cur_baginfo1
+			INTO :tmpData.BankId,
+				 :tmpData.BundleCode;
+			if (abs(sqlca.sqlcode) == 100)
+			{
+				return NODATA;
+			}
+
+			strtrim(tmpData.BankId);
+			strtrim(tmpData.BundleCode);
+			memcpy(fileRecord,&tmpData,sizeof(BAGINFO));
+			return JudgeSqlExecResultLocal(0,"DBS_FETCH BAGINFO",&sqlca);
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE cur_baginfo1;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE BAGINFO SET PUTSTATUS=0 WHERE BUNDLECODE=:tmpData.BundleCode;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE BAGINFO",&sqlca);
+		case DBS_INSERT:
+			EXEC SQL INSERT INTO BAGINFO
+			(
+				BAGCODE        ,
+				BANKID         ,
+				BAGDATE        ,
+				BAGBAGID       ,
+				BAGCHECKID     ,
+				BUNDLECODE     ,
+				BUNDLEDATE     ,
+				WRITESTATUS    ,
+				PUTSTATUS	   ,
+				FILENAME
+			)
+			VALUES(
+				:tmpData.BagCode,
+				:tmpData.BankId,
+				 to_date(:tmpData.BagDate,
+				'yyyy-mm-dd hh24:mi:ss'),
+				:tmpData.BagBagId,
+				:tmpData.BagCheckId,
+				:tmpData.BundleCode,
+				 to_date(:tmpData.BundleDate,
+				'yyyy-mm-dd hh24:mi:ss'),
+				'0',
+				'0',
+				:tmpData.FileName
+				);
+
+			return JudgeSqlExecResultLocal(0,"DBS_INSERT BAGINFO",&sqlca);
+
+		case DBS_DELETE:
+			EXEC SQL DELETE FROM BAGINFO WHERE INSERTDATE < to_date(:tmpData.InsertDate,'yyyymmdd');
+			return JudgeSqlExecResultLocal(0,"DBS_DELETE BAGINFO",&sqlca);
+	}
+	return SUCESS;
+}

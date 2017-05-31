@@ -1,6 +1,6 @@
 TOPDIR=./..
 
-exclude_dirs= xpp main
+exclude_dirs= xpp main     
 
 ifeq ($(DBTYPE),NO_DB)
 exclude_dirs+= pokapbrmb pokadaemon db pokafile

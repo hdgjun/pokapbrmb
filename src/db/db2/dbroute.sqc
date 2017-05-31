@@ -1,0 +1,110 @@
+/*
+ * dbroute.c
+ *
+ *  Created on: 2016Äê12ÔÂ27ÈÕ
+ *      Author: Administrator
+ */
+#include "db/db.h"
+#include "db/dbroute.h"
+#include "common.h"
+#include "pokalog.h"
+#include "filepath.h"
+EXEC SQL INCLUDE SQLCA;
+int DbRoute(int oprType, ROUTE *record)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		 int id;
+		char targetbank[20+1];
+		char forwardbank[20+1];
+		char user[20+1];
+		char password[20+1];
+		char localdir[100+1];
+		char remotedir[100+1];
+		 int type;
+		 int servicecode;
+		 int lastdate;
+		 int starttime;
+	     int interval;
+	    char status;
+	    char ipaddr[20+1];
+	    char port[8+1];
+	    int  model;
+	} temData;
+		char strSql[500];
+	EXEC SQL END DECLARE SECTION;
+
+	if(record!=NULL){
+		memset(&temData,0x00,sizeof(ROUTE));
+		memcpy(&temData,record,sizeof(ROUTE));
+	}
+	memset(strSql,0x00,500);
+	switch (oprType)
+	{
+		case DBS_CURSOR_OPEN:
+		{
+			sprintf(strSql,"SELECT ID,TARGETBANK,FORWARDBANK,USER_,PASSWORD_,LOCALDIR,REMOTEDIR,TYPE_,SERVICECODE,STARTTIME,INTER_VAL ,STATUS_,LASTDATE,IPADDR,PORT_,MODEL_ FROM ROUTE WHERE ((STATUS_ = 1 OR STATUS_ IS NULL) AND INTER_VAL = 0 AND STARTTIME < %d  AND (LASTDATE <> '%d' OR LASTDATE IS NULL)) OR ((STATUS_ = 1 OR STATUS_ IS NULL) AND (INTER_VAL <> 0))",temData.starttime,temData.lastdate);
+			EXEC SQL PREPARE PREPARE_T_ROUTE FROM :strSql;
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN PREPARE",&sqlca);
+			EXEC SQL DECLARE CURSOR_T_ROUTE  CURSOR for PREPARE_T_ROUTE;
+			if (sqlca.sqlcode) return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN DECLARE",&sqlca);
+			EXEC SQL OPEN CURSOR_T_ROUTE;
+			return JudgeSqlExecResultLocal(0,"DBS_CURSOR_OPEN OPEN",&sqlca);
+		}
+		case DBS_FETCH:
+		{
+			EXEC SQL FETCH CURSOR_T_ROUTE INTO
+				:temData.id,
+				:temData.targetbank,
+				:temData.forwardbank,
+				:temData.user,
+				:temData.password,
+				:temData.localdir,
+				:temData.remotedir,
+				:temData.type,
+				:temData.servicecode,
+				:temData.starttime,
+				:temData.interval,
+				:temData.status,
+				:temData.lastdate,
+				:temData.ipaddr,
+				:temData.port,
+				:temData.model;
+			if (abs(sqlca.sqlcode) == 100)
+			{
+				return NODATA;
+			}
+
+			strtrim(temData.targetbank);
+			strtrim(temData.forwardbank);
+			strtrim(temData.user);
+			strtrim(temData.password);
+			strtrim(temData.localdir);
+			strtrim(temData.remotedir);
+			strtrim(temData.ipaddr);
+			strtrim(temData.port);
+			memcpy(record,&temData,sizeof(ROUTE));
+			return sqlca.sqlcode;
+		}
+		case DBS_CLOSE:
+			EXEC SQL CLOSE CURSOR_T_ROUTE;
+			return SUCESS;
+		case DBS_UPDATE:
+			EXEC SQL UPDATE ROUTE SET
+			STATUS_ = :temData.status ,
+			STARTTIME = :temData.starttime,
+			LASTDATE = :temData.lastdate
+			WHERE ID=:temData.id;
+			return JudgeSqlExecResultLocal(0,"DBS_UPDATE ",&sqlca);
+		case DBS_UPDATE1:
+		EXEC SQL UPDATE ROUTE SET STATUS_ = '1'  WHERE STATUS_= '0' OR STATUS_ IS NULL;
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE1 ",&sqlca);
+		case DBS_UPDATE2:
+		EXEC SQL UPDATE ROUTE SET STARTTIME = 1  WHERE STARTTIME > 230000;
+		return JudgeSqlExecResultLocal(0,"DBS_UPDATE2 ",&sqlca);
+	}
+	return SUCESS;
+}

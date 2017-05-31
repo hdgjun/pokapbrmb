@@ -1,0 +1,55 @@
+/*
+ * dbperinfo.c
+ *
+ *  Created on: 2016Äê12ÔÂ26ÈÕ
+ *      Author: Administrator
+ */
+
+#include "db/db.h"
+#include "db/dbperinfo.h"
+#include "common.h"
+EXEC SQL INCLUDE SQLCA;
+int DbPerinfo(int oprType, PERINFO *record)
+{
+	struct sqlca sqlca;
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	 struct
+	{
+		char percode[22+1];
+		char pertype[2+1];
+		char bankno[20+1];
+		char agencyno[20+1];
+		char acctaddr[120+1];
+		char brand[50+1];
+		char model[100+1];
+		char quality[100+1];
+		char status;
+		char usestatus;
+		char moduser[60+1];
+		char terminalno[30+1];
+	} tem;
+	EXEC SQL END DECLARE SECTION;
+	if(record)
+	{
+		memset(&tem,0x00,sizeof(PERINFO));
+		memcpy(&tem,record,sizeof(PERINFO));
+	}
+
+	switch (oprType)
+	{
+		case DBS_SELECT:
+			EXEC SQL SELECT BANKNO,AGENCYNO,PERCODE
+			INTO :tem.bankno,:tem.agencyno,:tem.percode
+			FROM PERINFO
+			WHERE TERMINALNO=:tem.terminalno;
+
+			strtrim(tem.bankno);
+			strtrim(tem.agencyno);
+			strtrim(tem.percode);
+			memcpy(record,&tem,sizeof(PERINFO));
+			return JudgeSqlExecResultLocal(0,"DBS_SELECT ",&sqlca);
+
+	}
+	return SUCESS;
+}
